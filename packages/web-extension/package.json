@@ -21,6 +21,6 @@
   "license": "Apache-2.0",
   "private": true,
   "dependencies": {
-    "masterchat": "^0.0.0"
+    "masterchat": "^0.1.0"
   }
 }
