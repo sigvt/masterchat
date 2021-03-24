@@ -2,24 +2,39 @@
 
 A Node.js library for YouTube Live Chat.
 
-## Packages
+## Suite
 
-### `masterchat`
+### MasterChat Core
 
 ```
 npm install masterchat
 ```
 
-### `masterchat-cli`
+### MasterChat CLI
 
 ```
 npm install -g masterchat-cli
 ```
 
+### MasterChat Desktop
+
+macOS, Windows, Linux
+
+> In development stage
+
 ### MasterChat Web Extension
 
 Firefox, Chrome, Opera
 
-### MasterChat Desktop
+> In wishlist stage
 
-macOS, Windows, Linux
+## Roadmap
+
+- [x] Release `masterchat`
+- [x] Release `masterchat-cli`
+- [ ] Release MasterChat Desktop
+- [ ] Release MasterChat Web Extension
+
+## Contribution
+
+See [Contribution Guide](./CONTRIBUTING.md) for more information.

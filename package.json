@@ -3,7 +3,6 @@
   "description": "masterchat",
   "version": "0.0.0",
   "author": "Yasuaki Uechi <y@uechi.io> (https://uechi.io/)",
-  "scripts": {},
   "devDependencies": {
     "lerna": "^4.0.0",
     "shx": "^0.3.3"
