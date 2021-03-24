@@ -1,0 +1,25 @@
+{
+  "folders": [
+    {
+      "name": "✨ masterchat",
+      "path": "."
+    },
+    {
+      "name": "📦 masterchat",
+      "path": "packages/core"
+    },
+    {
+      "name": "📦 masterchat-cli",
+      "path": "packages/cli"
+    },
+    {
+      "name": "🚀 @holodata/masterchat-app",
+      "path": "packages/desktop"
+    },
+    {
+      "name": "🚀 @holodata/masterchat-web-extension",
+      "path": "packages/web-extension"
+    }
+  ],
+  "settings": {}
+}

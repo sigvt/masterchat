@@ -1,0 +1,19 @@
+{
+  "name": "@holodata/masterchat-app",
+  "description": "MasterChat desktop companion",
+  "version": "0.0.0",
+  "homepage": "https://github.com/holodata/masterchat",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/holodata/masterchat.git",
+    "directory": "packages/desktop"
+  },
+  "bugs": {
+    "url": "https://github.com/holodata/masterchat/issues"
+  },
+  "license": "Apache-2.0",
+  "private": true,
+  "dependencies": {
+    "masterchat": "^0.0.0"
+  }
+}

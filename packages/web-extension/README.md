@@ -1,0 +1,1 @@
+# MasterChat Web Extension

@@ -1,0 +1,27 @@
+{
+  "name": "masterchat",
+  "description": "masterchat",
+  "version": "0.0.0",
+  "author": "Yasuaki Uechi <y@uechi.io> (https://uechi.io/)",
+  "scripts": {},
+  "devDependencies": {
+    "lerna": "^4.0.0",
+    "shx": "^0.3.3"
+  },
+  "homepage": "https://github.com/holodata/masterchat",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/holodata/masterchat.git"
+  },
+  "bugs": {
+    "url": "https://github.com/holodata/masterchat/issues"
+  },
+  "license": "Apache-2.0",
+  "keywords": [
+    "masterchat"
+  ],
+  "engines": {
+    "node": ">= 12.18.3"
+  },
+  "private": true
+}

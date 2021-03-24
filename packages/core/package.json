@@ -1,0 +1,51 @@
+{
+  "name": "masterchat",
+  "description": "masterchat",
+  "version": "0.0.0",
+  "author": "Yasuaki Uechi <y@uechi.io> (https://uechi.io/)",
+  "scripts": {
+    "build": "tsc",
+    "clean": "shx rm -rf lib",
+    "dev": "tsc -w",
+    "docs": "typedoc --out docs --excludeExternals --excludePrivate --exclude '**/__tests__/*' --includeVersion src && shx touch ./docs/.nojekyll",
+    "prepublishOnly": "npm run clean && npm run build",
+    "test": "jest"
+  },
+  "types": "lib/index.d.ts",
+  "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
+  "dependencies": {
+    "@types/node-fetch": "^2.5.8",
+    "node-fetch": "^2.6.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.21",
+    "@types/node": "^14.14.35",
+    "jest": "^26.6.3",
+    "shx": "^0.3.3",
+    "ts-jest": "^26.5.4",
+    "ts-node": "^9.1.1",
+    "typedoc": "^0.20.33",
+    "typescript": "^4.2.3"
+  },
+  "homepage": "https://github.com/holodata/masterchat",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/holodata/masterchat.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/holodata/masterchat/issues"
+  },
+  "license": "Apache-2.0",
+  "keywords": [
+    "livechat",
+    "masterchat",
+    "youtube"
+  ],
+  "engines": {
+    "node": ">= 12.18.3"
+  }
+}
