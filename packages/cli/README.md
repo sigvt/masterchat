@@ -1,5 +1,7 @@
 # MasterChat CLI
 
+See YouTube Live Chat through flexible filtering engine.
+
 ## Install
 
 ```
