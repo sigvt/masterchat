@@ -21,5 +21,9 @@
       "path": "packages/web-extension"
     }
   ],
-  "settings": {}
+  "settings": {
+    "languageToolLinter.languageTool.ignoredWordsInWorkspace": [
+      "masterchat"
+    ]
+  }
 }

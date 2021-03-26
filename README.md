@@ -1,22 +1,22 @@
 # MasterChat
 
+## Packages
+
+### [MasterChat Core](https://github.com/holodata/masterchat/tree/master/packages/core)
+
 A Node.js library for YouTube Live Chat.
-
-## Suite
-
-### MasterChat Core
 
 ```
 npm install masterchat
 ```
 
-### MasterChat CLI
+### [MasterChat CLI](https://github.com/holodata/masterchat/tree/master/packages/cli)
 
 ```
 npm install -g masterchat-cli
 ```
 
-### MasterChat Desktop
+### [MasterChat Desktop](https://github.com/holodata/masterchat/tree/master/packages/desktop)
 
 macOS, Windows, Linux
 
