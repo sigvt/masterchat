@@ -107,6 +107,8 @@ function parseChatAction(action: YTAction): Action | undefined {
         authorName: renderer.authorName?.simpleText,
         authorPhoto,
         authorChannelId: renderer.authorExternalChannelId,
+        superchat: undefined,
+        membership: undefined,
         isVerified: false,
         isOwner: false,
         isModerator: false,
