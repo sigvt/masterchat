@@ -20,13 +20,13 @@
     "lib"
   ],
   "dependencies": {
-    "epicfail": "^1.0.0",
-    "filtrex": "^2.1.0",
-    "masterchat": "^0.1.0"
+    "epicfail": "^2.0.0",
+    "masterchat": "^0.1.0",
+    "vm2": "^3.9.2"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.21",
-    "@types/node": "^14.14.35",
+    "@types/jest": "^26.0.22",
+    "@types/node": "^14.14.36",
     "jest": "^26.6.3",
     "shx": "^0.3.3",
     "ts-jest": "^26.5.4",

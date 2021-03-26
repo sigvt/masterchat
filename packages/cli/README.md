@@ -11,56 +11,56 @@ npm i -g masterchat-cli
 ## Use
 
 ```
-masterchat inspect <video>
+masterchat <videoUrl or videoId>
 ```
 
 ## Options
 
-- `--type, -t`: Chat type (`top` or `all`)
-- `--mod, -m`: Show moderation events
-- `--author, -a`: Show author name
-- `--filter, -f`: Filter chat
+- `--type <string>`: Chat type (`top` or `all`)
+- `--mod`: Show moderation events
+- `--author`: Show author name
+- `--filter <string>`: Filter rule
 
-### Filter Rules
+### Useful Filter Rules
 
 Only show moderators' chat:
 
-```
-masterchat inspect <videoId> --filter isModerator
+```bash
+--filter isModerator
 ```
 
 Only show chat from verified account or channel owner:
 
-```
-masterchat inspect <videoId> --filter 'isVerified or isOwner'
+```bash
+--filter 'isVerified || isOwner'
 ```
 
 Only show super chat:
 
-```
-masterchat inspect <videoId> --filter superchat
+```bash
+--filter superchat
 ```
 
 Only show red super chat:
 
-```
-masterchat inspect <videoId> --filter 'superchat.color == "red"'
+```bash
+--filter 'superchat && superchat.color == "red"'
 ```
 
 Only show membership chat:
 
-```
-masterchat inspect <videoId> --filter membership
+```bash
+--filter membership
 ```
 
 Only show live translations:
 
-```
-masterchat inspect <videoId> --filter 'match(message, "^(\\[[a-z]+?\\]|[a-z]+?: )", "i")'
+```bash
+--filter '/^(\\[[a-z]+?\\]|[a-z]+?: )/i.test(message)'
 ```
 
 Only show chat contains 草:
 
-```
-masterchat inspect <videoId> --filter 'message.includes("草")'
+```bash
+--filter 'message.includes("草")'
 ```

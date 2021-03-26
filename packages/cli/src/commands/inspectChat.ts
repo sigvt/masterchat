@@ -7,9 +7,10 @@ import {
   normalizeVideoId,
   ReloadContinuationType,
 } from "masterchat";
-import { compileExpression } from "filtrex";
+import { VM, VMScript } from "vm2";
 import { timeoutThen } from "masterchat/lib/util";
 import { ChatAdditionAction } from "masterchat/lib/types/chat";
+import { logAndExit } from "epicfail";
 
 interface CustomAddChatItemAction extends ChatAdditionAction {
   message?: string;
@@ -31,8 +32,22 @@ export function flattenActions(
           let text = "";
 
           if (showAuthor) {
-            const colorize = action.isModerator ? chalk.green : chalk.gray;
-            text += `${colorize(action.authorName + ": ")}`;
+            const colorize = action.membership ? chalk.green : chalk.gray;
+            const badges = [];
+            if (action.isModerator) {
+              badges.push("🛠");
+            }
+            if (action.isVerified) {
+              badges.push("✅");
+            }
+            if (action.isOwner) {
+              badges.push("⚡️");
+            }
+            text += colorize(action.authorName);
+            if (badges.length >= 1) {
+              text += "( " + badges.join(" ") + " )";
+            }
+            text += ": ";
           }
 
           text += action.rawMessage
@@ -67,6 +82,24 @@ export function flattenActions(
   return simpleChat;
 }
 
+function compileFilter(
+  rule: string | undefined
+): ((args: any) => boolean) | undefined {
+  if (!rule) {
+    return undefined;
+  }
+
+  const compiledRule = new VMScript(rule).compile();
+
+  return (args: any) => {
+    return new VM({
+      sandbox: args,
+      eval: false,
+      wasm: false,
+    }).run(compiledRule);
+  };
+}
+
 export async function inspectChat(argv: any) {
   process.on("SIGINT", () => {
     process.exit(0);
@@ -80,15 +113,7 @@ export async function inspectChat(argv: any) {
   const filterExp: string = Array.isArray(argv.filter)
     ? argv.filter[0]
     : argv.filter;
-  const filter = filterExp
-    ? compileExpression(filterExp, {
-        extraFunctions: {
-          match: function (query: string, match: string, flags?: string) {
-            return new RegExp(match, flags).test(query);
-          },
-        },
-      })
-    : undefined;
+  const filter = compileFilter(filterExp);
 
   // get web player context
   const context = await fetchContext(videoId);
@@ -96,23 +121,20 @@ export async function inspectChat(argv: any) {
 
   // check if the video is valid
   if (!metadata) {
-    console.log("video source is unavailable. wrong video id?");
-    process.exit(1);
+    logAndExit("video source is unavailable. wrong video id?");
   }
 
   // check if the stream is live
   const isLive = metadata.isLive;
 
   if (!isLive) {
-    console.log("only live stream is supported");
-    process.exit(1);
+    logAndExit("only live stream is supported");
   }
 
   if (!context.continuations) {
-    console.log(
+    logAndExit(
       "reload continuation not found. try again later or maybe it's a normal video."
     );
-    process.exit(1);
   }
 
   console.log("title:", metadata.title);
@@ -150,6 +172,7 @@ export async function inspectChat(argv: any) {
 
       for (const action of aggregatedActions) {
         if (action.type === "addChatItemAction") {
+          // stringified message
           (action as CustomAddChatItemAction).message = action.rawMessage
             ? convertRunsToString(action.rawMessage)
             : "";
