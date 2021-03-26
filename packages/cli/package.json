@@ -21,6 +21,7 @@
   ],
   "dependencies": {
     "epicfail": "^1.0.0",
+    "filtrex": "^2.1.0",
     "masterchat": "^0.1.0"
   },
   "devDependencies": {

@@ -21,6 +21,24 @@ yargs(process.argv.slice(2))
           alias: "v",
           default: false,
           type: "boolean",
+        })
+        .option("type", {
+          describe: "Chat type",
+          alias: "t",
+          default: "top",
+          choices: ["top", "all"],
+        })
+        .option("mod", {
+          describe: "Show moderation events",
+          alias: "m",
+          type: "boolean",
+          default: false,
+        })
+        .option("author", {
+          describe: "Show author name",
+          alias: "a",
+          type: "boolean",
+          default: false,
         });
     },
     inspectChat
