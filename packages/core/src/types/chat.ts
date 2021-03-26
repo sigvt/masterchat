@@ -1,6 +1,21 @@
-export interface Chat {
-  continuation: TimedContinuation;
+export interface SucceededChatResponse {
+  continuation?: TimedContinuation;
   actions: Action[];
+}
+
+export interface FailedChatResponse {
+  error: ChatError;
+}
+
+export interface ChatError {
+  message: string;
+  status: ChatErrorStatus | YTChatErrorStatus;
+}
+
+export enum ChatErrorStatus {
+  Invalid = "INVALID",
+  Timeout = "TIMEOUT",
+  ContinuationNotFound = "CONTINUATION_NOT_FOUND",
 }
 
 export type ReloadContinuationItems = {
@@ -40,7 +55,7 @@ export interface ChatAdditionAction {
   authorName?: string;
   authorChannelId: string;
   authorPhoto: string;
-  purchase?: Purchase;
+  superchat?: Superchat;
   membership?: Membership;
   isOwner: boolean;
   isModerator: boolean;
@@ -53,13 +68,44 @@ export interface Membership {
   thumbnail: string;
 }
 
-export interface Purchase {
+export interface Color {
+  r: number;
+  g: number;
+  b: number;
+  opacity: number;
+}
+
+export const SUPERCHAT_SIGNIFICANCE_MAP = {
+  blue: 1,
+  lightblue: 2,
+  green: 3,
+  yellow: 4,
+  orange: 5,
+  magenta: 6,
+  red: 7,
+} as const;
+export type SuperchatSignificance = typeof SUPERCHAT_SIGNIFICANCE_MAP[keyof typeof SUPERCHAT_SIGNIFICANCE_MAP];
+
+export const SUPERCHAT_COLOR_MAP = {
+  "4279592384": "blue",
+  "4278237396": "lightblue",
+  "4278239141": "green",
+  "4294947584": "yellow",
+  "4293284096": "orange",
+  "4290910299": "magenta",
+  "4291821568": "red",
+} as const;
+export type SuperchatColor = typeof SUPERCHAT_COLOR_MAP[keyof typeof SUPERCHAT_COLOR_MAP];
+
+export interface Superchat {
   amount: number;
   currency: string;
-  headerBackgroundColor: string;
-  headerTextColor: string;
-  bodyBackgroundColor: string;
-  bodyTextColor: string;
+  color: SuperchatColor;
+  significance: SuperchatSignificance;
+  headerBackgroundColor: Color;
+  headerTextColor: Color;
+  bodyBackgroundColor: Color;
+  bodyTextColor: Color;
 }
 
 export interface ChatByAuthorDeletionAction {
@@ -85,30 +131,17 @@ export interface Run {
 }
 
 // --------------------
-// Raw Interface
+// YT Interface
 // --------------------
 
-export interface RawChatResponse {
-  responseContext: ResponseContext;
-  trackingParams: string;
-  continuationContents?: RawContinuationContents;
-  error?: RawChatError;
-}
-
-export interface RawChatError {
+export interface YTChatError {
   code: number;
   message: string;
-  errors: RawChatErrorDetail[];
-  status: RawChatErrorStatus; // UNAVAILABLE, PERMISSION_DENIED
+  errors: YTChatErrorDetail[];
+  status: YTChatErrorStatus;
 }
 
-export interface RawChatErrorDetail {
-  message: string;
-  domain: "global";
-  reason: "forbidden" | "backendError" | "badRequest" | "notFound";
-}
-
-export enum RawChatErrorStatus {
+export enum YTChatErrorStatus {
   Unavailable = "UNAVAILABLE",
   PermissionDenied = "PERMISSION_DENIED",
   Internal = "INTERNAL",
@@ -116,14 +149,27 @@ export enum RawChatErrorStatus {
   NotFound = "NOT_FOUND",
 }
 
-export interface RawContinuationContents {
-  liveChatContinuation: RawLiveChatContinuation;
+export interface YTChatResponse {
+  responseContext: ResponseContext;
+  trackingParams: string;
+  continuationContents?: YTContinuationContents;
+  error?: YTChatError;
 }
 
-export interface RawLiveChatContinuation {
+export interface YTChatErrorDetail {
+  message: string;
+  domain: "global";
+  reason: "forbidden" | "backendError" | "badRequest" | "notFound";
+}
+
+export interface YTContinuationContents {
+  liveChatContinuation: YTLiveChatContinuation;
+}
+
+export interface YTLiveChatContinuation {
   continuations: ContinuationElement[];
-  actions?: RawAction[];
-  actionPanel?: RawActionPanel;
+  actions?: YTAction[];
+  actionPanel?: YTActionPanel;
   itemList?: ItemList;
   header?: LiveChatContinuationHeader;
   ticker?: Ticker;
@@ -143,23 +189,23 @@ export interface MarkChatItemAsDeletedAction {
   targetItemId: string;
 }
 
-export interface RawActionPanel {
-  liveChatMessageInputRenderer: RawLiveChatMessageInputRenderer;
+export interface YTActionPanel {
+  liveChatMessageInputRenderer: YTLiveChatMessageInputRenderer;
 }
 
-export interface RawLiveChatMessageInputRenderer {
-  inputField: RawInputField;
+export interface YTLiveChatMessageInputRenderer {
+  inputField: YTInputField;
   sendButton: SendButton;
   pickers: Picker[];
   pickerButtons: PickerButton[];
   interactionMessage: InteractionMessage;
 }
 
-export interface RawInputField {
-  liveChatTextInputFieldRenderer: RawLiveChatTextInputFieldRenderer;
+export interface YTInputField {
+  liveChatTextInputFieldRenderer: YTLiveChatTextInputFieldRenderer;
 }
 
-export interface RawLiveChatTextInputFieldRenderer {
+export interface YTLiveChatTextInputFieldRenderer {
   placeholder: TextArray;
   maxCharacterLimit: number;
   emojiCharacterCount: number;
@@ -317,7 +363,7 @@ export interface SendButtonButtonRenderer {
   trackingParams: string;
 }
 
-export interface RawAction {
+export interface YTAction {
   clickTrackingParams: TrackingParams;
   addChatItemAction?: AddChatItemAction;
   addLiveChatTickerItemAction?: AddLiveChatTickerItemAction;
@@ -343,7 +389,7 @@ export interface LiveChatPlaceholderItemRenderer {
 }
 
 export interface ReplayChatItemAction {
-  actions: RawAction[];
+  actions: YTAction[];
 }
 
 export interface AddBannerToLiveChatCommand {

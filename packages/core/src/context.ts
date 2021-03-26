@@ -1,4 +1,4 @@
-import fetch from "node-fetch";
+import fetch, { RequestInit } from "node-fetch";
 import {
   ReloadContinuationData,
   ReloadContinuationItems,
@@ -6,12 +6,17 @@ import {
   TimedContinuationData,
 } from "./types/chat";
 import { ContextConfig, InitialData, WebPlayerContext } from "./types/context";
-import { convertRunsToString } from "./util";
+import { convertRunsToString, log } from "./util";
 
 export interface Context {
+  auth: AuthParams;
+  continuations?: ReloadContinuationItems;
+  metadata?: Metadata;
+}
+
+export interface AuthParams {
   apiKey: string;
   client: Client;
-  metadata?: Metadata;
 }
 
 export interface Client {
@@ -27,7 +32,6 @@ export interface Metadata {
   channelId: string;
   channelName: string;
   isLive: boolean;
-  continuations?: ReloadContinuationItems;
 }
 
 export type ContinuationData = ReloadContinuationData | TimedContinuationData;
@@ -38,11 +42,12 @@ export type ContinuationData = ReloadContinuationData | TimedContinuationData;
  */
 
 export async function fetchWebPlayerContext(
-  id: string
+  id: string,
+  requestInit?: RequestInit
 ): Promise<WebPlayerContext> {
   const context = {} as WebPlayerContext;
 
-  const res = await fetch("https://www.youtube.com/watch?v=" + id);
+  const res = await fetch("https://www.youtube.com/watch?v=" + id, requestInit);
   const data = await res.text();
 
   // 1. web_player_context_config
@@ -73,7 +78,7 @@ export function getClientFromContextConfig(config: ContextConfig): Client {
 
 export function getAPIKeyFromContextConfig(config: ContextConfig): string {
   if (!config?.innertubeApiKey) {
-    console.log(config);
+    log(config);
   }
   return config.innertubeApiKey;
 }
@@ -81,6 +86,10 @@ export function getAPIKeyFromContextConfig(config: ContextConfig): string {
 export function getContinuationFromInitialData(
   initialData: InitialData
 ): ReloadContinuationItems | undefined {
+  if (!initialData.contents) {
+    return undefined;
+  }
+
   const conversationBar =
     initialData.contents.twoColumnWatchNextResults.conversationBar;
   if (!conversationBar || !conversationBar.liveChatRenderer) {
@@ -129,7 +138,6 @@ export function getMetadataFromInitialData(
       results.contents[1].videoSecondaryInfoRenderer.owner.videoOwnerRenderer
         .navigationEndpoint.browseEndpoint.browseId,
     isLive: viewCount.videoViewCountRenderer.isLive ?? false,
-    continuations: getContinuationFromInitialData(initialData),
   };
 }
 
@@ -139,10 +147,11 @@ export async function fetchContext(id: string): Promise<Context> {
   const apiKey = getAPIKeyFromContextConfig(context.config);
   const client = getClientFromContextConfig(context.config);
   const metadata = getMetadataFromInitialData(context.initialData);
+  const continuations = getContinuationFromInitialData(context.initialData);
 
   return {
-    apiKey,
-    client,
+    auth: { apiKey, client },
+    continuations,
     metadata,
   };
 }

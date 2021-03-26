@@ -43,7 +43,7 @@ export interface Device {
 
 export interface InitialData {
   responseContext: ResponseContext;
-  contents: Contents;
+  contents?: Contents;
   currentVideoEndpoint: CurrentVideoEndpointClass;
   trackingParams: string;
   playerOverlays: PlayerOverlays;
