@@ -1,5 +1,5 @@
 import debug from "debug";
-import { Emoji, Run } from "./types/chat";
+import { YTEmoji, YTRun } from "./types/chat";
 
 export const log = debug("masterchat");
 
@@ -14,8 +14,10 @@ export function normalizeVideoId(idOrUrl: string) {
 }
 
 export function convertRunsToString(
-  runs: Run[],
-  { emojiHandler = undefined }: { emojiHandler?: (emoji: Emoji) => string } = {}
+  runs: YTRun[],
+  {
+    emojiHandler = undefined,
+  }: { emojiHandler?: (emoji: YTEmoji) => string } = {}
 ): string {
   try {
     return runs

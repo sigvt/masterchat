@@ -1,22 +1,146 @@
 import fetch from "node-fetch";
-import { Client } from "./context";
+import { ClientInfo } from "./context";
 import {
-  Action,
-  AddChatItemActionItem,
-  ChatAdditionAction,
-  ChatErrorStatus,
-  Color,
-  FailedChatResponse,
-  SucceededChatResponse,
-  SUPERCHAT_COLOR_MAP,
-  SUPERCHAT_SIGNIFICANCE_MAP,
-  TimedContinuation,
   YTAction,
+  YTAddChatItemActionItem,
   YTChatErrorStatus,
   YTChatResponse,
   YTContinuationContents,
+  YTRun,
 } from "./types/chat";
 import { log } from "./util";
+
+// Components
+
+export const SUPERCHAT_SIGNIFICANCE_MAP = {
+  blue: 1,
+  lightblue: 2,
+  green: 3,
+  yellow: 4,
+  orange: 5,
+  magenta: 6,
+  red: 7,
+} as const;
+
+export const SUPERCHAT_COLOR_MAP = {
+  "4279592384": "blue",
+  "4278237396": "lightblue",
+  "4278239141": "green",
+  "4294947584": "yellow",
+  "4293284096": "orange",
+  "4290910299": "magenta",
+  "4291821568": "red",
+} as const;
+
+export interface Membership {
+  status: string;
+  since: string;
+  thumbnail: string;
+}
+
+export interface Color {
+  r: number;
+  g: number;
+  b: number;
+  opacity: number;
+}
+
+export type SuperchatSignificance = typeof SUPERCHAT_SIGNIFICANCE_MAP[keyof typeof SUPERCHAT_SIGNIFICANCE_MAP];
+
+export type SuperchatColor = typeof SUPERCHAT_COLOR_MAP[keyof typeof SUPERCHAT_COLOR_MAP];
+
+export interface Superchat {
+  amount: number;
+  currency: string;
+  color: SuperchatColor;
+  significance: SuperchatSignificance;
+  headerBackgroundColor: Color;
+  headerTextColor: Color;
+  bodyBackgroundColor: Color;
+  bodyTextColor: Color;
+}
+
+// Continuation
+
+export interface ReloadContinuation {
+  token: string;
+}
+
+export type ReloadContinuationItems = {
+  [index in ReloadContinuationType]: ReloadContinuation;
+};
+
+export enum ReloadContinuationType {
+  Top = "top",
+  All = "all",
+}
+
+export interface TimedContinuation extends ReloadContinuation {
+  timeoutMs: number;
+}
+
+// Actions
+
+export type Action =
+  | ChatAdditionAction
+  | ChatDeletionAction
+  | ChatByAuthorDeletionAction;
+
+/*
+  liveChatPlaceholderItemRenderer?: LiveChatPlaceholderItemRenderer; -> ignore
+  liveChatMembershipItemRenderer?: LiveChatMembershipItemRenderer; -> ignore
+  liveChatViewerEngagementMessageRenderer; -> ignore
+  */
+export interface ChatAdditionAction {
+  type: "addChatItemAction";
+  id: string;
+  timestamp: Date;
+  timestampUsec: string;
+  rawMessage?: YTRun[];
+  authorName?: string;
+  authorChannelId: string;
+  authorPhoto: string;
+  superchat?: Superchat;
+  membership?: Membership;
+  isOwner: boolean;
+  isModerator: boolean;
+  isVerified: boolean;
+}
+
+export interface ChatByAuthorDeletionAction {
+  type: "markChatItemsByAuthorAsDeletedAction";
+  channelId: string;
+  timestamp: Date;
+}
+
+export interface ChatDeletionAction {
+  type: "markChatItemAsDeletedAction";
+  retracted: boolean;
+  targetId: string;
+  timestamp: Date;
+}
+
+// Response
+
+export interface SucceededChatResponse {
+  continuation?: TimedContinuation;
+  actions: Action[];
+}
+
+export interface FailedChatResponse {
+  error: ChatError;
+}
+
+export interface ChatError {
+  message: string;
+  status: ChatErrorStatus | YTChatErrorStatus;
+}
+
+export enum ChatErrorStatus {
+  Invalid = "INVALID",
+  Timeout = "TIMEOUT",
+  ContinuationNotFound = "CONTINUATION_NOT_FOUND",
+}
 
 function splitColorCode(code: number): Color | undefined {
   if (code > 4294967295) {
@@ -82,14 +206,31 @@ function parseChatAction(action: YTAction): Action | undefined {
 
       const { item } = action[type]!;
 
-      const rendererType = Object.keys(item)[0] as keyof AddChatItemActionItem;
+      const rendererType = Object.keys(
+        item
+      )[0] as keyof YTAddChatItemActionItem;
 
       if (!(guard as readonly string[]).includes(rendererType)) {
+        if (
+          ![
+            "liveChatViewerEngagementMessageRenderer",
+            "liveChatPlaceholderItemRenderer",
+            "liveChatMembershipItemRenderer",
+          ].includes(rendererType)
+        ) {
+          log("off guard", rendererType, JSON.stringify(item, null, 2));
+        }
+        // - liveChatViewerEngagementMessageRenderer - Engagement
+        // - liveChatPlaceholderItemRenderer - Placeholder chat
+        // - liveChatMembershipItemRenderer - New membership
         return undefined;
       }
 
       const renderer = item[
-        rendererType as keyof Pick<AddChatItemActionItem, typeof guard[number]>
+        rendererType as keyof Pick<
+          YTAddChatItemActionItem,
+          typeof guard[number]
+        >
       ]!;
 
       const timestamp = new Date(parseInt(renderer.timestampUsec, 10) / 1000);
@@ -203,30 +344,52 @@ function parseChatAction(action: YTAction): Action | undefined {
     }
 
     case "addLiveChatTickerItemAction": {
-      // Superchat ticker
+      // Superchat ticker: "liveChatTickerPaidMessageItemRenderer"
+      // New membership: "liveChatTickerSponsorItemRenderer"
+      const { item } = action[type]!;
+
+      const rendererType = Object.keys(item)[0];
+      if (
+        ![
+          "liveChatTickerPaidMessageItemRenderer",
+          "liveChatTickerSponsorItemRenderer",
+        ].includes(rendererType)
+      ) {
+        log(
+          "addLiveChatTickerItemAction",
+          JSON.stringify(action[type]!, null, 2)
+        );
+      }
       // TODO: handle later
       break;
     }
 
     case "replaceChatItemAction": {
-      // Replace placeholder item
+      log("replaceChatItemAction", JSON.stringify(action[type]!, null, 2));
+      // Replace placeholder item?
       // TODO: handle later
       break;
     }
 
     case "addBannerToLiveChatCommand": {
+      log("addBannerToLiveChatCommand", JSON.stringify(action[type]!, null, 2));
       // add pinned item
       // TODO: handle later
       break;
     }
 
-    // case "removeBannerToLiveChatCommand": {
-    //   // add pinned item
-    //   // TODO: handle later
-    //   break;
-    // }
+    case "removeBannerToLiveChatCommand": {
+      log(
+        "removeBannerToLiveChatCommand",
+        JSON.stringify(action[type]!, null, 2)
+      );
+      // add pinned item
+      // TODO: handle later
+      break;
+    }
 
     default: {
+      log("Unsupported action", JSON.stringify(action[type]!, null, 2));
       throw new Error("Unsupported actionType: " + type);
     }
   }
@@ -248,7 +411,7 @@ export async function fetchChat({
 }: {
   continuation: string;
   apiKey: string;
-  client: Client;
+  client: ClientInfo;
   isLiveChat?: boolean;
 }): Promise<SucceededChatResponse | FailedChatResponse> {
   const endpoint = isLiveChat
@@ -270,6 +433,7 @@ export async function fetchChat({
       body: JSON.stringify(requestBody),
     }).then((res) => res.json());
   } catch (err) {
+    log("fetchError", err, err.code);
     switch (err.code) {
       case "ETIMEOUT":
         return {
@@ -372,7 +536,7 @@ export async function* iterateChat({
 }: {
   token: string;
   apiKey: string;
-  client: Client;
+  client: ClientInfo;
   isLiveChat: boolean;
   ignoreFirstResponse?: boolean;
 }) {
@@ -407,6 +571,7 @@ export async function* iterateChat({
     });
 
     if ("error" in chatResponse) {
+      log("error", chatResponse.error);
       break;
     }
 
@@ -419,6 +584,7 @@ export async function* iterateChat({
 
     // refresh continuation token
     if (!continuation) {
+      log("no continuation");
       // end of the chain
       break;
     }

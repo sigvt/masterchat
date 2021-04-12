@@ -1,4 +1,3 @@
 export { fetchContext } from "./context";
-export { iterateChat, fetchChat } from "./chat";
+export { iterateChat, fetchChat, ReloadContinuationType } from "./chat";
 export { normalizeVideoId, convertRunsToString } from "./util";
-export { Action, Run, Color, ReloadContinuationType } from "./types/chat";

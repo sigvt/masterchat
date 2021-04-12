@@ -1,11 +1,12 @@
 import fetch, { RequestInit } from "node-fetch";
+import { ReloadContinuationItems, ReloadContinuationType } from "./chat";
+import { YTTimedContinuationData } from "./types/chat";
 import {
-  ReloadContinuationData,
-  ReloadContinuationItems,
-  ReloadContinuationType,
-  TimedContinuationData,
-} from "./types/chat";
-import { ContextConfig, InitialData, WebPlayerContext } from "./types/context";
+  YTContextConfig,
+  YTInitialData,
+  YTReloadContinuationData,
+  YTWebPlayerContext,
+} from "./types/context";
 import { convertRunsToString, log } from "./util";
 
 export interface Context {
@@ -16,10 +17,10 @@ export interface Context {
 
 export interface AuthParams {
   apiKey: string;
-  client: Client;
+  client: ClientInfo;
 }
 
-export interface Client {
+export interface ClientInfo {
   clientName: string;
   clientVersion: string;
   utcOffsetMinutes: number;
@@ -34,18 +35,20 @@ export interface Metadata {
   isLive: boolean;
 }
 
-export type ContinuationData = ReloadContinuationData | TimedContinuationData;
+export type ContinuationData =
+  | YTReloadContinuationData
+  | YTTimedContinuationData;
+
 /**
  * get the initial data from YouTube page
  *
  * @param {string} id video id
  */
-
 export async function fetchWebPlayerContext(
   id: string,
   requestInit?: RequestInit
-): Promise<WebPlayerContext> {
-  const context = {} as WebPlayerContext;
+): Promise<YTWebPlayerContext> {
+  const context = {} as YTWebPlayerContext;
 
   const res = await fetch("https://www.youtube.com/watch?v=" + id, requestInit);
   const data = await res.text();
@@ -67,7 +70,9 @@ export async function fetchWebPlayerContext(
   return context;
 }
 
-export function getClientFromContextConfig(config: ContextConfig): Client {
+export function getClientFromContextConfig(
+  config: YTContextConfig
+): ClientInfo {
   return {
     clientName: config.device.interfaceName,
     clientVersion: config.device.interfaceVersion,
@@ -76,7 +81,7 @@ export function getClientFromContextConfig(config: ContextConfig): Client {
   };
 }
 
-export function getAPIKeyFromContextConfig(config: ContextConfig): string {
+export function getAPIKeyFromContextConfig(config: YTContextConfig): string {
   if (!config?.innertubeApiKey) {
     log(config);
   }
@@ -84,7 +89,7 @@ export function getAPIKeyFromContextConfig(config: ContextConfig): string {
 }
 
 export function getContinuationFromInitialData(
-  initialData: InitialData
+  initialData: YTInitialData
 ): ReloadContinuationItems | undefined {
   if (!initialData.contents) {
     return undefined;
@@ -112,7 +117,7 @@ export function getContinuationFromInitialData(
 }
 
 export function getMetadataFromInitialData(
-  initialData: InitialData
+  initialData: YTInitialData
 ): Metadata | undefined {
   if (!initialData.contents) return undefined;
 
