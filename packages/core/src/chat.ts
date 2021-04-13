@@ -117,7 +117,7 @@ export interface AddChatItemAction {
   id: string;
   timestamp: Date;
   timestampUsec: string;
-  rawMessage?: YTRun[];
+  rawMessage: YTRun[];
   authorName?: string;
   authorChannelId: string;
   authorPhoto: string;

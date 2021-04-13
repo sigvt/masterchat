@@ -1,15 +1,8 @@
 import { logAndExit } from "epicfail";
 import fs from "fs";
 import { fetchContext, iterateChat, normalizeVideoId } from "masterchat";
-import {
-  ChatAdditionAction,
-  ReloadContinuationType,
-} from "masterchat/lib/chat";
+import { ReloadContinuationType } from "masterchat/lib/chat";
 import { timeoutThen } from "masterchat/lib/util";
-
-interface CustomAddChatItemAction extends ChatAdditionAction {
-  message?: string;
-}
 
 export async function collectEvents(argv: any) {
   console.log("Event collection mode is enabled");

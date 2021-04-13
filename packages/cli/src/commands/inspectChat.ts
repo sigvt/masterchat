@@ -8,13 +8,13 @@ import {
 } from "masterchat";
 import {
   Action,
-  AddChatAction,
+  AddChatItemAction,
   ReloadContinuationType,
 } from "masterchat/lib/chat";
 import { timeoutThen } from "masterchat/lib/util";
 import { VM, VMScript } from "vm2";
 
-interface CustomAddChatAction extends AddChatAction {
+interface CustomAddChatAction extends AddChatItemAction {
   message?: string;
 }
 
@@ -29,45 +29,54 @@ export function flattenActions(
 
   for (const action of actions) {
     switch (action.type) {
-      case "addChatItemAction": {
-        if (action.rawMessage || action.superchat) {
-          let text = "";
+      case "addSuperChatItemAction": {
+        let text = "";
 
-          if (showAuthor) {
-            const colorize = action.membership ? chalk.green : chalk.gray;
-            const badges = [];
-
-            if (action.isModerator) {
-              badges.push("🛠");
-            }
-
-            if (action.isVerified) {
-              badges.push("✅");
-            }
-
-            if (action.isOwner) {
-              badges.push("⚡️");
-            }
-
-            text += colorize(action.authorName);
-
-            if (badges.length >= 1) {
-              text += "( " + badges.join(" ") + " )";
-            }
-
-            text += ": ";
-          }
-
-          text += action.rawMessage
-            ? convertRunsToString(action.rawMessage)
-            : "<empty message>";
-
-          if (action.superchat) {
-            text += ` (${action.superchat.amount} ${action.superchat.currency})`;
-          }
-
-          simpleChat.push(text);
+        if (showAuthor) {
+          text += chalk.gray(action.authorName);
+          text += ": ";
         }
+
+        text += action.rawMessage
+          ? convertRunsToString(action.rawMessage)
+          : "<empty message>";
+
+        text += ` (${action.superchat.amount} ${action.superchat.currency})`;
+
+        simpleChat.push(text);
+        break;
+      }
+      case "addChatItemAction": {
+        let text = "";
+
+        if (showAuthor) {
+          const colorize = action.membership ? chalk.green : chalk.gray;
+          const badges = [];
+
+          if (action.isModerator) {
+            badges.push("🛠");
+          }
+
+          if (action.isVerified) {
+            badges.push("✅");
+          }
+
+          if (action.isOwner) {
+            badges.push("⚡️");
+          }
+
+          text += colorize(action.authorName);
+
+          if (badges.length >= 1) {
+            text += "( " + badges.join(" ") + " )";
+          }
+
+          text += ": ";
+        }
+
+        text += convertRunsToString(action.rawMessage);
+
+        simpleChat.push(text);
         break;
       }
       case "markChatItemsByAuthorAsDeletedAction": {
