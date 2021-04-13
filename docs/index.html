@@ -1,0 +1,106 @@
+<html lang="en">
+<head>
+    <meta charset='UTF-8'>
+    <title>Documentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mini.css/3.0.1/mini-default.min.css">
+    <style>
+        h5 {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        code {
+            line-height: inherit;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+        }
+
+        .spacer {
+            flex-grow: 1;
+        }
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<header>
+    <a href="/" class="logo">Documentation</a>
+        <div class="spacer"></div>
+    <button onclick="openSearch()"><span class="icon-search"></span> Search: <kbd>Ctrl</kbd>+<kbd>K</kbd></button>
+</header>
+<div class="container">
+    <div class="row">
+        <aside class="col-sm-12 col-md-4 col-lg-3">
+            <nav class="fixed">
+                <a href="/">Project README</a>
+                <span>Modules</span>
+                                    <a href="/masterchat">
+                        <code>
+                            masterchat                        </code>
+                    </a>
+                                    <a href="/masterchat-cli">
+                        <code>
+                            masterchat-cli                        </code>
+                    </a>
+                            </nav>
+        </aside>
+        <div class="col-sm-12 col-md-8 col-lg-6">
+<h1>MasterChat</h1>
+<h2>Packages</h2>
+<h3><a href="https://github.com/holodata/masterchat/tree/master/packages/core">MasterChat Core</a></h3>
+<p>A Node.js library for YouTube Live Chat.</p>
+<pre><code>npm install masterchat
+</code></pre>
+<h3><a href="https://github.com/holodata/masterchat/tree/master/packages/cli">MasterChat CLI</a></h3>
+<p>See YouTube Live Chat through flexible filtering engine.</p>
+<pre><code>npm install -g masterchat-cli
+</code></pre>
+<h3><a href="https://github.com/holodata/masterchat/tree/master/packages/desktop">MasterChat Desktop</a></h3>
+<p>Tweetdeck for YouTube Live Chat.</p>
+<p>macOS, Windows, Linux</p>
+<blockquote>
+<p>In development stage</p>
+</blockquote>
+<h2>Roadmap</h2>
+<ul>
+<li>[x] Release <code>masterchat</code></li>
+<li>[x] Release <code>masterchat-cli</code></li>
+<li>[ ] Release MasterChat Desktop</li>
+</ul>
+<h2>Contribution</h2>
+<p>See <a href="./CONTRIBUTING.md">Contribution Guide</a> for more information.</p>
+</div>
+</div>
+</div>
+<script src="https://rawcdn.githack.com/nextapps-de/flexsearch/master/dist/flexsearch.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/fliegwerk/search-popup@2.0.0/dist/bundle.js"></script>
+<script>
+    const searchIndex = new FlexSearch({
+        encode: q => (q.replace(/([a-z])([A-Z])/g, "$1 $2")).toLowerCase() + ' ' + q.toLowerCase(),
+        // encode: q => (q.replace(/(.*)[\W.](.*)/g, "$1$2")).toLowerCase(),
+        tokenize: "full",
+        threshold: 0,
+        resolution: 9,
+        depth: 3,
+        doc: {
+            id: 'url',
+            field: ['name', 'text']
+        }
+    });
+
+    function search(q) {
+        q = q || '';
+        return searchIndex.search((q.replace(/([a-z])([A-Z])/g, "$1 $2")).toLowerCase(), 5)
+    }
+
+    fetch('/search-index.json').then(r => r.json()).then(index => {
+        searchIndex.add(index)
+        const searchPopup = document.createElement('search-popup');
+        searchPopup.setAttribute('search', 'search')
+        document.body.appendChild(searchPopup);
+    });
+</script>
+</body>
+</html>

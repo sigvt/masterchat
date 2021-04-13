@@ -1,0 +1,352 @@
+<html lang="en">
+<head>
+    <meta charset='UTF-8'>
+    <title>Documentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mini.css/3.0.1/mini-default.min.css">
+    <style>
+        h5 {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        code {
+            line-height: inherit;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+        }
+
+        .spacer {
+            flex-grow: 1;
+        }
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<header>
+    <a href="/" class="logo">Documentation</a>
+        <div class="spacer"></div>
+    <button onclick="openSearch()"><span class="icon-search"></span> Search: <kbd>Ctrl</kbd>+<kbd>K</kbd></button>
+</header>
+<div class="container">
+    <div class="row">
+        <aside class="col-sm-12 col-md-4 col-lg-3">
+            <nav class="fixed">
+                <a href="/">Project README</a>
+                <span>Modules</span>
+                                    <a href="/masterchat">
+                        <code>
+                            masterchat                        </code>
+                    </a>
+                                    <a href="/masterchat-cli">
+                        <code>
+                            masterchat-cli                        </code>
+                    </a>
+                            </nav>
+        </aside>
+        <div class="col-sm-12 col-md-8 col-lg-6">
+<h1><code>masterchat</code></h1>
+
+<p>
+    Install using
+</p>
+<pre><code>npm install masterchat</code></pre>
+
+<h2>Exported Members</h2>
+<p>You can access these members by importing the module:</p>
+<pre><code>import { <i>member</i> } from 'masterchat';</code></pre>
+
+<!-- Members -->
+    <div class="card fluid">
+        <!-- Name with anchor link -->
+        <a id="fetchContext" href="#fetchContext">
+            <h3><code>fetchContext</code></h3></a>
+
+        <!-- Description, based on type -->
+                                    
+<!-- Signature -->
+<p>
+    <b>
+        <code>
+            async
+            function fetchContext
+            <!-- Type Parameters -->
+            
+                        <!-- Parameters -->
+            (
+                            
+                <br>
+                &nbsp;&nbsp;
+
+                                
+                <!-- parameter name -->
+                id
+                
+                <!-- type -->
+                :
+                string
+                <!-- Default value -->
+                
+                <!-- Comma if not last -->
+                                                        <br>
+                        )
+
+            <!-- Return type -->
+            :
+            Promise&lt;Context&gt;        </code>
+    </b>
+</p>
+
+<!-- Docs -->
+    <!-- no docs :( -->
+    <p><small>No docs provided</small></p>
+                        </div>
+    <div class="card fluid">
+        <!-- Name with anchor link -->
+        <a id="iterateChat" href="#iterateChat">
+            <h3><code>iterateChat</code></h3></a>
+
+        <!-- Description, based on type -->
+                                    
+<!-- Signature -->
+<p>
+    <b>
+        <code>
+            async
+            function iterateChat
+            <!-- Type Parameters -->
+            
+            *            <!-- Parameters -->
+            (
+                            
+                <br>
+                &nbsp;&nbsp;
+
+                                
+                <!-- parameter name -->
+                {
+  token,
+  apiKey,
+  client,
+  isLiveChat,
+  ignoreFirstResponse = false,
+}
+                
+                <!-- type -->
+                :
+                {
+  token: string;
+  apiKey: string;
+  client: ClientInfo;
+  isLiveChat: boolean;
+  ignoreFirstResponse?: boolean;
+}
+                <!-- Default value -->
+                
+                <!-- Comma if not last -->
+                                                        <br>
+                        )
+
+            <!-- Return type -->
+            :
+            any        </code>
+    </b>
+</p>
+
+<!-- Docs -->
+    <!-- no docs :( -->
+    <p><small>No docs provided</small></p>
+                        </div>
+    <div class="card fluid">
+        <!-- Name with anchor link -->
+        <a id="fetchChat" href="#fetchChat">
+            <h3><code>fetchChat</code></h3></a>
+
+        <!-- Description, based on type -->
+                                    
+<!-- Signature -->
+<p>
+    <b>
+        <code>
+            async
+            function fetchChat
+            <!-- Type Parameters -->
+            
+                        <!-- Parameters -->
+            (
+                            
+                <br>
+                &nbsp;&nbsp;
+
+                                
+                <!-- parameter name -->
+                {
+  continuation,
+  apiKey,
+  client,
+  isLiveChat = true,
+}
+                
+                <!-- type -->
+                :
+                {
+  continuation: string;
+  apiKey: string;
+  client: ClientInfo;
+  isLiveChat?: boolean;
+}
+                <!-- Default value -->
+                
+                <!-- Comma if not last -->
+                                                        <br>
+                        )
+
+            <!-- Return type -->
+            :
+            Promise&lt;SucceededChatResponse | FailedChatResponse&gt;        </code>
+    </b>
+</p>
+
+<!-- Docs -->
+    <!-- no docs :( -->
+    <p><small>No docs provided</small></p>
+                        </div>
+    <div class="card fluid">
+        <!-- Name with anchor link -->
+        <a id="normalizeVideoId" href="#normalizeVideoId">
+            <h3><code>normalizeVideoId</code></h3></a>
+
+        <!-- Description, based on type -->
+                                    
+<!-- Signature -->
+<p>
+    <b>
+        <code>
+            
+            function normalizeVideoId
+            <!-- Type Parameters -->
+            
+                        <!-- Parameters -->
+            (
+                            
+                <br>
+                &nbsp;&nbsp;
+
+                                
+                <!-- parameter name -->
+                idOrUrl
+                
+                <!-- type -->
+                :
+                string
+                <!-- Default value -->
+                
+                <!-- Comma if not last -->
+                                                        <br>
+                        )
+
+            <!-- Return type -->
+            :
+            any        </code>
+    </b>
+</p>
+
+<!-- Docs -->
+    <!-- no docs :( -->
+    <p><small>No docs provided</small></p>
+                        </div>
+    <div class="card fluid">
+        <!-- Name with anchor link -->
+        <a id="convertRunsToString" href="#convertRunsToString">
+            <h3><code>convertRunsToString</code></h3></a>
+
+        <!-- Description, based on type -->
+                                    
+<!-- Signature -->
+<p>
+    <b>
+        <code>
+            
+            function convertRunsToString
+            <!-- Type Parameters -->
+            
+                        <!-- Parameters -->
+            (
+                            
+                <br>
+                &nbsp;&nbsp;
+
+                                
+                <!-- parameter name -->
+                runs
+                
+                <!-- type -->
+                :
+                YTRun[]
+                <!-- Default value -->
+                
+                <!-- Comma if not last -->
+                ,                             
+                <br>
+                &nbsp;&nbsp;
+
+                                
+                <!-- parameter name -->
+                {
+    emojiHandler = undefined,
+  }
+                
+                <!-- type -->
+                :
+                { emojiHandler?: (emoji: YTEmoji) =&gt; string }
+                <!-- Default value -->
+                                = {}                
+                <!-- Comma if not last -->
+                                                        <br>
+                        )
+
+            <!-- Return type -->
+            :
+            string        </code>
+    </b>
+</p>
+
+<!-- Docs -->
+    <!-- no docs :( -->
+    <p><small>No docs provided</small></p>
+                        </div>
+</div>
+</div>
+</div>
+<script src="https://rawcdn.githack.com/nextapps-de/flexsearch/master/dist/flexsearch.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/fliegwerk/search-popup@2.0.0/dist/bundle.js"></script>
+<script>
+    const searchIndex = new FlexSearch({
+        encode: q => (q.replace(/([a-z])([A-Z])/g, "$1 $2")).toLowerCase() + ' ' + q.toLowerCase(),
+        // encode: q => (q.replace(/(.*)[\W.](.*)/g, "$1$2")).toLowerCase(),
+        tokenize: "full",
+        threshold: 0,
+        resolution: 9,
+        depth: 3,
+        doc: {
+            id: 'url',
+            field: ['name', 'text']
+        }
+    });
+
+    function search(q) {
+        q = q || '';
+        return searchIndex.search((q.replace(/([a-z])([A-Z])/g, "$1 $2")).toLowerCase(), 5)
+    }
+
+    fetch('/search-index.json').then(r => r.json()).then(index => {
+        searchIndex.add(index)
+        const searchPopup = document.createElement('search-popup');
+        searchPopup.setAttribute('search', 'search')
+        document.body.appendChild(searchPopup);
+    });
+</script>
+</body>
+</html>
