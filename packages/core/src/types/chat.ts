@@ -22,7 +22,7 @@ export interface YTEmoji {
   emojiId: string;
   shortcuts: string[];
   searchTerms: string[];
-  image: TickerThumbnailClass;
+  image: YTTickerThumbnailClass;
   isCustomEmoji: boolean;
 }
 
@@ -88,22 +88,29 @@ export interface YTTimedContinuationData {
 
 // Actions
 
+export interface YTReplayChatItemAction {
+  actions: YTAction[];
+}
+
 export interface YTAction {
   clickTrackingParams: string;
 
+  // Chat
   addChatItemAction?: YTAddChatItemAction;
   markChatItemsByAuthorAsDeletedAction?: YTMarkChatItemsByAuthorAsDeletedAction;
   markChatItemAsDeletedAction?: YTMarkChatItemAsDeletedAction;
 
+  // Ticker
   addLiveChatTickerItemAction?: YTAddLiveChatTickerItemAction;
+
+  // Banner
   addBannerToLiveChatCommand?: YTAddBannerToLiveChatCommand;
   removeBannerToLiveChatCommand?: any; // TODO: find out the structure
-  showLiveChatTooltipCommand?: YTShowLiveChatTooltipCommand;
-  replaceChatItemAction: YTReplaceChatItemAction;
-}
 
-export interface YTReplayChatItemAction {
-  actions: YTAction[];
+  // Placeholder
+  replaceChatItemAction: YTReplaceChatItemAction;
+
+  showLiveChatTooltipCommand?: YTShowLiveChatTooltipCommand;
 }
 
 export interface YTAddChatItemAction {
@@ -112,12 +119,12 @@ export interface YTAddChatItemAction {
 }
 
 export interface YTAddLiveChatTickerItemAction {
-  item: AddLiveChatTickerItem;
+  item: YTAddLiveChatTickerItem;
   durationSec: string;
 }
 
 export interface YTAddBannerToLiveChatCommand {
-  bannerRenderer: BannerRenderer;
+  bannerRenderer: YTBannerRendererContainer;
 }
 
 export interface YTMarkChatItemsByAuthorAsDeletedAction {
@@ -134,54 +141,52 @@ export interface YTReplaceChatItemAction {
 
 export interface YTAddChatItemActionItem {
   liveChatTextMessageRenderer?: YTItemLiveChatTextMessageRenderer;
-  liveChatPlaceholderItemRenderer?: YTLiveChatPlaceholderItemRenderer;
   liveChatPaidMessageRenderer?: YTLiveChatPaidMessageRenderer;
   liveChatMembershipItemRenderer?: YTLiveChatMembershipItemRenderer;
+  liveChatPlaceholderItemRenderer?: YTLiveChatPlaceholderItemRenderer;
   liveChatViewerEngagementMessageRenderer?: YTLiveChatViewerEngagementMessageRenderer;
 }
 
 export interface YTItemLiveChatTextMessageRenderer {
-  message: YTRunContainer;
-  authorName: YTSimpleText;
-  authorPhoto: Thumbnails;
-  contextMenuEndpoint: ContextMenuEndpoint;
   id: string;
   timestampUsec: string;
+  message: YTRunContainer;
+  authorName: YTSimpleText;
+  authorPhoto: YTThumbnails;
   authorExternalChannelId: string;
+  contextMenuEndpoint: YTContextMenuEndpoint;
   contextMenuAccessibility: YTAccessibilityData;
+
   authorBadges?: YTAuthorBadge[];
 }
 
-export interface YTLiveChatPlaceholderItemRenderer {
+export interface YTLiveChatPaidMessageRenderer {
   id: string;
   timestampUsec: string;
+  message?: YTRunContainer;
+  authorName: YTSimpleText;
+  authorPhoto: YTThumbnails;
+  authorExternalChannelId: string;
+  contextMenuEndpoint: YTContextMenuEndpoint;
+  contextMenuAccessibility: YTAccessibilityData;
+
+  purchaseAmountText: YTSimpleText;
+  timestampColor: number;
+  authorNameTextColor: number;
+  headerBackgroundColor: number;
+  headerTextColor: number;
+  bodyBackgroundColor: number;
+  bodyTextColor: number;
+  trackingParams: string;
 }
 
 export interface YTLiveChatPaidMessageRendererContainer {
   liveChatPaidMessageRenderer: YTLiveChatPaidMessageRenderer;
 }
 
-export interface YTLiveChatPaidMessageRenderer {
+export interface YTLiveChatPlaceholderItemRenderer {
   id: string;
   timestampUsec: string;
-  authorName: YTSimpleText;
-  authorPhoto: Thumbnails;
-  purchaseAmountText: YTSimpleText;
-  message?: YTRunContainer;
-  headerBackgroundColor: number;
-  headerTextColor: number;
-  bodyBackgroundColor: number;
-  bodyTextColor: number;
-  authorExternalChannelId: string;
-  authorNameTextColor: number;
-  contextMenuEndpoint: ContextMenuEndpoint;
-  timestampColor: number;
-  contextMenuAccessibility: YTAccessibilityData;
-  trackingParams: string;
-}
-
-export interface YTLiveChatMembershipItemRendererContainer {
-  liveChatMembershipItemRenderer: YTLiveChatMembershipItemRenderer;
 }
 
 export interface YTLiveChatMembershipItemRenderer {
@@ -190,25 +195,25 @@ export interface YTLiveChatMembershipItemRenderer {
   authorExternalChannelId: string;
   headerSubtext: YTRunContainer;
   authorName: YTSimpleText;
-  authorPhoto: Thumbnails;
-  authorBadges: LiveChatParticipantRendererAuthorBadge[];
-  contextMenuEndpoint: ContextMenuEndpoint;
+  authorPhoto: YTThumbnails;
+  authorBadges: YTLiveChatParticipantRendererAuthorBadge[];
+  contextMenuEndpoint: YTContextMenuEndpoint;
   contextMenuAccessibility: YTAccessibilityData;
 }
 
-export interface YTLiveChatPaidStickerRendererContainer {
-  liveChatPaidStickerRenderer: YTLiveChatPaidStickerRenderer;
+export interface YTLiveChatMembershipItemRendererContainer {
+  liveChatMembershipItemRenderer: YTLiveChatMembershipItemRenderer;
 }
 
 export interface YTLiveChatPaidStickerRenderer {
   id: string;
-  contextMenuEndpoint: ContextMenuEndpoint;
+  contextMenuEndpoint: YTContextMenuEndpoint;
   contextMenuAccessibility: YTAccessibilityData;
   timestampUsec: string;
-  authorPhoto: Thumbnails;
+  authorPhoto: YTThumbnails;
   authorName: YTSimpleText;
   authorExternalChannelId: string;
-  sticker: TickerThumbnailClass;
+  sticker: YTTickerThumbnailClass;
   moneyChipBackgroundColor: number;
   moneyChipTextColor: number;
   purchaseAmountText: YTSimpleText;
@@ -219,34 +224,33 @@ export interface YTLiveChatPaidStickerRenderer {
   trackingParams: string;
 }
 
+export interface YTLiveChatPaidStickerRendererContainer {
+  liveChatPaidStickerRenderer: YTLiveChatPaidStickerRenderer;
+}
+
 export interface YTLiveChatViewerEngagementMessageRenderer {
   id: string;
   timestampUsec: string;
   icon: YTIcon;
   message: YTRunContainer;
-  actionButton: ActionButton;
-}
-
-export interface YTLiveChatPlaceholderItemRenderer {
-  id: string;
-  timestampUsec: string;
+  actionButton: YTActionButton;
 }
 
 // Ticker Renderers
 
-export interface AddLiveChatTickerItem {
-  liveChatTickerPaidMessageItemRenderer?: YTLiveChatTickerPaidMessageItemRenderer;
-  liveChatTickerPaidStickerItemRenderer?: YTLiveChatTickerPaidStickerItemRenderer;
-  liveChatTickerSponsorItemRenderer?: YTLiveChatTickerSponsorItemRenderer;
+export interface YTAddLiveChatTickerItem {
+  liveChatTickerPaidMessageItemRenderer?: YTLiveChatTickerPaidMessageItemRenderer; // Super Chat
+  liveChatTickerPaidStickerItemRenderer?: YTLiveChatTickerPaidStickerItemRenderer; // Super Sticker
+  liveChatTickerSponsorItemRenderer?: YTLiveChatTickerSponsorItemRenderer; // Membership Updates
 }
 
-export interface LiveChatTickerShowItemEndpoint<T> {
+export interface YTLiveChatTickerShowItemEndpoint<T> {
   clickTrackingParams: string;
-  commandMetadata: CommandMetadata;
-  showLiveChatItemEndpoint: ShowLiveChatItemEndpoint<T>;
+  commandMetadata: YTCommandMetadata;
+  showLiveChatItemEndpoint: YTShowLiveChatItemEndpoint<T>;
 }
 
-export interface ShowLiveChatItemEndpoint<T> {
+export interface YTShowLiveChatItemEndpoint<T> {
   renderer: T;
   trackingParams: string;
 }
@@ -257,9 +261,9 @@ export interface YTLiveChatTickerPaidMessageItemRenderer {
   amountTextColor: number;
   startBackgroundColor: number;
   endBackgroundColor: number;
-  authorPhoto: TickerThumbnailClass;
+  authorPhoto: YTTickerThumbnailClass;
   durationSec: number;
-  showItemEndpoint: LiveChatTickerShowItemEndpoint<YTLiveChatPaidMessageRendererContainer>;
+  showItemEndpoint: YTLiveChatTickerShowItemEndpoint<YTLiveChatPaidMessageRendererContainer>;
   authorExternalChannelId: string;
   fullDurationSec: number;
   trackingParams: string;
@@ -267,14 +271,14 @@ export interface YTLiveChatTickerPaidMessageItemRenderer {
 
 export interface YTLiveChatTickerPaidStickerItemRenderer {
   id: string;
-  authorPhoto: TickerThumbnailClass;
+  authorPhoto: YTTickerThumbnailClass;
   startBackgroundColor: number;
   endBackgroundColor: number;
   durationSec: number;
   fullDurationSec: number;
-  showItemEndpoint: LiveChatTickerShowItemEndpoint<YTLiveChatPaidStickerRendererContainer>;
+  showItemEndpoint: YTLiveChatTickerShowItemEndpoint<YTLiveChatPaidStickerRendererContainer>;
   authorExternalChannelId: string;
-  tickerThumbnails: TickerThumbnailClass[];
+  tickerThumbnails: YTTickerThumbnailClass[];
   trackingParams: string;
 }
 
@@ -284,11 +288,23 @@ export interface YTLiveChatTickerSponsorItemRenderer {
   detailTextColor: number;
   startBackgroundColor: number;
   endBackgroundColor: number;
-  sponsorPhoto: Thumbnails;
+  sponsorPhoto: YTThumbnails;
   durationSec: number;
-  showItemEndpoint: LiveChatTickerShowItemEndpoint<YTLiveChatMembershipItemRendererContainer>;
+  showItemEndpoint: YTLiveChatTickerShowItemEndpoint<YTLiveChatMembershipItemRendererContainer>;
   authorExternalChannelId: string;
   fullDurationSec: number;
+}
+
+export interface YTBannerRendererContainer {
+  liveChatBannerRenderer: YTBannerRenderer;
+}
+
+export interface YTBannerRenderer {
+  header: YTLiveChatBannerRendererHeader;
+  contents: YTContents;
+  actionId: string;
+  viewerIsCreator: boolean;
+  targetId: string;
 }
 
 // Misc
@@ -298,64 +314,61 @@ export interface YTReplacementItem {
 }
 
 export interface YTActionPanel {
-  liveChatMessageInputRenderer: YTLiveChatMessageInputRenderer;
+  liveChatMessageInputRenderer: {
+    inputField: YTInputField;
+    sendButton: YTSendButton;
+    pickers: YTPicker[];
+    pickerButtons: YTPickerButton[];
+    interactionMessage: YTInteractionMessage;
+  };
 }
 
 export interface YTTooltip {
-  tooltipRenderer: YTTooltipRenderer;
-}
-
-export interface YTLiveChatMessageInputRenderer {
-  inputField: YTInputField;
-  sendButton: YTSendButton;
-  pickers: YTPicker[];
-  pickerButtons: PickerButton[];
-  interactionMessage: YTInteractionMessage;
+  tooltipRenderer: {
+    promoConfig: YTPromoConfig;
+    targetId: string;
+    detailsText: YTRunContainer;
+    suggestedPosition: YTType;
+    dismissStrategy: YTType;
+    trackingParams: string;
+  };
 }
 
 export interface YTInputField {
-  liveChatTextInputFieldRenderer: YTLiveChatTextInputFieldRenderer;
-}
-
-export interface YTLiveChatTextInputFieldRenderer {
-  placeholder: YTRunContainer;
-  maxCharacterLimit: number;
-  emojiCharacterCount: number;
+  liveChatTextInputFieldRenderer: {
+    placeholder: YTRunContainer;
+    maxCharacterLimit: number;
+    emojiCharacterCount: number;
+  };
 }
 
 export interface YTInteractionMessage {
-  messageRenderer: YTInteractionMessageMessageRenderer;
-}
-
-export interface YTInteractionMessageMessageRenderer {
-  trackingParams: string;
-  button: YTButtonRendererContainer;
-  subtext: YTSubtext;
+  messageRenderer: {
+    trackingParams: string;
+    button: YTButtonRendererContainer;
+    subtext: YTSubtext;
+  };
 }
 
 export interface YTButtonRendererContainer {
-  buttonRenderer: YTButtonRenderer;
-}
-
-export interface YTButtonRenderer {
-  style: string;
-  size: string;
-  isDisabled: boolean;
-  text: YTSimpleText;
-  navigationEndpoint: YTSignInEndpointContainer;
-  accessibility: YTAccessibilityLabel;
-  trackingParams: string;
+  buttonRenderer: {
+    style: string;
+    size: string;
+    isDisabled: boolean;
+    text: YTSimpleText;
+    navigationEndpoint: YTSignInEndpointContainer;
+    accessibility: YTAccessibilityLabel;
+    trackingParams: string;
+  };
 }
 
 export interface YTAuthorBadge {
-  liveChatAuthorBadgeRenderer: YTLiveChatAuthorBadgeRenderer;
-}
-
-export interface YTLiveChatAuthorBadgeRenderer {
-  customThumbnail?: YTCustomThumbnail;
-  icon?: YTIcon;
-  tooltip: string;
-  accessibility: YTAccessibilityData;
+  liveChatAuthorBadgeRenderer: {
+    customThumbnail?: YTCustomThumbnail;
+    icon?: YTIcon;
+    tooltip: string;
+    accessibility: YTAccessibilityData;
+  };
 }
 
 export interface YTCustomThumbnail {
@@ -401,17 +414,15 @@ export interface YTSubtext {
   };
 }
 
-export interface PickerButton {
-  liveChatIconToggleButtonRenderer: LiveChatIconToggleButtonRenderer;
-}
-
-export interface LiveChatIconToggleButtonRenderer {
-  targetId: string;
-  icon: YTIcon;
-  tooltip: string;
-  accessibility: YTAccessibilityData;
-  toggledIcon: YTIcon;
-  trackingParams: string;
+export interface YTPickerButton {
+  liveChatIconToggleButtonRenderer: {
+    targetId: string;
+    icon: YTIcon;
+    tooltip: string;
+    accessibility: YTAccessibilityData;
+    toggledIcon: YTIcon;
+    trackingParams: string;
+  };
 }
 
 // TODO: convert to enum
@@ -426,7 +437,7 @@ export interface YTPicker {
 export interface EmojiPickerRenderer {
   id: string;
   categories: YTEmojiCategory[];
-  categoryButtons: CategoryButton[];
+  categoryButtons: YTCategoryButton[];
   searchPlaceholderText: YTRunContainer;
   searchNoResultsText: YTRunContainer;
   pickSkinToneText: YTRunContainer;
@@ -449,15 +460,15 @@ export interface YTEmojiCategory {
   };
 }
 
-export interface CategoryButton {
-  emojiPickerCategoryButtonRenderer: EmojiPickerCategoryButtonRenderer;
+export interface YTCategoryButton {
+  emojiPickerCategoryButtonRenderer: YTEmojiPickerCategoryButtonRenderer;
 }
 
-export interface LiveChatParticipantRendererAuthorBadge {
-  liveChatAuthorBadgeRenderer: EmojiPickerCategoryButtonRenderer;
+export interface YTLiveChatParticipantRendererAuthorBadge {
+  liveChatAuthorBadgeRenderer: YTEmojiPickerCategoryButtonRenderer;
 }
 
-export interface EmojiPickerCategoryButtonRenderer {
+export interface YTEmojiPickerCategoryButtonRenderer {
   categoryId?: string;
   icon: YTIcon;
   tooltip: string;
@@ -472,156 +483,150 @@ export interface YTSendButton {
   };
 }
 
-export interface BannerRenderer {
-  liveChatBannerRenderer: {
-    header: LiveChatBannerRendererHeader;
-    contents: Contents;
-    actionId: string;
-    viewerIsCreator: boolean;
-    targetId: string;
+export interface YTContents {
+  liveChatTextMessageRenderer: {
+    message: YTRunContainer;
+    authorName: YTSimpleText;
+    authorPhoto: YTThumbnails;
+    id: string;
+    timestampUsec: string;
+    authorBadges: YTLiveChatParticipantRendererAuthorBadge[];
+    authorExternalChannelId: string;
   };
 }
 
-export interface Contents {
-  liveChatTextMessageRenderer: ContentsLiveChatTextMessageRenderer;
+export interface YTThumbnails {
+  thumbnails: YTThumbnail[];
 }
 
-export interface ContentsLiveChatTextMessageRenderer {
-  message: YTRunContainer;
-  authorName: YTSimpleText;
-  authorPhoto: Thumbnails;
-  id: string;
-  timestampUsec: string;
-  authorBadges: LiveChatParticipantRendererAuthorBadge[];
-  authorExternalChannelId: string;
-}
-
-export interface Thumbnails {
-  thumbnails: Thumbnail[];
-}
-
-export interface Thumbnail {
+export interface YTThumbnail {
   url: string;
   width: number;
   height: number;
 }
 
-export interface LiveChatBannerRendererHeader {
-  liveChatBannerHeaderRenderer: LiveChatBannerHeaderRenderer;
+export interface YTLiveChatBannerRendererHeader {
+  liveChatBannerHeaderRenderer: {
+    icon: YTIcon;
+    text: YTRunContainer;
+    contextMenuButton: YTButton;
+  };
 }
 
-export interface LiveChatBannerHeaderRenderer {
-  icon: YTIcon;
-  text: YTRunContainer;
-  contextMenuButton: Button;
+export interface YTButton {
+  buttonRenderer: YTMoreCommentsBelowButtonButtonRenderer;
 }
 
-export interface Button {
-  buttonRenderer: MoreCommentsBelowButtonButtonRenderer;
-}
-
-export interface MoreCommentsBelowButtonButtonRenderer {
+export interface YTMoreCommentsBelowButtonButtonRenderer {
   style?: string;
-  command?: ContextMenuEndpoint;
+  command?: YTContextMenuEndpoint;
   icon: YTIcon;
   accessibilityData: YTAccessibilityData;
   trackingParams: string;
 }
 
-export interface FluffyButton {
+export interface YTFluffyButton {
   buttonRenderer: {
     style: string;
     text: YTRunContainer;
-    serviceEndpoint: ButtonRendererServiceEndpoint;
+    serviceEndpoint: YTButtonRendererServiceEndpoint;
     trackingParams: string;
   };
 }
 
-export interface ButtonRendererServiceEndpoint {
+export interface YTButtonRendererServiceEndpoint {
   clickTrackingParams: string;
   popoutLiveChatEndpoint: YTPopoutLiveChatEndpoint;
 }
 
-export interface ContextMenuEndpoint {
+export interface YTContextMenuEndpoint {
   clickTrackingParams: string;
-  commandMetadata: CommandMetadata;
+  commandMetadata: YTCommandMetadata;
   liveChatItemContextMenuEndpoint: {
     params: string;
   };
 }
 
-export interface CommandMetadata {
-  webCommandMetadata: WebCommandMetadata;
+export interface YTCommandMetadata {
+  webCommandMetadata: YTWebCommandMetadata;
 }
 
 export interface YTNextEndpointCommandMetadata {
-  webCommandMetadata: PurpleWebCommandMetadata;
+  webCommandMetadata: YTPurpleWebCommandMetadata;
 }
 
-export interface AcceptCommandCommandMetadata {
-  webCommandMetadata: TentacledWebCommandMetadata;
+export interface YTAcceptCommandCommandMetadata {
+  webCommandMetadata: YTTentacledWebCommandMetadata;
 }
 
-export interface WebCommandMetadata {
+export interface YTWebCommandMetadata {
   ignoreNavigation: boolean;
 }
 
-export interface PurpleWebCommandMetadata {
+export interface YTPurpleWebCommandMetadata {
   url: string;
   webPageType: string;
   rootVe: number;
 }
 
-export interface TentacledWebCommandMetadata {
+export interface YTTentacledWebCommandMetadata {
   sendPost: boolean;
   apiUrl: string;
 }
 
-export interface ActionButton {
-  buttonRenderer: ActionButtonButtonRenderer;
+export interface YTActionButton {
+  buttonRenderer: {
+    style: string;
+    size: string;
+    isDisabled: boolean;
+    text: YTSimpleText;
+    navigationEndpoint: YTFluffyNavigationEndpoint;
+    accessibility: YTAccessibilityLabel;
+    accessibilityData: YTAccessibilityData;
+    trackingParams: string;
+  };
 }
 
-export interface ActionButtonButtonRenderer {
-  style: string;
-  size: string;
-  isDisabled: boolean;
-  text: YTSimpleText;
-  navigationEndpoint: FluffyNavigationEndpoint;
-  accessibility: YTAccessibilityLabel;
-  trackingParams: string;
-  accessibilityData: YTAccessibilityData;
-}
-
-export interface MenuNavigationItemRendererServiceEndpoint {
-  showLiveChatParticipantsEndpoint?: SEndpoint;
-  popoutLiveChatEndpoint?: YTPopoutLiveChatEndpoint;
-  toggleLiveChatTimestampsEndpoint?: SEndpoint;
-  clickTrackingParams: string;
-}
-
-export interface FluffyNavigationEndpoint {
+export interface YTFluffyNavigationEndpoint {
   clickTrackingParams: string;
   commandMetadata: YTNextEndpointCommandMetadata;
   urlEndpoint: YTURLEndpoint;
 }
 
-export interface MenuNavigationItemRendererNavigationEndpoint {
+export interface YTMenuNavigationItemRendererServiceEndpoint {
+  showLiveChatParticipantsEndpoint?: YTSEndpoint;
+  popoutLiveChatEndpoint?: YTPopoutLiveChatEndpoint;
+  toggleLiveChatTimestampsEndpoint?: YTSEndpoint;
   clickTrackingParams: string;
-  commandMetadata: CommandMetadata;
-  userFeedbackEndpoint: UserFeedbackEndpoint;
+}
+export interface YTMenuNavigationItemRendererNavigationEndpoint {
+  clickTrackingParams: string;
+  commandMetadata: YTCommandMetadata;
+  userFeedbackEndpoint: YTUserFeedbackEndpoint;
 }
 
-export interface UserFeedbackEndpoint {
+export interface YTUserFeedbackEndpoint {
   hack: boolean;
   bucketIdentifier: string;
 }
 
-export interface SEndpoint {
+export interface YTSEndpoint {
   hack: boolean;
 }
 
-export interface TickerThumbnailClass {
-  thumbnails: Thumbnail[];
+export interface YTAcceptCommand {
+  commandMetadata: YTAcceptCommandCommandMetadata;
+  feedbackEndpoint: YTFeedbackEndpoint;
+  clickTrackingParams: string;
+}
+
+export interface YTFeedbackEndpoint {
+  feedbackToken: string;
+  uiActions: UIActions;
+}
+
+export interface YTTickerThumbnailClass {
+  thumbnails: YTThumbnail[];
   accessibility: YTAccessibilityData;
 }
 
@@ -629,35 +634,15 @@ export interface YTShowLiveChatTooltipCommand {
   tooltip: YTTooltip;
 }
 
-export interface YTTooltipRenderer {
-  promoConfig: PromoConfig;
-  targetId: string;
-  detailsText: YTRunContainer;
-  suggestedPosition: DismissStrategy;
-  dismissStrategy: DismissStrategy;
-  trackingParams: string;
-}
-
-export interface DismissStrategy {
+export interface YTType {
   type: string;
 }
 
-export interface PromoConfig {
+export interface YTPromoConfig {
   promoId: string;
-  impressionEndpoints: AcceptCommand[];
-  acceptCommand: AcceptCommand;
-  dismissCommand: AcceptCommand;
-}
-
-export interface AcceptCommand {
-  clickTrackingParams: string;
-  commandMetadata: AcceptCommandCommandMetadata;
-  feedbackEndpoint: FeedbackEndpoint;
-}
-
-export interface FeedbackEndpoint {
-  feedbackToken: string;
-  uiActions: UIActions;
+  impressionEndpoints: YTAcceptCommand[];
+  acceptCommand: YTAcceptCommand;
+  dismissCommand: YTAcceptCommand;
 }
 
 export interface UIActions {
@@ -674,53 +659,49 @@ export interface YTClientMessages {
 
 export interface YTLiveChatContinuationHeader {
   liveChatHeaderRenderer: {
-    overflowMenu: OverflowMenu;
+    overflowMenu: YTOverflowMenu;
     collapseButton: CollapseButton;
-    viewSelector: ViewSelector;
+    viewSelector: YTViewSelector;
   };
 }
 
 export interface CollapseButton {
-  buttonRenderer: CollapseButtonButtonRenderer;
+  buttonRenderer: {
+    style: string;
+    size: string;
+    isDisabled: boolean;
+    accessibility: YTAccessibilityLabel;
+    trackingParams: string;
+  };
 }
 
-export interface CollapseButtonButtonRenderer {
-  style: string;
-  size: string;
-  isDisabled: boolean;
-  accessibility: YTAccessibilityLabel;
-  trackingParams: string;
-}
-
-export interface OverflowMenu {
+export interface YTOverflowMenu {
   menuRenderer: {
-    items: ItemElement[];
+    items: YTItemElement[];
     trackingParams: string;
     accessibility: YTAccessibilityData;
   };
 }
 
-export interface ItemElement {
-  menuServiceItemRenderer?: MenuItemRenderer;
-  menuNavigationItemRenderer?: MenuItemRenderer;
+export interface YTItemElement {
+  menuServiceItemRenderer?: YTMenuItemRenderer;
+  menuNavigationItemRenderer?: YTMenuItemRenderer;
 }
 
-export interface MenuItemRenderer {
+export interface YTMenuItemRenderer {
   text: YTRunContainer;
   icon: YTIcon;
-  navigationEndpoint?: MenuNavigationItemRendererNavigationEndpoint;
+  navigationEndpoint?: YTMenuNavigationItemRendererNavigationEndpoint;
   trackingParams: string;
-  serviceEndpoint?: MenuNavigationItemRendererServiceEndpoint;
+  serviceEndpoint?: YTMenuNavigationItemRendererServiceEndpoint;
 }
 
-export interface ViewSelector {
-  sortFilterSubMenuRenderer: SortFilterSubMenuRenderer;
-}
-
-export interface SortFilterSubMenuRenderer {
-  subMenuItems: YTSubMenuItem[];
-  accessibility: YTAccessibilityData;
-  trackingParams: string;
+export interface YTViewSelector {
+  sortFilterSubMenuRenderer: {
+    subMenuItems: YTSubMenuItem[];
+    accessibility: YTAccessibilityData;
+    trackingParams: string;
+  };
 }
 
 export interface YTSubMenuItem {
@@ -734,7 +715,7 @@ export interface YTSubMenuItem {
 export interface YTItemList {
   liveChatItemListRenderer: {
     maxItemsToDisplay: number;
-    moreCommentsBelowButton: Button;
+    moreCommentsBelowButton: YTButton;
     enablePauseChatKeyboardShortcuts: boolean;
   };
 }
@@ -742,7 +723,7 @@ export interface YTItemList {
 export interface YTParticipantsList {
   liveChatParticipantsListRenderer: {
     title: YTRunContainer;
-    backButton: Button;
+    backButton: YTButton;
     participants: YTParticipant[];
   };
 }
@@ -750,8 +731,8 @@ export interface YTParticipantsList {
 export interface YTParticipant {
   liveChatParticipantRenderer: {
     authorName: YTSimpleText;
-    authorPhoto: Thumbnails;
-    authorBadges: LiveChatParticipantRendererAuthorBadge[];
+    authorPhoto: YTThumbnails;
+    authorBadges: YTLiveChatParticipantRendererAuthorBadge[];
   };
 }
 
@@ -759,7 +740,7 @@ export interface YTPopoutMessage {
   messageRenderer: {
     text: YTRunContainer;
     trackingParams: string;
-    button: FluffyButton;
+    button: YTFluffyButton;
   };
 }
 

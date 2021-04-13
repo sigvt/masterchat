@@ -1,4 +1,5 @@
-import { fetchChat, fetchContext, ReloadContinuationType } from "..";
+import { fetchChat, fetchContext } from "..";
+import { ReloadContinuationType } from "../chat";
 
 it("can fetch initial chat", async () => {
   const context = await fetchContext("QK75uDJ9eyk");

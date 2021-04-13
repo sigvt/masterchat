@@ -3,14 +3,23 @@ import { ClientInfo } from "./context";
 import {
   YTAction,
   YTAddChatItemActionItem,
+  YTAddLiveChatTickerItem,
+  YTBannerRenderer,
   YTChatErrorStatus,
   YTChatResponse,
   YTContinuationContents,
+  YTLiveChatMembershipItemRenderer,
+  YTLiveChatPaidMessageRenderer,
+  YTLiveChatPlaceholderItemRenderer,
+  YTLiveChatTickerPaidMessageItemRenderer,
+  YTLiveChatTickerPaidStickerItemRenderer,
+  YTLiveChatTickerSponsorItemRenderer,
+  YTReplaceChatItemAction,
   YTRun,
 } from "./types/chat";
 import { log } from "./util";
 
-// Components
+const LIVECHAT_API_ENDPOINT = "https://www.youtube.com/youtubei/v1/live_chat";
 
 export const SUPERCHAT_SIGNIFICANCE_MAP = {
   blue: 1,
@@ -22,6 +31,7 @@ export const SUPERCHAT_SIGNIFICANCE_MAP = {
   red: 7,
 } as const;
 
+// Map from headerBackgroundColor to color name
 export const SUPERCHAT_COLOR_MAP = {
   "4279592384": "blue",
   "4278237396": "lightblue",
@@ -32,9 +42,16 @@ export const SUPERCHAT_COLOR_MAP = {
   "4291821568": "red",
 } as const;
 
+// Components
+
+export type OmitTrackingParams<T> = Omit<
+  T,
+  "clickTrackingParams" | "trackingParams"
+>;
+
 export interface Membership {
   status: string;
-  since: string;
+  since?: string;
   thumbnail: string;
 }
 
@@ -45,15 +62,15 @@ export interface Color {
   opacity: number;
 }
 
-export type SuperchatSignificance = typeof SUPERCHAT_SIGNIFICANCE_MAP[keyof typeof SUPERCHAT_SIGNIFICANCE_MAP];
+export type SuperChatSignificance = typeof SUPERCHAT_SIGNIFICANCE_MAP[keyof typeof SUPERCHAT_SIGNIFICANCE_MAP];
 
-export type SuperchatColor = typeof SUPERCHAT_COLOR_MAP[keyof typeof SUPERCHAT_COLOR_MAP];
+export type SuperChatColor = typeof SUPERCHAT_COLOR_MAP[keyof typeof SUPERCHAT_COLOR_MAP];
 
-export interface Superchat {
+export interface SuperChat {
   amount: number;
   currency: string;
-  color: SuperchatColor;
-  significance: SuperchatSignificance;
+  color: SuperChatColor;
+  significance: SuperChatSignificance;
   headerBackgroundColor: Color;
   headerTextColor: Color;
   bodyBackgroundColor: Color;
@@ -82,16 +99,20 @@ export interface TimedContinuation extends ReloadContinuation {
 // Actions
 
 export type Action =
-  | ChatAdditionAction
-  | ChatDeletionAction
-  | ChatByAuthorDeletionAction;
+  | AddChatItemAction
+  | AddSuperChatItemAction
+  | AddMembershipItemAction
+  | AddPlaceholderItemAction
+  | ReplaceChatItemAction
+  | MarkChatItemAsDeletedAction
+  | MarkChatItemsByAuthorAsDeletedAction
+  | AddSuperChatTickerAction
+  | AddSuperStickerTickerAction
+  | AddMembershipTickerAction
+  | AddBannerAction
+  | RemoveBannerAction;
 
-/*
-  liveChatPlaceholderItemRenderer?: LiveChatPlaceholderItemRenderer; -> ignore
-  liveChatMembershipItemRenderer?: LiveChatMembershipItemRenderer; -> ignore
-  liveChatViewerEngagementMessageRenderer; -> ignore
-  */
-export interface ChatAdditionAction {
+export interface AddChatItemAction {
   type: "addChatItemAction";
   id: string;
   timestamp: Date;
@@ -100,24 +121,73 @@ export interface ChatAdditionAction {
   authorName?: string;
   authorChannelId: string;
   authorPhoto: string;
-  superchat?: Superchat;
   membership?: Membership;
   isOwner: boolean;
   isModerator: boolean;
   isVerified: boolean;
 }
 
-export interface ChatByAuthorDeletionAction {
+export interface AddSuperChatItemAction {
+  type: "addSuperChatItemAction";
+  id: string;
+  timestamp: Date;
+  timestampUsec: string;
+  rawMessage?: YTRun[];
+  authorName?: string;
+  authorChannelId: string;
+  authorPhoto: string;
+  superchat: SuperChat;
+}
+
+export interface AddMembershipItemAction
+  extends YTLiveChatMembershipItemRenderer {
+  type: "addMembershipItemAction";
+}
+
+export interface AddPlaceholderItemAction
+  extends YTLiveChatPlaceholderItemRenderer {
+  type: "addPlaceholderItemAction";
+}
+
+export interface ReplaceChatItemAction extends YTReplaceChatItemAction {
+  type: "replaceChatItemAction";
+}
+
+export interface MarkChatItemAsDeletedAction {
+  type: "markChatItemAsDeletedAction";
+  retracted: boolean;
+  targetId: string;
+  timestamp: Date;
+}
+
+export interface MarkChatItemsByAuthorAsDeletedAction {
   type: "markChatItemsByAuthorAsDeletedAction";
   channelId: string;
   timestamp: Date;
 }
 
-export interface ChatDeletionAction {
-  type: "markChatItemAsDeletedAction";
-  retracted: boolean;
-  targetId: string;
-  timestamp: Date;
+export interface AddSuperChatTickerAction
+  extends OmitTrackingParams<YTLiveChatTickerPaidMessageItemRenderer> {
+  type: "addSuperChatTickerAction";
+}
+
+export interface AddSuperStickerTickerAction
+  extends OmitTrackingParams<YTLiveChatTickerPaidStickerItemRenderer> {
+  type: "addSuperStickerTickerAction";
+}
+
+export interface AddMembershipTickerAction
+  extends OmitTrackingParams<YTLiveChatTickerSponsorItemRenderer> {
+  type: "addMembershipTickerAction";
+}
+
+export interface AddBannerAction extends YTBannerRenderer {
+  type: "addBannerAction";
+}
+
+// TODO: find out interface
+export interface RemoveBannerAction {
+  type: "removeBannerAction";
 }
 
 // Response
@@ -142,7 +212,7 @@ export enum ChatErrorStatus {
   ContinuationNotFound = "CONTINUATION_NOT_FOUND",
 }
 
-function splitColorCode(code: number): Color | undefined {
+function parseColorCode(code: number): Color | undefined {
   if (code > 4294967295) {
     return undefined;
   }
@@ -155,7 +225,7 @@ function splitColorCode(code: number): Color | undefined {
   return { r, g, b, opacity };
 }
 
-export function getContinuation(
+export function getTimedContinuation(
   continuationContents: YTContinuationContents
 ): TimedContinuation | undefined {
   // observed k: invalidationContinuationData | timedContinuationData | liveChatReplayContinuationData
@@ -182,225 +252,335 @@ export function getContinuation(
   };
 }
 
-function omitTrackingParams<T>(obj: T): Omit<T, "clickTrackingParams"> {
+function omitTrackingParams<T>(obj: T): OmitTrackingParams<T> {
   return Object.entries(obj)
-    .filter(([k]) => k !== "clickTrackingParams")
+    .filter(([k]) => k !== "clickTrackingParams" && k !== "trackingParams")
     .reduce(
-      (sum, [k, v]) => (
-        (sum[k as keyof Omit<T, "clickTrackingParams">] = v), sum
-      ),
-      {} as Omit<T, "clickTrackingParams">
+      (sum, [k, v]) => ((sum[k as keyof OmitTrackingParams<T>] = v), sum),
+      {} as OmitTrackingParams<T>
     );
 }
 
+function parseSuperChat(renderer: YTLiveChatPaidMessageRenderer) {
+  const AMOUNT_REGEXP = /[\d.,]+/;
+
+  const input = renderer.purchaseAmountText.simpleText;
+  const amountString = AMOUNT_REGEXP.exec(input)![0].replace(/,/g, "");
+
+  const amount = parseInt(amountString, 10);
+  const currency = input.replace(AMOUNT_REGEXP, "").trim();
+  const color =
+    SUPERCHAT_COLOR_MAP[
+      renderer.headerBackgroundColor.toString() as keyof typeof SUPERCHAT_COLOR_MAP
+    ];
+  const significance = SUPERCHAT_SIGNIFICANCE_MAP[color];
+
+  return {
+    amount,
+    currency,
+    color,
+    significance,
+    headerBackgroundColor: parseColorCode(renderer.headerBackgroundColor)!,
+    headerTextColor: parseColorCode(renderer.headerTextColor)!,
+    bodyBackgroundColor: parseColorCode(renderer.bodyBackgroundColor)!,
+    bodyTextColor: parseColorCode(renderer.bodyTextColor)!,
+  };
+}
+
+/**
+ * parse raw action object and returns Action
+ *
+ * @param {YTAction} action
+ * @return {*}  {(Action | undefined)}
+ */
 function parseChatAction(action: YTAction): Action | undefined {
   const filteredActions = omitTrackingParams(action);
   const type = Object.keys(filteredActions)[0] as keyof typeof filteredActions;
 
   switch (type) {
     case "addChatItemAction": {
-      const guard = [
-        "liveChatTextMessageRenderer",
-        "liveChatPaidMessageRenderer",
-      ] as const;
-
       const { item } = action[type]!;
 
       const rendererType = Object.keys(
         item
       )[0] as keyof YTAddChatItemActionItem;
 
-      if (!(guard as readonly string[]).includes(rendererType)) {
-        if (
-          ![
-            "liveChatViewerEngagementMessageRenderer",
-            "liveChatPlaceholderItemRenderer",
-            "liveChatMembershipItemRenderer",
-          ].includes(rendererType)
-        ) {
-          log("off guard", rendererType, JSON.stringify(item, null, 2));
-        }
-        // - liveChatViewerEngagementMessageRenderer - Engagement
-        // - liveChatPlaceholderItemRenderer - Placeholder chat
-        // - liveChatMembershipItemRenderer - New membership
-        return undefined;
-      }
+      switch (rendererType) {
+        case "liveChatTextMessageRenderer": {
+          // Chat
+          const renderer = item[rendererType]!;
+          const {
+            id,
+            timestampUsec,
+            authorExternalChannelId: authorChannelId,
+          } = renderer;
 
-      const renderer = item[
-        rendererType as keyof Pick<
-          YTAddChatItemActionItem,
-          typeof guard[number]
-        >
-      ]!;
+          const timestamp = new Date(parseInt(timestampUsec, 10) / 1000);
 
-      const timestamp = new Date(parseInt(renderer.timestampUsec, 10) / 1000);
-      const authorPhoto =
-        renderer.authorPhoto.thumbnails[
-          renderer.authorPhoto.thumbnails.length - 1
-        ].url;
+          const authorPhoto =
+            renderer.authorPhoto.thumbnails[
+              renderer.authorPhoto.thumbnails.length - 1
+            ].url;
 
-      const raw = {
-        type: "addChatItemAction",
-        id: renderer.id,
-        timestamp,
-        timestampUsec: renderer.timestampUsec,
-        rawMessage: renderer.message?.runs,
-        authorName: renderer.authorName?.simpleText,
-        authorPhoto,
-        authorChannelId: renderer.authorExternalChannelId,
-        superchat: undefined,
-        membership: undefined,
-        isVerified: false,
-        isOwner: false,
-        isModerator: false,
-      } as ChatAdditionAction;
-
-      if ("purchaseAmountText" in renderer) {
-        const AMOUNT_REGEXP = /[\d.,]+/;
-
-        const input = renderer.purchaseAmountText.simpleText;
-        const amountString = AMOUNT_REGEXP.exec(input)![0].replace(/,/g, "");
-
-        const amount = parseInt(amountString, 10);
-        const currency = input.replace(AMOUNT_REGEXP, "").trim();
-        const color =
-          SUPERCHAT_COLOR_MAP[
-            renderer.headerBackgroundColor.toString() as keyof typeof SUPERCHAT_COLOR_MAP
-          ];
-        const significance = SUPERCHAT_SIGNIFICANCE_MAP[color];
-
-        raw.superchat = {
-          amount,
-          currency,
-          color,
-          significance,
-          headerBackgroundColor: splitColorCode(
-            renderer.headerBackgroundColor
-          )!,
-          headerTextColor: splitColorCode(renderer.headerTextColor)!,
-          bodyBackgroundColor: splitColorCode(renderer.bodyBackgroundColor)!,
-          bodyTextColor: splitColorCode(renderer.bodyTextColor)!,
-        };
-      }
-
-      if ("authorBadges" in renderer && renderer.authorBadges) {
-        for (const badge of renderer.authorBadges) {
-          const renderer = badge.liveChatAuthorBadgeRenderer;
-          const iconType = renderer.icon?.iconType;
-          switch (iconType) {
-            case "VERIFIED":
-              raw.isVerified = true;
-              break;
-            case "OWNER":
-              raw.isOwner = true;
-              break;
-            case "MODERATOR":
-              raw.isModerator = true;
-              break;
-            case undefined:
-              // membership
-              if (renderer.customThumbnail) {
-                const match = /^(.+?)(?:\s\((.+)\))?$/.exec(renderer.tooltip);
-                if (match) {
-                  const [_, status, since] = match;
-                  raw.membership = {
-                    status,
-                    since,
-                    thumbnail:
-                      renderer.customThumbnail.thumbnails[
-                        renderer.customThumbnail.thumbnails.length - 1
-                      ].url,
-                  };
-                }
+          let isVerified = false,
+            isOwner = false,
+            isModerator = false,
+            membership: Membership | undefined = undefined;
+          if ("authorBadges" in renderer && renderer.authorBadges) {
+            for (const badge of renderer.authorBadges) {
+              const renderer = badge.liveChatAuthorBadgeRenderer;
+              const iconType = renderer.icon?.iconType;
+              switch (iconType) {
+                case "VERIFIED":
+                  isVerified = true;
+                  break;
+                case "OWNER":
+                  isOwner = true;
+                  break;
+                case "MODERATOR":
+                  isModerator = true;
+                  break;
+                case undefined:
+                  // membership
+                  if (renderer.customThumbnail) {
+                    const match = /^(.+?)(?:\s\((.+)\))?$/.exec(
+                      renderer.tooltip
+                    );
+                    if (match) {
+                      const [_, status, since] = match;
+                      membership = {
+                        status,
+                        since,
+                        thumbnail:
+                          renderer.customThumbnail.thumbnails[
+                            renderer.customThumbnail.thumbnails.length - 1
+                          ].url,
+                      };
+                    }
+                  }
+                  break;
+                default:
+                  log(
+                    "Unrecognized iconType:",
+                    iconType,
+                    JSON.stringify(renderer, null, 2)
+                  );
+                  throw new Error("Unrecognized iconType: " + iconType);
               }
-              break;
-            default:
-              throw new Error("Unrecognized iconType: " + iconType);
+            }
           }
+
+          const raw: AddChatItemAction = {
+            type: "addChatItemAction",
+            id,
+            timestamp,
+            timestampUsec,
+            rawMessage: renderer.message?.runs,
+            authorName: renderer.authorName?.simpleText,
+            authorPhoto,
+            authorChannelId,
+            membership,
+            isVerified,
+            isOwner,
+            isModerator,
+          };
+
+          return raw;
+        }
+        case "liveChatPaidMessageRenderer": {
+          // Super Chat
+          const renderer = item[rendererType]!;
+          const {
+            timestampUsec,
+            authorExternalChannelId: authorChannelId,
+          } = renderer;
+
+          const timestamp = new Date(parseInt(timestampUsec, 10) / 1000);
+
+          const authorPhoto =
+            renderer.authorPhoto.thumbnails[
+              renderer.authorPhoto.thumbnails.length - 1
+            ].url;
+
+          const raw: AddSuperChatItemAction = {
+            type: "addSuperChatItemAction",
+            id: renderer.id,
+            timestamp,
+            timestampUsec,
+            rawMessage: renderer.message?.runs,
+            authorName: renderer.authorName?.simpleText,
+            authorPhoto,
+            authorChannelId,
+            superchat: parseSuperChat(renderer),
+          };
+
+          return raw;
+        }
+        case "liveChatMembershipItemRenderer": {
+          // Membership updates
+          const renderer = item[rendererType]!;
+          return {
+            type: "addMembershipItemAction",
+            ...renderer,
+          };
+        }
+        case "liveChatPlaceholderItemRenderer": {
+          // Placeholder chat
+          const renderer = item[rendererType]!;
+          return {
+            type: "addPlaceholderItemAction",
+            ...renderer,
+          };
+        }
+        case "liveChatViewerEngagementMessageRenderer": {
+          // Engagement
+          // Ignore
+          return;
+        }
+        default: {
+          log(
+            "Unrecognized renderer type (addChatItemAction):",
+            rendererType,
+            JSON.stringify(item, null, 2)
+          );
+
+          const _exhaust: never = rendererType;
+          return _exhaust;
         }
       }
-
-      return raw;
     }
 
     case "markChatItemsByAuthorAsDeletedAction": {
+      const payload = action[type]!;
+
       return {
         type: "markChatItemsByAuthorAsDeletedAction",
-        channelId: action[type]!.externalChannelId,
+        channelId: payload.externalChannelId,
         timestamp: new Date(),
       };
     }
 
     case "markChatItemAsDeletedAction": {
-      const deletionAction = action[type]!;
+      const payload = action[type]!;
+
+      const statusText = payload.deletedStateMessage.runs[0].text;
+      switch (statusText) {
+        case "[message retracted]":
+        case "[message deleted]":
+          break;
+        default:
+          log(
+            "Unrecognized deletion status:",
+            statusText,
+            JSON.stringify(payload, null, 2)
+          );
+          throw new Error(`Unrecognized deletion status: ${statusText}`);
+      }
+
+      const retracted = statusText === "[message retracted]";
+
       return {
         type: "markChatItemAsDeletedAction",
-        retracted:
-          deletionAction.deletedStateMessage.runs[0].text ===
-          "[message retracted]",
-        targetId: deletionAction.targetItemId,
+        retracted,
+        targetId: payload.targetItemId,
         timestamp: new Date(),
       };
     }
 
     case "addLiveChatTickerItemAction": {
-      // Superchat ticker: "liveChatTickerPaidMessageItemRenderer"
-      // New membership: "liveChatTickerSponsorItemRenderer"
       const { item } = action[type]!;
 
-      const rendererType = Object.keys(item)[0];
-      if (
-        ![
-          "liveChatTickerPaidMessageItemRenderer",
-          "liveChatTickerSponsorItemRenderer",
-        ].includes(rendererType)
-      ) {
-        log(
-          "addLiveChatTickerItemAction",
-          JSON.stringify(action[type]!, null, 2)
-        );
+      const rendererType = Object.keys(
+        item
+      )[0] as keyof YTAddLiveChatTickerItem;
+
+      switch (rendererType) {
+        case "liveChatTickerPaidMessageItemRenderer": {
+          // SuperChat ticker
+          const renderer = item[rendererType]!;
+          return {
+            type: "addSuperChatTickerAction",
+            ...omitTrackingParams(renderer),
+          };
+        }
+        case "liveChatTickerPaidStickerItemRenderer": {
+          // Super Sticker
+          const renderer = item[rendererType]!;
+          return {
+            type: "addSuperStickerTickerAction",
+            ...omitTrackingParams(renderer),
+          };
+        }
+        case "liveChatTickerSponsorItemRenderer": {
+          // Membership
+          const renderer = item[rendererType]!;
+          return {
+            type: "addMembershipTickerAction",
+            ...omitTrackingParams(renderer),
+          };
+        }
+        default:
+          log(
+            "Unrecognized renderer type (addLiveChatTickerItemAction):",
+            rendererType,
+            JSON.stringify(item, null, 2)
+          );
+
+          const _exhaust: never = rendererType;
+          return _exhaust;
       }
-      // TODO: handle later
-      break;
     }
 
     case "replaceChatItemAction": {
-      log("replaceChatItemAction", JSON.stringify(action[type]!, null, 2));
       // Replace placeholder item?
-      // TODO: handle later
-      break;
+      const payload = action[type]!;
+
+      log("replaceChatItemAction", JSON.stringify(payload, null, 2));
+
+      return {
+        type: "replaceChatItemAction",
+        ...payload,
+      };
     }
 
     case "addBannerToLiveChatCommand": {
-      log("addBannerToLiveChatCommand", JSON.stringify(action[type]!, null, 2));
       // add pinned item
-      // TODO: handle later
-      break;
+      const payload = action[type]!["bannerRenderer"]["liveChatBannerRenderer"];
+
+      log("addBannerToLiveChatCommand", JSON.stringify(action[type]!, null, 2));
+
+      return {
+        type: "addBannerAction",
+        ...payload,
+      };
     }
 
     case "removeBannerToLiveChatCommand": {
+      // remove pinned item
+      const payload = action[type]!;
+
       log(
         "removeBannerToLiveChatCommand",
         JSON.stringify(action[type]!, null, 2)
       );
-      // add pinned item
-      // TODO: handle later
-      break;
+
+      return {
+        type: "removeBannerAction",
+        ...payload,
+      };
     }
 
     default: {
-      log("Unsupported action", JSON.stringify(action[type]!, null, 2));
-      throw new Error("Unsupported actionType: " + type);
+      log("Unrecognized action type:", JSON.stringify(action[type]!, null, 2));
+      // throw new Error("Unsupported actionType: " + type);
     }
   }
 }
 
 function parseChatActions(actions: YTAction[]): Action[] {
-  const parsed = actions
-    ?.map(parseChatAction)
+  return actions
+    .map(parseChatAction)
     .filter((a): a is Action => a !== undefined);
-
-  return parsed;
 }
 
 export async function fetchChat({
@@ -414,9 +594,9 @@ export async function fetchChat({
   client: ClientInfo;
   isLiveChat?: boolean;
 }): Promise<SucceededChatResponse | FailedChatResponse> {
-  const endpoint = isLiveChat
-    ? `https://www.youtube.com/youtubei/v1/live_chat/get_live_chat?key=${apiKey}`
-    : `https://www.youtube.com/youtubei/v1/live_chat/get_live_chat_replay?key=${apiKey}`;
+  const queryUrl = isLiveChat
+    ? `${LIVECHAT_API_ENDPOINT}/get_live_chat?key=${apiKey}`
+    : `${LIVECHAT_API_ENDPOINT}/get_live_chat_replay?key=${apiKey}`;
 
   const requestBody = {
     continuation,
@@ -428,7 +608,7 @@ export async function fetchChat({
   let res: YTChatResponse;
 
   try {
-    res = await fetch(endpoint, {
+    res = await fetch(queryUrl, {
       method: "POST",
       body: JSON.stringify(requestBody),
     }).then((res) => res.json());
@@ -482,7 +662,8 @@ export async function fetchChat({
   if (!continuationContents) {
     // there's several possibilities lied here:
     // 1. live chat is over
-    // 2. given video is neither a live stream nor an archived stream
+    // 2. turned into membership-only stream
+    // 3. given video is neither a live stream nor an archived stream
     return {
       error: {
         status: ChatErrorStatus.Invalid,
@@ -491,7 +672,7 @@ export async function fetchChat({
     };
   }
 
-  const newContinuation = getContinuation(continuationContents);
+  const newContinuation = getTimedContinuation(continuationContents);
 
   const rawActions = continuationContents.liveChatContinuation.actions;
 
