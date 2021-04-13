@@ -16,10 +16,6 @@
       "name": "🚀 @holodata/masterchat-desktop",
       "path": "packages/desktop"
     },
-    {
-      "name": "🚀 @holodata/masterchat-web-extension",
-      "path": "packages/web-extension"
-    }
   ],
   "settings": {
     "languageToolLinter.languageTool.ignoredWordsInWorkspace": ["masterchat"]
