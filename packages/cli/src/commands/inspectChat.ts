@@ -1,18 +1,20 @@
 import chalk from "chalk";
+import { logAndExit } from "epicfail";
 import {
-  Action,
   convertRunsToString,
   fetchContext,
   iterateChat,
   normalizeVideoId,
-  ReloadContinuationType,
 } from "masterchat";
-import { VM, VMScript } from "vm2";
+import {
+  Action,
+  AddChatAction,
+  ReloadContinuationType,
+} from "masterchat/lib/chat";
 import { timeoutThen } from "masterchat/lib/util";
-import { ChatAdditionAction } from "masterchat/lib/types/chat";
-import { logAndExit } from "epicfail";
+import { VM, VMScript } from "vm2";
 
-interface CustomAddChatItemAction extends ChatAdditionAction {
+interface CustomAddChatAction extends AddChatAction {
   message?: string;
 }
 
@@ -27,26 +29,32 @@ export function flattenActions(
 
   for (const action of actions) {
     switch (action.type) {
-      case "addChatItemAction":
+      case "addChatItemAction": {
         if (action.rawMessage || action.superchat) {
           let text = "";
 
           if (showAuthor) {
             const colorize = action.membership ? chalk.green : chalk.gray;
             const badges = [];
+
             if (action.isModerator) {
               badges.push("🛠");
             }
+
             if (action.isVerified) {
               badges.push("✅");
             }
+
             if (action.isOwner) {
               badges.push("⚡️");
             }
+
             text += colorize(action.authorName);
+
             if (badges.length >= 1) {
               text += "( " + badges.join(" ") + " )";
             }
+
             text += ": ";
           }
 
@@ -61,12 +69,14 @@ export function flattenActions(
           simpleChat.push(text);
         }
         break;
-      case "markChatItemsByAuthorAsDeletedAction":
+      }
+      case "markChatItemsByAuthorAsDeletedAction": {
         if (!ignoreModerationEvents) {
           simpleChat.push(chalk.red(`[banned]: ${action.channelId}`));
         }
         break;
-      case "markChatItemAsDeletedAction":
+      }
+      case "markChatItemAsDeletedAction": {
         if (!ignoreModerationEvents) {
           simpleChat.push(
             chalk.yellow(
@@ -77,6 +87,7 @@ export function flattenActions(
           );
         }
         break;
+      }
     }
   }
   return simpleChat;
@@ -109,6 +120,7 @@ export async function inspectChat(argv: any) {
   const verbose: boolean = argv.verbose;
   const showModeration: boolean = argv.mod;
   const showAuthor: boolean = argv.author;
+  const ignoreChat: boolean = !!argv.ignoreChat;
   const type = argv.type as ReloadContinuationType;
   const filterExp: string = Array.isArray(argv.filter)
     ? argv.filter[0]
@@ -173,7 +185,7 @@ export async function inspectChat(argv: any) {
       for (const action of aggregatedActions) {
         if (action.type === "addChatItemAction") {
           // stringified message
-          (action as CustomAddChatItemAction).message = action.rawMessage
+          (action as CustomAddChatAction).message = action.rawMessage
             ? convertRunsToString(action.rawMessage)
             : "";
         }

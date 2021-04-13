@@ -2,6 +2,7 @@
 
 import yargs from "yargs";
 import { inspectChat } from "./commands/inspectChat";
+import { collectEvents } from "./commands/collectEvents";
 import epicfail from "epicfail";
 
 epicfail();
@@ -42,6 +43,15 @@ const argv = yargs(process.argv.slice(2))
     type: "boolean",
     default: false,
   })
+  .option("collect", {
+    describe: "Enters event collection mode, ignoring other flags",
+    alias: "c",
+    type: "boolean",
+  })
   .showHelpOnFail(false).argv;
 
-inspectChat(argv);
+if (argv.collect) {
+  collectEvents(argv);
+} else {
+  inspectChat(argv);
+}
