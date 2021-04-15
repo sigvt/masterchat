@@ -1,11 +1,7 @@
 import { logAndExit } from "epicfail";
 import fs from "fs";
 import { fetchContext, iterateChat, normalizeVideoId } from "masterchat";
-import {
-  Action,
-  FetchChatErrorStatus,
-  ReloadContinuationType,
-} from "masterchat/lib/chat";
+import { Action, ReloadContinuationType } from "masterchat/lib/chat";
 import { timeoutThen } from "masterchat/lib/util";
 
 export async function collectEvents(argv: any) {
