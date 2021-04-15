@@ -4,17 +4,18 @@
 
 ```bash
 yarn install
-yarn lerna boostrap
+yarn bootstrap
+yarn build
 ```
 
 ## Development Flow
 
 ```bash
-yarn lerna run dev --parallel
+yarn dev
 ```
 
 ```bash
-DEBUG=masterchat masterchat -c <videoId>
+DEBUG=masterchat ./packages/cli/lib/masterchat -c <videoId>
 ```
 
 ## Release Flow (Maintainers only)

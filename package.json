@@ -4,6 +4,8 @@
   "version": "0.0.0",
   "author": "Yasuaki Uechi <y@uechi.io> (https://uechi.io/)",
   "scripts": {
+    "bootstrap": "lerna bootstrap",
+    "build": "lerna run build",
     "dev": "lerna run dev --parallel",
     "docs": "fliegdoc build"
   },
