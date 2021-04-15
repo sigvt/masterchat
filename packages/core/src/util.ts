@@ -22,10 +22,11 @@ export function convertRunsToString(
   try {
     return runs
       .map((run) => {
-        if (run.text) {
+        if ("text" in run) {
           return run.text;
         }
-        if (run.emoji) {
+
+        if ("emoji" in run) {
           if (emojiHandler) {
             return emojiHandler(run.emoji);
           }

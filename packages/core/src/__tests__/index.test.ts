@@ -13,12 +13,12 @@ it("can fetch initial chat", async () => {
   const res = await fetchChat({
     ...context.auth,
     continuation: context.continuations[ReloadContinuationType.All].token,
-    isLiveChat: context.metadata.isLive,
+    isReplayChat: context.metadata.isLive,
   });
 
   expect(res).toHaveProperty("actions");
 
-  if ("error" in res) {
+  if (res.error) {
     throw new Error(res.error.message);
   }
 

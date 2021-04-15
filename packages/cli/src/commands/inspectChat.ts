@@ -9,6 +9,7 @@ import {
 import {
   Action,
   AddChatItemAction,
+  FetchChatErrorStatus,
   ReloadContinuationType,
 } from "masterchat/lib/chat";
 import { timeoutThen } from "masterchat/lib/util";
@@ -18,7 +19,7 @@ interface CustomAddChatAction extends AddChatItemAction {
   message?: string;
 }
 
-export function flattenActions(
+export function stringifyActions(
   actions: Action[],
   {
     ignoreModerationEvents = true,
@@ -165,7 +166,6 @@ export async function inspectChat(argv: any) {
   const liveChatIter = iterateChat({
     ...context.auth,
     token: initialToken,
-    isLiveChat: isLive,
   });
 
   let chatQueue: string[] = [];
@@ -183,7 +183,22 @@ export async function inspectChat(argv: any) {
   });
 
   // fetch chat
-  for await (const { actions, delay } of liveChatIter) {
+  for await (const response of liveChatIter) {
+    if (response.error) {
+      const { error } = response;
+      switch (error.status) {
+        case FetchChatErrorStatus.Timeout: {
+          console.log(`Timeout error occured. Retrying...`);
+          await timeoutThen(5000);
+          continue;
+        }
+      }
+      console.log(`Error(${error.status}): ${error.message}`);
+      break;
+    }
+    const { actions, continuation } = response;
+    const delay = continuation?.timeoutMs || 0;
+
     if (verbose) {
       console.log("incoming actions:", actions.length, "delay:", delay);
     }
@@ -206,13 +221,13 @@ export async function inspectChat(argv: any) {
         );
       }
 
-      const simpleChat: string[] = flattenActions(aggregatedActions, {
+      const chat: string[] = stringifyActions(aggregatedActions, {
         ignoreModerationEvents: !showModeration,
         showAuthor,
       });
 
-      if (simpleChat.length > 0) {
-        chatQueue = [...chatQueue, ...simpleChat];
+      if (chat.length > 0) {
+        chatQueue = [...chatQueue, ...chat];
       }
 
       wait += delay || 0;

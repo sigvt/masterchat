@@ -1,7 +1,11 @@
 import { logAndExit } from "epicfail";
 import fs from "fs";
 import { fetchContext, iterateChat, normalizeVideoId } from "masterchat";
-import { ReloadContinuationType } from "masterchat/lib/chat";
+import {
+  Action,
+  FetchChatErrorStatus,
+  ReloadContinuationType,
+} from "masterchat/lib/chat";
 import { timeoutThen } from "masterchat/lib/util";
 
 export async function collectEvents(argv: any) {
@@ -45,19 +49,33 @@ export async function collectEvents(argv: any) {
   const liveChatIter = iterateChat({
     ...context.auth,
     token: initialToken,
-    isLiveChat: isLive,
   });
 
+  const ignoredTypes: Action["type"][] = [];
+
   // fetch chat
-  for await (const { actions, delay } of liveChatIter) {
-    console.log("incoming actions:", actions.length, "delay:", delay);
+  for await (const response of liveChatIter) {
+    if (response.error) {
+      const { error } = response;
+
+      console.log(`Error(${error.status}): ${error.message}`);
+      break;
+    }
+
+    const { actions, continuation } = response;
+
+    // console.log("incoming actions:", actions.length, "delay:", delay);
 
     for (const action of actions) {
       const type = action.type;
       const payload = action;
+
+      if (ignoredTypes.includes(type)) continue;
+
       fs.appendFileSync(`${type}.jsonl`, JSON.stringify(payload) + "\n");
     }
 
+    const delay = continuation?.timeoutMs || 0;
     await timeoutThen(delay);
   }
 

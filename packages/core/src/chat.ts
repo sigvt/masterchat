@@ -2,22 +2,25 @@ import fetch from "node-fetch";
 import { ClientInfo } from "./context";
 import {
   YTAction,
-  YTAddChatItemActionItem,
   YTAddLiveChatTickerItem,
-  YTBannerRenderer,
+  YTLiveChatBannerRenderer,
   YTChatErrorStatus,
   YTChatResponse,
   YTContinuationContents,
   YTLiveChatMembershipItemRenderer,
   YTLiveChatPaidMessageRenderer,
+  YTLiveChatPaidStickerRenderer,
   YTLiveChatPlaceholderItemRenderer,
   YTLiveChatTickerPaidMessageItemRenderer,
   YTLiveChatTickerPaidStickerItemRenderer,
   YTLiveChatTickerSponsorItemRenderer,
   YTReplaceChatItemAction,
   YTRun,
+  YTRemoveBannerForLiveChatCommand,
+  YTTooltipRenderer,
+  YTLiveChatViewerEngagementMessageRenderer,
 } from "./types/chat";
-import { log } from "./util";
+import { log, timeoutThen } from "./util";
 
 const LIVECHAT_API_ENDPOINT = "https://www.youtube.com/youtubei/v1/live_chat";
 
@@ -101,6 +104,7 @@ export interface TimedContinuation extends ReloadContinuation {
 export type Action =
   | AddChatItemAction
   | AddSuperChatItemAction
+  | AddSuperStickerItemAction
   | AddMembershipItemAction
   | AddPlaceholderItemAction
   | ReplaceChatItemAction
@@ -110,7 +114,9 @@ export type Action =
   | AddSuperStickerTickerAction
   | AddMembershipTickerAction
   | AddBannerAction
-  | RemoveBannerAction;
+  | RemoveBannerAction
+  | AddViewerEngagementMessageAction
+  | ShowTooltipAction;
 
 export interface AddChatItemAction {
   type: "addChatItemAction";
@@ -118,7 +124,7 @@ export interface AddChatItemAction {
   timestamp: Date;
   timestampUsec: string;
   rawMessage: YTRun[];
-  authorName?: string;
+  authorName: string;
   authorChannelId: string;
   authorPhoto: string;
   membership?: Membership;
@@ -132,11 +138,16 @@ export interface AddSuperChatItemAction {
   id: string;
   timestamp: Date;
   timestampUsec: string;
-  rawMessage?: YTRun[];
-  authorName?: string;
+  rawMessage: YTRun[] | undefined;
+  authorName: string;
   authorChannelId: string;
   authorPhoto: string;
   superchat: SuperChat;
+}
+
+export interface AddSuperStickerItemAction
+  extends YTLiveChatPaidStickerRenderer {
+  type: "addSuperStickerItemAction";
 }
 
 export interface AddMembershipItemAction
@@ -181,20 +192,34 @@ export interface AddMembershipTickerAction
   type: "addMembershipTickerAction";
 }
 
-export interface AddBannerAction extends YTBannerRenderer {
+export interface AddBannerAction extends YTLiveChatBannerRenderer {
   type: "addBannerAction";
 }
 
-// TODO: find out interface
-export interface RemoveBannerAction {
+export interface RemoveBannerAction extends YTRemoveBannerForLiveChatCommand {
   type: "removeBannerAction";
+}
+
+export interface ShowTooltipAction extends YTTooltipRenderer {
+  type: "showTooltipAction";
+}
+
+export interface AddViewerEngagementMessageAction
+  extends YTLiveChatViewerEngagementMessageRenderer {
+  type: "addViewerEngagementMessageAction";
+}
+
+export interface UnknownAction {
+  type: "unknown";
+  payload: unknown;
 }
 
 // Response
 
 export interface SucceededChatResponse {
-  continuation?: TimedContinuation;
   actions: Action[];
+  continuation: TimedContinuation | undefined;
+  error: null;
 }
 
 export interface FailedChatResponse {
@@ -203,10 +228,10 @@ export interface FailedChatResponse {
 
 export interface ChatError {
   message: string;
-  status: ChatErrorStatus | YTChatErrorStatus;
+  status: FetchChatErrorStatus | YTChatErrorStatus;
 }
 
-export enum ChatErrorStatus {
+export enum FetchChatErrorStatus {
   Invalid = "INVALID",
   Timeout = "TIMEOUT",
   ContinuationNotFound = "CONTINUATION_NOT_FOUND",
@@ -289,11 +314,8 @@ function parseSuperChat(renderer: YTLiveChatPaidMessageRenderer) {
 
 /**
  * parse raw action object and returns Action
- *
- * @param {YTAction} action
- * @return {*}  {(Action | undefined)}
  */
-function parseChatAction(action: YTAction): Action | undefined {
+function parseChatAction(action: YTAction): Action | UnknownAction {
   const filteredActions = omitTrackingParams(action);
   const type = Object.keys(filteredActions)[0] as keyof typeof filteredActions;
 
@@ -301,152 +323,147 @@ function parseChatAction(action: YTAction): Action | undefined {
     case "addChatItemAction": {
       const { item } = action[type]!;
 
-      const rendererType = Object.keys(
-        item
-      )[0] as keyof YTAddChatItemActionItem;
+      if ("liveChatTextMessageRenderer" in item) {
+        // Chat
+        const renderer = item["liveChatTextMessageRenderer"]!;
+        const {
+          id,
+          timestampUsec,
+          authorExternalChannelId: authorChannelId,
+        } = renderer;
 
-      switch (rendererType) {
-        case "liveChatTextMessageRenderer": {
-          // Chat
-          const renderer = item[rendererType]!;
-          const {
-            id,
-            timestampUsec,
-            authorExternalChannelId: authorChannelId,
-          } = renderer;
+        const timestamp = new Date(parseInt(timestampUsec, 10) / 1000);
 
-          const timestamp = new Date(parseInt(timestampUsec, 10) / 1000);
+        const authorPhoto =
+          renderer.authorPhoto.thumbnails[
+            renderer.authorPhoto.thumbnails.length - 1
+          ].url;
 
-          const authorPhoto =
-            renderer.authorPhoto.thumbnails[
-              renderer.authorPhoto.thumbnails.length - 1
-            ].url;
+        let isVerified = false,
+          isOwner = false,
+          isModerator = false,
+          membership: Membership | undefined = undefined;
 
-          let isVerified = false,
-            isOwner = false,
-            isModerator = false,
-            membership: Membership | undefined = undefined;
-          if ("authorBadges" in renderer && renderer.authorBadges) {
-            for (const badge of renderer.authorBadges) {
-              const renderer = badge.liveChatAuthorBadgeRenderer;
-              const iconType = renderer.icon?.iconType;
-              switch (iconType) {
-                case "VERIFIED":
-                  isVerified = true;
-                  break;
-                case "OWNER":
-                  isOwner = true;
-                  break;
-                case "MODERATOR":
-                  isModerator = true;
-                  break;
-                case undefined:
-                  // membership
-                  if (renderer.customThumbnail) {
-                    const match = /^(.+?)(?:\s\((.+)\))?$/.exec(
-                      renderer.tooltip
-                    );
-                    if (match) {
-                      const [_, status, since] = match;
-                      membership = {
-                        status,
-                        since,
-                        thumbnail:
-                          renderer.customThumbnail.thumbnails[
-                            renderer.customThumbnail.thumbnails.length - 1
-                          ].url,
-                      };
-                    }
+        if ("authorBadges" in renderer && renderer.authorBadges) {
+          for (const badge of renderer.authorBadges) {
+            const renderer = badge.liveChatAuthorBadgeRenderer;
+            const iconType = renderer.icon?.iconType;
+            switch (iconType) {
+              case "VERIFIED":
+                isVerified = true;
+                break;
+              case "OWNER":
+                isOwner = true;
+                break;
+              case "MODERATOR":
+                isModerator = true;
+                break;
+              case undefined:
+                // membership
+                if (renderer.customThumbnail) {
+                  const match = /^(.+?)(?:\s\((.+)\))?$/.exec(renderer.tooltip);
+                  if (match) {
+                    const [_, status, since] = match;
+                    membership = {
+                      status,
+                      since,
+                      thumbnail:
+                        renderer.customThumbnail.thumbnails[
+                          renderer.customThumbnail.thumbnails.length - 1
+                        ].url,
+                    };
                   }
-                  break;
-                default:
-                  log(
-                    "Unrecognized iconType:",
-                    iconType,
-                    JSON.stringify(renderer, null, 2)
-                  );
-                  throw new Error("Unrecognized iconType: " + iconType);
-              }
+                }
+                break;
+              default:
+                log(
+                  "Unrecognized iconType:",
+                  iconType,
+                  JSON.stringify(renderer, null, 2)
+                );
+                throw new Error("Unrecognized iconType: " + iconType);
             }
           }
-
-          const raw: AddChatItemAction = {
-            type: "addChatItemAction",
-            id,
-            timestamp,
-            timestampUsec,
-            rawMessage: renderer.message?.runs,
-            authorName: renderer.authorName?.simpleText,
-            authorPhoto,
-            authorChannelId,
-            membership,
-            isVerified,
-            isOwner,
-            isModerator,
-          };
-
-          return raw;
         }
-        case "liveChatPaidMessageRenderer": {
-          // Super Chat
-          const renderer = item[rendererType]!;
-          const {
-            timestampUsec,
-            authorExternalChannelId: authorChannelId,
-          } = renderer;
 
-          const timestamp = new Date(parseInt(timestampUsec, 10) / 1000);
+        const raw: AddChatItemAction = {
+          type: "addChatItemAction",
+          id,
+          timestamp,
+          timestampUsec,
+          rawMessage: renderer.message.runs,
+          authorName: renderer.authorName?.simpleText,
+          authorPhoto,
+          authorChannelId,
+          membership,
+          isVerified,
+          isOwner,
+          isModerator,
+        };
 
-          const authorPhoto =
-            renderer.authorPhoto.thumbnails[
-              renderer.authorPhoto.thumbnails.length - 1
-            ].url;
+        return raw;
+      } else if ("liveChatPaidMessageRenderer" in item) {
+        // Super Chat
+        const renderer = item["liveChatPaidMessageRenderer"]!;
+        const {
+          timestampUsec,
+          authorExternalChannelId: authorChannelId,
+        } = renderer;
 
-          const raw: AddSuperChatItemAction = {
-            type: "addSuperChatItemAction",
-            id: renderer.id,
-            timestamp,
-            timestampUsec,
-            rawMessage: renderer.message?.runs,
-            authorName: renderer.authorName?.simpleText,
-            authorPhoto,
-            authorChannelId,
-            superchat: parseSuperChat(renderer),
-          };
+        const timestamp = new Date(parseInt(timestampUsec, 10) / 1000);
 
-          return raw;
-        }
-        case "liveChatMembershipItemRenderer": {
-          // Membership updates
-          const renderer = item[rendererType]!;
-          return {
-            type: "addMembershipItemAction",
-            ...renderer,
-          };
-        }
-        case "liveChatPlaceholderItemRenderer": {
-          // Placeholder chat
-          const renderer = item[rendererType]!;
-          return {
-            type: "addPlaceholderItemAction",
-            ...renderer,
-          };
-        }
-        case "liveChatViewerEngagementMessageRenderer": {
-          // Engagement
-          // Ignore
-          return;
-        }
-        default: {
-          log(
-            "Unrecognized renderer type (addChatItemAction):",
-            rendererType,
-            JSON.stringify(item, null, 2)
-          );
+        const authorPhoto =
+          renderer.authorPhoto.thumbnails[
+            renderer.authorPhoto.thumbnails.length - 1
+          ].url;
 
-          const _exhaust: never = rendererType;
-          return _exhaust;
-        }
+        const raw: AddSuperChatItemAction = {
+          type: "addSuperChatItemAction",
+          id: renderer.id,
+          timestamp,
+          timestampUsec,
+          rawMessage: renderer.message?.runs,
+          authorName: renderer.authorName?.simpleText,
+          authorPhoto,
+          authorChannelId,
+          superchat: parseSuperChat(renderer),
+        };
+
+        return raw;
+      } else if ("liveChatPaidStickerRenderer" in item) {
+        // Super Sticker
+        const renderer = item["liveChatPaidStickerRenderer"]!;
+        return {
+          type: "addSuperStickerItemAction",
+          ...renderer,
+        };
+      } else if ("liveChatMembershipItemRenderer" in item) {
+        // Membership updates
+        const renderer = item["liveChatMembershipItemRenderer"]!;
+        return {
+          type: "addMembershipItemAction",
+          ...renderer,
+        };
+      } else if ("liveChatPlaceholderItemRenderer" in item) {
+        // Placeholder chat
+        const renderer = item["liveChatPlaceholderItemRenderer"]!;
+        return {
+          type: "addPlaceholderItemAction",
+          ...renderer,
+        };
+      } else if ("liveChatViewerEngagementMessageRenderer" in item) {
+        // Engagement
+        const renderer = item["liveChatViewerEngagementMessageRenderer"]!;
+        return {
+          type: "addViewerEngagementMessageAction",
+          ...renderer,
+        };
+      } else {
+        log(
+          "Unrecognized renderer type (addChatItemAction):",
+          JSON.stringify(item, null, 2)
+        );
+        break;
       }
     }
 
@@ -474,7 +491,9 @@ function parseChatAction(action: YTAction): Action | undefined {
             statusText,
             JSON.stringify(payload, null, 2)
           );
-          throw new Error(`Unrecognized deletion status: ${statusText}`);
+          throw new Error(
+            `Unrecognized deletion status: ${payload.deletedStateMessage}`
+          );
       }
 
       const retracted = statusText === "[message retracted]";
@@ -526,8 +545,8 @@ function parseChatAction(action: YTAction): Action | undefined {
             JSON.stringify(item, null, 2)
           );
 
-          const _exhaust: never = rendererType;
-          return _exhaust;
+          const _: never = rendererType;
+          return _;
       }
     }
 
@@ -555,12 +574,12 @@ function parseChatAction(action: YTAction): Action | undefined {
       };
     }
 
-    case "removeBannerToLiveChatCommand": {
+    case "removeBannerForLiveChatCommand": {
       // remove pinned item
       const payload = action[type]!;
 
       log(
-        "removeBannerToLiveChatCommand",
+        "removeBannerForLiveChatCommand",
         JSON.stringify(action[type]!, null, 2)
       );
 
@@ -570,33 +589,43 @@ function parseChatAction(action: YTAction): Action | undefined {
       };
     }
 
+    case "showLiveChatTooltipCommand": {
+      const payload = action[type]!;
+      return {
+        type: "showTooltipAction",
+        ...payload["tooltip"]["tooltipRenderer"],
+      };
+    }
+
     default: {
-      log("Unrecognized action type:", JSON.stringify(action[type]!, null, 2));
-      // throw new Error("Unsupported actionType: " + type);
+      const _: never = type;
+
+      const actionString = JSON.stringify(action, null, 2);
+      log("Unrecognized action type:", actionString);
     }
   }
-}
 
-function parseChatActions(actions: YTAction[]): Action[] {
-  return actions
-    .map(parseChatAction)
-    .filter((a): a is Action => a !== undefined);
+  // TODO: remove unknown type in future
+  return {
+    type: "unknown",
+    payload: action,
+  };
 }
 
 export async function fetchChat({
   continuation,
   apiKey,
   client,
-  isLiveChat = true,
+  isReplayChat = false,
 }: {
   continuation: string;
   apiKey: string;
   client: ClientInfo;
-  isLiveChat?: boolean;
+  isReplayChat?: boolean;
 }): Promise<SucceededChatResponse | FailedChatResponse> {
-  const queryUrl = isLiveChat
-    ? `${LIVECHAT_API_ENDPOINT}/get_live_chat?key=${apiKey}`
-    : `${LIVECHAT_API_ENDPOINT}/get_live_chat_replay?key=${apiKey}`;
+  const queryUrl = isReplayChat
+    ? `${LIVECHAT_API_ENDPOINT}/get_live_chat_replay?key=${apiKey}`
+    : `${LIVECHAT_API_ENDPOINT}/get_live_chat?key=${apiKey}`;
 
   const requestBody = {
     continuation,
@@ -605,26 +634,30 @@ export async function fetchChat({
     },
   };
 
+  const MAX_RETRY_COUNT = 3;
   let res: YTChatResponse;
+  let retryRemaining = MAX_RETRY_COUNT;
 
-  try {
-    res = await fetch(queryUrl, {
-      method: "POST",
-      body: JSON.stringify(requestBody),
-    }).then((res) => res.json());
-  } catch (err) {
-    log("fetchError", err, err.code);
-    switch (err.code) {
-      case "ETIMEOUT":
-        return {
-          error: {
-            status: ChatErrorStatus.Timeout,
-            message: "Request timeout",
-          },
-        };
-
-      default:
-        throw err;
+  while (true) {
+    try {
+      res = await fetch(queryUrl, {
+        method: "POST",
+        body: JSON.stringify(requestBody),
+      }).then((res) => res.json());
+      retryRemaining = MAX_RETRY_COUNT;
+      break;
+    } catch (err) {
+      log("fetchError", err, err.code);
+      switch (err.code) {
+        case "ETIMEOUT":
+          if (retryRemaining > 0) {
+            retryRemaining -= 1;
+            log(`Retrying (remaining: ${retryRemaining})`);
+            await timeoutThen(5000);
+            continue;
+          }
+      }
+      throw err;
     }
   }
 
@@ -638,7 +671,9 @@ export async function fetchChat({
     //   500: internal error encountered
     //   503: The service is currently unavailable (temporary?)
 
-    switch (res.error.status) {
+    const { status, message } = res.error;
+
+    switch (status) {
       case YTChatErrorStatus.PermissionDenied:
       case YTChatErrorStatus.NotFound:
       case YTChatErrorStatus.Invalid:
@@ -651,8 +686,8 @@ export async function fetchChat({
 
     return {
       error: {
-        status: res.error.status,
-        message: res.error.message,
+        status,
+        message,
       },
     };
   }
@@ -664,9 +699,10 @@ export async function fetchChat({
     // 1. live chat is over
     // 2. turned into membership-only stream
     // 3. given video is neither a live stream nor an archived stream
+    log(JSON.stringify(res, null, 2));
     return {
       error: {
-        status: ChatErrorStatus.Invalid,
+        status: FetchChatErrorStatus.Invalid,
         message: "continuationContents cannot be found",
       },
     };
@@ -674,35 +710,39 @@ export async function fetchChat({
 
   const newContinuation = getTimedContinuation(continuationContents);
 
-  const rawActions = continuationContents.liveChatContinuation.actions;
+  let rawActions = continuationContents.liveChatContinuation.actions;
 
+  // this means no chat available between the time window
   if (!rawActions) {
-    // this means no chat available between the timeoutMs
-    return { continuation: newContinuation, actions: [] };
+    return { actions: [], continuation: newContinuation, error: null };
   }
 
-  const actions = parseChatActions(
-    isLiveChat
-      ? rawActions
-      : rawActions.map(
-          // TODO: verify actions actually brace single item all the time
-          (action): YTAction => {
-            const replayAction = Object.values(
-              omitTrackingParams(action)
-            )[0] as any;
+  // unwrap replay actions into YTActions
+  if (isReplayChat) {
+    rawActions = rawActions.map(
+      // TODO: verify actions actually brace single item all the time
+      (action): YTAction => {
+        const replayAction = Object.values(
+          omitTrackingParams(action)
+        )[0] as any;
 
-            if (replayAction.actions.length > 1) {
-              log("replayCount: " + replayAction.actions.length);
-            }
+        if (replayAction.actions.length > 1) {
+          log("replayCount: " + replayAction.actions.length);
+        }
 
-            return replayAction.actions[0];
-          }
-        )
-  );
+        return replayAction.actions[0];
+      }
+    );
+  }
+
+  const actions = rawActions
+    .map(parseChatAction)
+    .filter((a): a is Action => a !== undefined);
 
   const chat: SucceededChatResponse = {
-    continuation: newContinuation,
     actions,
+    continuation: newContinuation,
+    error: null,
   };
 
   return chat;
@@ -712,61 +752,37 @@ export async function* iterateChat({
   token,
   apiKey,
   client,
-  isLiveChat,
-  ignoreFirstResponse = false,
+  isReplayChat = false,
 }: {
   token: string;
   apiKey: string;
   client: ClientInfo;
-  isLiveChat: boolean;
-  ignoreFirstResponse?: boolean;
-}) {
-  if (ignoreFirstResponse) {
-    const chatResponse = await fetchChat({
-      continuation: token,
-      apiKey,
-      client,
-      isLiveChat,
-    });
-
-    if ("error" in chatResponse) {
-      return;
-    }
-
-    const { continuation } = chatResponse;
-
-    if (!continuation) {
-      throw new Error("Continuation cannot be found");
-    }
-
-    token = continuation.token;
-  }
-
+  isReplayChat?: boolean;
+}): AsyncGenerator<SucceededChatResponse | FailedChatResponse> {
   // continuously fetch chat fragments
   while (true) {
     const chatResponse = await fetchChat({
       continuation: token,
       apiKey,
       client,
-      isLiveChat,
+      isReplayChat,
     });
 
-    if ("error" in chatResponse) {
+    // handle errors
+    if (chatResponse.error) {
       log("error", chatResponse.error);
-      break;
+      yield chatResponse;
+      continue;
     }
 
     // handle chats
-    const { continuation, actions } = chatResponse;
-
-    const delay = continuation?.timeoutMs ?? 0;
-
-    yield { actions, delay, continuation };
+    yield chatResponse;
 
     // refresh continuation token
+    const { continuation } = chatResponse;
     if (!continuation) {
-      log("no continuation");
-      // end of the chain
+      // TODO: check if this scenario actually exists
+      log("live stream might be over. no timed continuation found.");
       break;
     }
 

@@ -1,5 +1,7 @@
 import { YTRun, YTRunContainer } from "./chat";
 
+// TODO: sort out interfaces
+
 export interface YTWebPlayerContext {
   config: YTContextConfig;
   initialData: YTInitialData;
@@ -114,10 +116,10 @@ export interface YTAutoplayVideoWatchEndpoint {
 }
 
 export interface YTWatchEndpointSupportedPrefetchConfig {
-  prefetchHintConfig: PrefetchHintConfig;
+  prefetchHintConfig: YTPrefetchHintConfig;
 }
 
-export interface PrefetchHintConfig {
+export interface YTPrefetchHintConfig {
   prefetchPriority: number;
   countdownUiRelativeSecondsPrefetchCondition: number;
 }
@@ -157,7 +159,7 @@ export interface YTHeader {
 }
 
 export interface YTLiveChatHeaderRenderer {
-  overflowMenu: OverflowMenu;
+  overflowMenu: YTOverflowMenu;
   collapseButton: YTDismissButtonClass;
   viewSelector: ViewSelector;
 }
@@ -175,9 +177,9 @@ export interface YTCollapseButtonButtonRenderer {
   text?: YTRunContainer;
 }
 
-export interface OverflowMenu {
+export interface YTOverflowMenu {
   menuRenderer: {
-    items: PurpleItem[];
+    items: YTPurpleItem[];
     trackingParams: string;
     accessibility: YTAccessibilityData;
   };
@@ -191,12 +193,12 @@ export interface YTAccessibilityLabel {
   label: string;
 }
 
-export interface PurpleItem {
-  menuServiceItemRenderer?: MenuItemRenderer;
-  menuNavigationItemRenderer?: MenuItemRenderer;
+export interface YTPurpleItem {
+  menuServiceItemRenderer?: YTMenuItemRenderer;
+  menuNavigationItemRenderer?: YTMenuItemRenderer;
 }
 
-export interface MenuItemRenderer {
+export interface YTMenuItemRenderer {
   text: YTRunContainer;
   icon: Icon;
   navigationEndpoint?: MenuNavigationItemRendererNavigationEndpoint;
@@ -704,17 +706,17 @@ export interface RichMetadataRenderer {
   subtitle?: CancelText;
   callToAction: CancelText;
   callToActionIcon: Icon;
-  endpoint: Endpoint;
+  endpoint: YTBrowseEndpointContainer;
   trackingParams: string;
 }
 
-export interface Endpoint {
-  clickTrackingParams: string;
+export interface YTBrowseEndpointContainer {
+  browseEndpoint: YTBrowseEndpoint;
   commandMetadata: YTAutoplayVideoCommandMetadata;
-  browseEndpoint: EndpointBrowseEndpoint;
+  clickTrackingParams: string;
 }
 
-export interface EndpointBrowseEndpoint {
+export interface YTBrowseEndpoint {
   browseId: string;
 }
 
@@ -831,7 +833,7 @@ export interface Byline {
 
 export interface BylineRun {
   text: string;
-  navigationEndpoint: Endpoint;
+  navigationEndpoint: YTBrowseEndpointContainer;
 }
 
 export interface SubscribeButton {
@@ -983,7 +985,7 @@ export interface MenuMenuRenderer {
 }
 
 export interface FluffyItem {
-  menuServiceItemRenderer: MenuItemRenderer;
+  menuServiceItemRenderer: YTMenuItemRenderer;
 }
 
 export interface CompactVideoRendererNavigationEndpoint {
@@ -1429,7 +1431,7 @@ export interface Logo {
 export interface TopbarLogoRenderer {
   iconImage: Icon;
   tooltipText: YTRunContainer;
-  endpoint: Endpoint;
+  endpoint: YTBrowseEndpointContainer;
   trackingParams: string;
 }
 
