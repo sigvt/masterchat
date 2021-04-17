@@ -15,8 +15,13 @@ import { iterateChat, fetchContext } from "masterchat";
 
 const history = [];
 const context = await fetchContext("<videoId>");
+const token = context.continuations.top.token;
 
-for await (const { actions } of iterateChat(context)) {
+for await (const response of iterateChat({ ...context.auth, token })) {
+  if (response.error) break;
+
+  const { actions } = response;
+
   history.push(...actions);
 }
 ```
