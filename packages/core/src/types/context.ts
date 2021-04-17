@@ -64,7 +64,7 @@ export interface YTContents {
 
 export interface YTTwoColumnWatchNextResults {
   results: TwoColumnWatchNextResultsResults;
-  secondaryResults: TwoColumnWatchNextResultsSecondaryResults;
+  secondaryResults: YTTwoColumnWatchNextResultsSecondaryResults;
   autoplay: YTTwoColumnWatchNextResultsAutoplay;
   conversationBar?: YTConversationBar;
 }
@@ -895,7 +895,7 @@ export interface TentacledSignInEndpoint {
   idamTag: string;
 }
 
-export interface TwoColumnWatchNextResultsSecondaryResults {
+export interface YTTwoColumnWatchNextResultsSecondaryResults {
   secondaryResults: SecondaryResultsSecondaryResults;
 }
 
