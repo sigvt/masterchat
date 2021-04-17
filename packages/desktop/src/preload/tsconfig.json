@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "module": "esnext",
+    "target": "esnext",
+    "sourceMap": true,
+    "moduleResolution": "Node",
+    "skipLibCheck": true,
+    "strict": true,
+    "isolatedModules": true,
+    "baseUrl": ".",
+    "paths": {
+      "/@/*": ["./*"]
+    }
+  },
+  "files": ["./types/electron-api.d.ts", "./index.ts"],
+  "exclude": ["**/node_modules", "**/.*"],
+  "include": ["../../types/**/*.d.ts"]
+}
