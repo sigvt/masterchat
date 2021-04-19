@@ -15,9 +15,6 @@
     {
       "name": "🚀 @holodata/masterchat-desktop",
       "path": "packages/desktop"
-    },
-  ],
-  "settings": {
-    "languageToolLinter.languageTool.ignoredWordsInWorkspace": ["masterchat"]
-  }
+    }
+  ]
 }
