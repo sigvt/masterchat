@@ -15,8 +15,7 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    "types/**/*.d.ts",
     "../../types/**/*.d.ts",
-    "../preload/types/electron-api.d.ts"
+    "../preload/types/*.d.ts"
   ]
 }

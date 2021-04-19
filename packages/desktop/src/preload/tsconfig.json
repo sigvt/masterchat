@@ -13,7 +13,7 @@
       "/@/*": ["./*"]
     }
   },
-  "files": ["./types/electron-api.d.ts", "./index.ts"],
+  "files": ["./index.ts"],
   "exclude": ["**/node_modules", "**/.*"],
-  "include": ["../../types/**/*.d.ts"]
+  "include": ["../../types/**/*.d.ts", "./types/*.d.ts"]
 }

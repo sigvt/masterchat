@@ -1,6 +1,4 @@
-import { ElectronApi } from "..";
-
 declare interface Window {
-  electron: Readonly<ElectronApi>;
+  electron: Readonly<import("..").ElectronApi>;
   electronRequire?: NodeRequire;
 }

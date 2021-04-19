@@ -1,8 +1,12 @@
 import { useEffect } from "react";
-import { ElectronApi } from "../../preload";
 
-export function useElectron(): Readonly<ElectronApi> {
-  return (window as any).electron;
+export enum IpcEvent {
+  AddVideo = "addVideo",
+  AddVideoResult = "addVideo_result",
+}
+
+export function useElectron() {
+  return window.electron;
 }
 
 const API = useElectron();
@@ -15,11 +19,6 @@ export function useIpcListen(channel: string, cb: (...args: any) => void) {
       API.removeResponseHandler(listnerKey);
     };
   }, []);
-}
-
-export enum IpcEvent {
-  AddVideo = "addVideo",
-  AddVideoResult = "addVideo_result",
 }
 
 export function addVideo(videoId: string) {

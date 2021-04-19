@@ -59,8 +59,8 @@ if (import.meta.env.MODE !== "test") {
 
   deepFreeze(api);
 
-  (window as any)[apiKey] = api;
+  window[apiKey] = api;
 
   // Need for Spectron tests
-  (window as any).electronRequire = require;
+  window.electronRequire = require;
 }
