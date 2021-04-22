@@ -7,6 +7,7 @@
     "build": "tsc",
     "clean": "shx rm -rf lib",
     "dev": "tsc -w",
+    "docs": "typedoc --out ../../docs --excludeExternals --excludePrivate --exclude '**/__tests__/*' src && shx touch ../../docs/.nojekyll",
     "prepublishOnly": "npm run clean && npm run build",
     "test": "jest"
   },
@@ -28,6 +29,7 @@
     "shx": "^0.3.3",
     "ts-jest": "^26.5.5",
     "ts-node": "^9.1.1",
+    "typedoc": "^0.20.35",
     "typescript": "^4.2.4"
   },
   "homepage": "https://github.com/holodata/masterchat",

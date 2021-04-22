@@ -15,7 +15,7 @@ yarn dev
 ```
 
 ```bash
-DEBUG=masterchat ./packages/cli/lib/masterchat -c <videoId>
+DEBUG=masterchat ./packages/cli/lib/cli.js -c -t all <videoId>
 ```
 
 ## Release Flow (Maintainers only)

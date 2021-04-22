@@ -11,10 +11,6 @@
     {
       "name": "📦 masterchat-cli",
       "path": "packages/cli"
-    },
-    {
-      "name": "🚀 @holodata/masterchat-desktop",
-      "path": "packages/desktop"
     }
   ]
 }

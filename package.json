@@ -7,10 +7,9 @@
     "bootstrap": "lerna bootstrap",
     "build": "lerna run build",
     "dev": "lerna run dev --parallel",
-    "docs": "fliegdoc build"
+    "docs": "lerna run --scope masterchat docs"
   },
   "devDependencies": {
-    "fliegdoc": "^0.4.7",
     "lerna": "^4.0.0",
     "shx": "^0.3.3"
   },
@@ -23,11 +22,5 @@
     "url": "https://github.com/holodata/masterchat/issues"
   },
   "license": "Apache-2.0",
-  "keywords": [
-    "masterchat"
-  ],
-  "engines": {
-    "node": ">= 12.18.3"
-  },
   "private": true
 }
