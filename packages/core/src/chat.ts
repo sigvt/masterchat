@@ -3,10 +3,10 @@ import { ClientInfo } from "./context";
 import {
   YTAction,
   YTAddLiveChatTickerItem,
-  YTLiveChatBannerRenderer,
   YTChatErrorStatus,
   YTChatResponse,
   YTContinuationContents,
+  YTLiveChatBannerRenderer,
   YTLiveChatMembershipItemRenderer,
   YTLiveChatPaidMessageRenderer,
   YTLiveChatPaidStickerRenderer,
@@ -14,13 +14,17 @@ import {
   YTLiveChatTickerPaidMessageItemRenderer,
   YTLiveChatTickerPaidStickerItemRenderer,
   YTLiveChatTickerSponsorItemRenderer,
+  YTLiveChatViewerEngagementMessageRenderer,
+  YTRemoveBannerForLiveChatCommand,
   YTReplaceChatItemAction,
   YTRun,
-  YTRemoveBannerForLiveChatCommand,
   YTTooltipRenderer,
-  YTLiveChatViewerEngagementMessageRenderer,
 } from "./types/chat";
 import { log, timeoutThen } from "./util";
+
+/** References
+ * @see https://developers.google.com/youtube/v3/live/docs/liveChatMessages
+ */
 
 const LIVECHAT_API_ENDPOINT = "https://www.youtube.com/youtubei/v1/live_chat";
 
@@ -34,7 +38,9 @@ export const SUPERCHAT_SIGNIFICANCE_MAP = {
   red: 7,
 } as const;
 
-// Map from headerBackgroundColor to color name
+/**
+ * Map from headerBackgroundColor to color name
+ */
 export const SUPERCHAT_COLOR_MAP = {
   "4279592384": "blue",
   "4278237396": "lightblue",
@@ -45,7 +51,9 @@ export const SUPERCHAT_COLOR_MAP = {
   "4291821568": "red",
 } as const;
 
-// Components
+/**
+ * Components
+ */
 
 export type OmitTrackingParams<T> = Omit<
   T,
@@ -80,7 +88,9 @@ export interface SuperChat {
   bodyTextColor: Color;
 }
 
-// Continuation
+/**
+ * Continuation
+ */
 
 export interface ReloadContinuation {
   token: string;
@@ -99,7 +109,9 @@ export interface TimedContinuation extends ReloadContinuation {
   timeoutMs: number;
 }
 
-// Actions
+/**
+ * Actions
+ */
 
 export type Action =
   | AddChatItemAction
@@ -214,7 +226,9 @@ export interface UnknownAction {
   payload: unknown;
 }
 
-// Response
+/**
+ * Response
+ */
 
 export interface SucceededChatResponse {
   actions: Action[];
@@ -253,8 +267,10 @@ function parseColorCode(code: number): Color | undefined {
 export function getTimedContinuation(
   continuationContents: YTContinuationContents
 ): TimedContinuation | undefined {
-  // observed k: invalidationContinuationData | timedContinuationData | liveChatReplayContinuationData
-  // continuations[1] would be playerSeekContinuationData
+  /**
+   * observed k: invalidationContinuationData | timedContinuationData | liveChatReplayContinuationData
+   * continuations[1] would be playerSeekContinuationData
+   */
   if (
     Object.keys(
       continuationContents.liveChatContinuation.continuations[0]
@@ -277,6 +293,9 @@ export function getTimedContinuation(
   };
 }
 
+/**
+ * Remove `clickTrackingParams` and `trackingParams` from object
+ */
 function omitTrackingParams<T>(obj: T): OmitTrackingParams<T> {
   return Object.entries(obj)
     .filter(([k]) => k !== "clickTrackingParams" && k !== "trackingParams")
@@ -313,7 +332,7 @@ function parseSuperChat(renderer: YTLiveChatPaidMessageRenderer) {
 }
 
 /**
- * parse raw action object and returns Action
+ * Parse raw action object and returns Action
  */
 function parseChatAction(action: YTAction): Action | UnknownAction {
   const filteredActions = omitTrackingParams(action);
@@ -662,14 +681,17 @@ export async function fetchChat({
   }
 
   if (res.error) {
-    // error.code ->
-    //   400: request contains an invalid argument
-    //   403:
-    //     - video is private (no permission)
-    //     - something went wrong (?)
-    //   404: request entity was not found (removed by uploader)
-    //   500: internal error encountered
-    //   503: The service is currently unavailable (temporary?)
+    /** error.code ->
+     * 400: request contains an invalid argument
+     * 403:
+     *   - video is private (no permission)
+     *   - something went wrong (?)
+     * 404: request entity was not found (removed by uploader)
+     * 500: internal error encountered
+     * 503: The service is currently unavailable (temporary?)
+     *
+     * @see https://developers.google.com/youtube/v3/live/docs/liveChatMessages/list
+     */
 
     const { status, message } = res.error;
 
@@ -695,10 +717,11 @@ export async function fetchChat({
   const { continuationContents } = res;
 
   if (!continuationContents) {
-    // there's several possibilities lied here:
-    // 1. live chat is over
-    // 2. turned into membership-only stream
-    // 3. given video is neither a live stream nor an archived stream
+    /** there's several possibilities lied here:
+     * 1. live chat is over
+     * 2. turned into membership-only stream
+     * 3. given video is neither a live stream nor an archived stream
+     */
     log(JSON.stringify(res, null, 2));
     return {
       error: {
@@ -748,6 +771,9 @@ export async function fetchChat({
   return chat;
 }
 
+/**
+ * Iterate chat until live stream ends
+ */
 export async function* iterateChat({
   token,
   apiKey,

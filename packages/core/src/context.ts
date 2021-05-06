@@ -43,6 +43,7 @@ export type ContinuationData =
  * get the initial data from YouTube page
  *
  * @param {string} id video id
+ * @param {RequestInit} [requestInit]
  */
 export async function fetchWebPlayerContext(
   id: string,
@@ -76,6 +77,7 @@ export function getClientFromContextConfig(
   return {
     clientName: config.device.interfaceName,
     clientVersion: config.device.interfaceVersion,
+    // TODO: use value from YTContextConfig
     utcOffsetMinutes: 540,
     timeZone: "Asia/Tokyo",
   };
