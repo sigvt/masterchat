@@ -49,7 +49,7 @@ export async function fetchWebPlayerContext(
   id: string,
   requestInit?: RequestInit
 ): Promise<YTWebPlayerContext> {
-  const context = {} as YTWebPlayerContext;
+  const context: YTWebPlayerContext = {};
 
   const res = await fetch("https://www.youtube.com/watch?v=" + id, requestInit);
   const data = await res.text();
@@ -103,10 +103,9 @@ export function getContinuationFromInitialData(
     return undefined;
   }
 
-  const [
-    top,
-    all,
-  ] = conversationBar.liveChatRenderer.header.liveChatHeaderRenderer.viewSelector.sortFilterSubMenuRenderer.subMenuItems;
+  const [top, all] =
+    conversationBar.liveChatRenderer.header.liveChatHeaderRenderer.viewSelector
+      .sortFilterSubMenuRenderer.subMenuItems;
 
   return {
     [ReloadContinuationType.Top]: {
@@ -148,8 +147,13 @@ export function getMetadataFromInitialData(
   };
 }
 
-export async function fetchContext(id: string): Promise<Context> {
+export async function fetchContext(id: string): Promise<Context | null> {
+  // TODO: Distinguish YT IP ban and other errors.
+
   const context = await fetchWebPlayerContext(id);
+  if (!context.config || !context.initialData) {
+    return null;
+  }
 
   const apiKey = getAPIKeyFromContextConfig(context.config);
   const client = getClientFromContextConfig(context.config);

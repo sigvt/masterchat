@@ -3,8 +3,8 @@ import { YTRun, YTRunContainer } from "./chat";
 // TODO: sort out interfaces
 
 export interface YTWebPlayerContext {
-  config: YTContextConfig;
-  initialData: YTInitialData;
+  config?: YTContextConfig;
+  initialData?: YTInitialData;
 }
 
 export interface YTContextConfig {

@@ -73,9 +73,11 @@ export interface Color {
   opacity: number;
 }
 
-export type SuperChatSignificance = typeof SUPERCHAT_SIGNIFICANCE_MAP[keyof typeof SUPERCHAT_SIGNIFICANCE_MAP];
+export type SuperChatSignificance =
+  typeof SUPERCHAT_SIGNIFICANCE_MAP[keyof typeof SUPERCHAT_SIGNIFICANCE_MAP];
 
-export type SuperChatColor = typeof SUPERCHAT_COLOR_MAP[keyof typeof SUPERCHAT_COLOR_MAP];
+export type SuperChatColor =
+  typeof SUPERCHAT_COLOR_MAP[keyof typeof SUPERCHAT_COLOR_MAP];
 
 export interface SuperChat {
   amount: number;
@@ -424,10 +426,8 @@ function parseChatAction(action: YTAction): Action | UnknownAction {
       } else if ("liveChatPaidMessageRenderer" in item) {
         // Super Chat
         const renderer = item["liveChatPaidMessageRenderer"]!;
-        const {
-          timestampUsec,
-          authorExternalChannelId: authorChannelId,
-        } = renderer;
+        const { timestampUsec, authorExternalChannelId: authorChannelId } =
+          renderer;
 
         const timestamp = new Date(parseInt(timestampUsec, 10) / 1000);
 
@@ -585,7 +585,11 @@ function parseChatAction(action: YTAction): Action | UnknownAction {
       // add pinned item
       const payload = action[type]!["bannerRenderer"]["liveChatBannerRenderer"];
 
-      log("addBannerToLiveChatCommand", JSON.stringify(action[type]!, null, 2));
+      if (
+        payload.header.liveChatBannerHeaderRenderer.icon.iconType !== "KEEP"
+      ) {
+        log("addBannerToLiveChatCommand", JSON.stringify(payload, null, 2));
+      }
 
       return {
         type: "addBannerAction",
@@ -666,9 +670,12 @@ export async function fetchChat({
       retryRemaining = MAX_RETRY_COUNT;
       break;
     } catch (err) {
-      log("fetchError", err, err.code);
-      switch (err.code) {
-        case "ETIMEOUT":
+      log("fetchError", err, err.code, err.type);
+      switch (err.type) {
+        case "invalid-json":
+          // TODO: ???
+          log("invalid-json?", err.response.text());
+        case "system":
           if (retryRemaining > 0) {
             retryRemaining -= 1;
             log(`Retrying (remaining: ${retryRemaining})`);
@@ -682,9 +689,9 @@ export async function fetchChat({
 
   if (res.error) {
     /** error.code ->
-     * 400: request contains an invalid argument
+     * 400: request contains an invalid argument?
      * 403:
-     *   - video is private (no permission)
+     *   - video is privated by uploader (no permission)
      *   - something went wrong (?)
      * 404: request entity was not found (removed by uploader)
      * 500: internal error encountered
@@ -725,7 +732,7 @@ export async function fetchChat({
     log(JSON.stringify(res, null, 2));
     return {
       error: {
-        status: FetchChatErrorStatus.Invalid,
+        status: FetchChatErrorStatus.ContinuationNotFound,
         message: "continuationContents cannot be found",
       },
     };
@@ -796,7 +803,6 @@ export async function* iterateChat({
 
     // handle errors
     if (chatResponse.error) {
-      log("error", chatResponse.error);
       yield chatResponse;
       continue;
     }
