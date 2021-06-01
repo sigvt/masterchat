@@ -4,7 +4,7 @@
   "version": "0.2.1",
   "author": "Yasuaki Uechi <y@uechi.io> (https://uechi.io/)",
   "scripts": {
-    "build": "npm run tsup -- --minify",
+    "build": "tsc --noEmit && npm run tsup -- --minify",
     "clean": "shx rm -rf lib",
     "dev": "npm run tsup -- --watch",
     "prepublishOnly": "npm run clean && npm run build",

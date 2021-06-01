@@ -5,7 +5,7 @@
   "author": "Yasuaki Uechi <y@uechi.io> (https://uechi.io/)",
   "scripts": {
     "bootstrap": "lerna bootstrap",
-    "build": "lerna run build",
+    "build": "lerna link && lerna run build",
     "dev": "lerna run dev --parallel",
     "docs": "lerna run --scope masterchat docs"
   },
