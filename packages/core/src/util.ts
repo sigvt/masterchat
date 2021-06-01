@@ -31,9 +31,14 @@ export function convertRunsToString(
             return emojiHandler(run.emoji);
           }
 
-          return (
-            "<" + run.emoji.image.accessibility.accessibilityData.label + ">"
-          );
+          const isCustomEmoji = run.emoji.isCustomEmoji;
+          const term = isCustomEmoji
+            ? ":" +
+              run.emoji.searchTerms[run.emoji.searchTerms.length - 1] +
+              ":"
+            : run.emoji.emojiId;
+
+          return term;
         }
       })
       .join("");
@@ -58,3 +63,62 @@ export function groupBy<T, K extends keyof T, S extends Extract<T[K], string>>(
     return result;
   }, {} as { [k in S]: (T extends { [s in K]: k } ? T : never)[] });
 }
+
+/*
+# Custom Emoji
+{
+  "emojiId": "UCQ0UDLQCjY0rmuxCDE38FGg/kde7X-mJFYbl-gOTuaGoBQ",
+  "shortcuts": [
+    ":_[omitted]:",
+    ":[omitted]:",
+    ":_[omitted]:",
+    ":[omitted]:"
+  ],
+  "searchTerms": [
+    "_[omitted]",
+    "[omitted]",
+    "_[omitted]",
+    "[omitted]"
+  ],
+  "image": {
+    "thumbnails": [
+      {
+        "url": "[omitted]",
+        "width": 24,
+        "height": 24
+      },
+      {
+        "url": "[omitted]",
+        "width": 48,
+        "height": 48
+      }
+    ],
+    "accessibility": {
+      "accessibilityData": {
+        "label": "[omitted]"
+      }
+    }
+  },
+  "isCustomEmoji": true
+}
+
+# Emoji
+{
+  "emojiId": "🎶",
+  "shortcuts": [
+    ":musical_notes:",
+    ":notes:"
+  ],
+  "searchTerms": [
+    "musical",
+    "notes"
+  ],
+  "image": {
+    "thumbnails": [
+      {
+        "url": "https://www.youtube.com/s/gaming/emoji/7ff574f2/emoji_u1f3b6.svg"
+      }
+    ]
+  }
+}
+*/
