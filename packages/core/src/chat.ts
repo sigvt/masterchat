@@ -248,8 +248,6 @@ export interface ChatError {
 }
 
 export enum FetchChatErrorStatus {
-  Invalid = "INVALID",
-  Timeout = "TIMEOUT",
   ContinuationNotFound = "CONTINUATION_NOT_FOUND",
 }
 
@@ -398,9 +396,9 @@ function parseChatAction(action: YTAction): Action | UnknownAction {
                 break;
               default:
                 log(
-                  "Unrecognized iconType:",
+                  "[action required] Unrecognized iconType:",
                   iconType,
-                  JSON.stringify(renderer, null, 2)
+                  JSON.stringify(renderer)
                 );
                 throw new Error("Unrecognized iconType: " + iconType);
             }
@@ -479,8 +477,8 @@ function parseChatAction(action: YTAction): Action | UnknownAction {
         };
       } else {
         log(
-          "Unrecognized renderer type (addChatItemAction):",
-          JSON.stringify(item, null, 2)
+          "[action required] Unrecognized renderer type (addChatItemAction):",
+          JSON.stringify(item)
         );
         break;
       }
@@ -506,9 +504,9 @@ function parseChatAction(action: YTAction): Action | UnknownAction {
           break;
         default:
           log(
-            "Unrecognized deletion status:",
+            "[action required] Unrecognized deletion status:",
             statusText,
-            JSON.stringify(payload, null, 2)
+            JSON.stringify(payload)
           );
           throw new Error(
             `Unrecognized deletion status: ${payload.deletedStateMessage}`
@@ -561,7 +559,7 @@ function parseChatAction(action: YTAction): Action | UnknownAction {
           log(
             "Unrecognized renderer type (addLiveChatTickerItemAction):",
             rendererType,
-            JSON.stringify(item, null, 2)
+            JSON.stringify(item)
           );
 
           const _: never = rendererType;
@@ -572,8 +570,6 @@ function parseChatAction(action: YTAction): Action | UnknownAction {
     case "replaceChatItemAction": {
       // Replace placeholder item?
       const payload = action[type]!;
-
-      log("replaceChatItemAction", JSON.stringify(payload, null, 2));
 
       return {
         type: "replaceChatItemAction",
@@ -588,7 +584,7 @@ function parseChatAction(action: YTAction): Action | UnknownAction {
       if (
         payload.header.liveChatBannerHeaderRenderer.icon.iconType !== "KEEP"
       ) {
-        log("addBannerToLiveChatCommand", JSON.stringify(payload, null, 2));
+        log("addBannerToLiveChatCommand", JSON.stringify(payload));
       }
 
       return {
@@ -601,10 +597,7 @@ function parseChatAction(action: YTAction): Action | UnknownAction {
       // remove pinned item
       const payload = action[type]!;
 
-      log(
-        "removeBannerForLiveChatCommand",
-        JSON.stringify(action[type]!, null, 2)
-      );
+      log("removeBannerForLiveChatCommand", JSON.stringify(action[type]!));
 
       return {
         type: "removeBannerAction",
@@ -624,7 +617,7 @@ function parseChatAction(action: YTAction): Action | UnknownAction {
       const _: never = type;
 
       const actionString = JSON.stringify(action, null, 2);
-      log("Unrecognized action type:", actionString);
+      log("[action required] unrecognized action type:", actionString);
     }
   }
 
@@ -674,7 +667,7 @@ export async function fetchChat({
       switch (err.type) {
         case "invalid-json":
           // TODO: ???
-          log("invalid-json?", err.response.text());
+          log("[action required] invalid-json", err.response.text());
         case "system":
           if (retryRemaining > 0) {
             retryRemaining -= 1;
@@ -710,7 +703,7 @@ export async function fetchChat({
       case YTChatErrorStatus.Internal:
         break;
       default:
-        log("unrecognized error code", JSON.stringify(res, null, 2));
+        log("[action required] unrecognized error code", JSON.stringify(res));
     }
 
     return {
@@ -729,11 +722,15 @@ export async function fetchChat({
      * 2. turned into membership-only stream
      * 3. given video is neither a live stream nor an archived stream
      */
-    log(JSON.stringify(res, null, 2));
+    const obj = Object.assign({}, res) as any;
+    delete obj["responseContext"];
+    log("continuationNotFound", JSON.stringify(obj));
+
     return {
       error: {
         status: FetchChatErrorStatus.ContinuationNotFound,
-        message: "continuationContents cannot be found",
+        message:
+          "continuation contents cannot be found. live chat is over, or turned into membership-only stream.",
       },
     };
   }
@@ -814,7 +811,9 @@ export async function* iterateChat({
     const { continuation } = chatResponse;
     if (!continuation) {
       // TODO: check if this scenario actually exists
-      log("live stream might be over. no timed continuation found.");
+      log(
+        "[action required] got chatResponse but no continuation event occured"
+      );
       break;
     }
 

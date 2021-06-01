@@ -117,6 +117,9 @@ export function getContinuationFromInitialData(
   };
 }
 
+/**
+ * Returns undefined if membership-only stream
+ */
 export function getMetadataFromInitialData(
   initialData: YTInitialData
 ): Metadata | undefined {
@@ -147,12 +150,13 @@ export function getMetadataFromInitialData(
   };
 }
 
-export async function fetchContext(id: string): Promise<Context | null> {
+export async function fetchContext(id: string): Promise<Context | undefined> {
   // TODO: Distinguish YT IP ban and other errors.
 
   const context = await fetchWebPlayerContext(id);
   if (!context.config || !context.initialData) {
-    return null;
+    log("!config || !initialData", JSON.stringify(context));
+    return undefined;
   }
 
   const apiKey = getAPIKeyFromContextConfig(context.config);
