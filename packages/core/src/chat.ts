@@ -313,7 +313,7 @@ function parseSuperChat(renderer: YTLiveChatPaidMessageRenderer) {
   const input = renderer.purchaseAmountText.simpleText;
   const amountString = AMOUNT_REGEXP.exec(input)![0].replace(/,/g, "");
 
-  const amount = parseInt(amountString, 10);
+  const amount = parseFloat(amountString);
   const currency = input.replace(AMOUNT_REGEXP, "").trim();
   const color =
     SUPERCHAT_COLOR_MAP[
