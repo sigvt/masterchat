@@ -16,6 +16,9 @@ export async function collectEvents(argv: any) {
 
   // get web player context
   const context = await fetchContext(videoId);
+  if (!context) {
+    throw new Error("context not found");
+  }
   const { metadata } = context;
 
   // check if the video is valid

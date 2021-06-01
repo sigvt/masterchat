@@ -130,7 +130,6 @@ export async function inspectChat(argv: any) {
   const verbose: boolean = argv.verbose;
   const showModeration: boolean = argv.mod;
   const showAuthor: boolean = argv.author;
-  const ignoreChat: boolean = !!argv.ignoreChat;
   const type = argv.type as ReloadContinuationType;
   const filterExp: string = Array.isArray(argv.filter)
     ? argv.filter[0]
@@ -139,6 +138,9 @@ export async function inspectChat(argv: any) {
 
   // get web player context
   const context = await fetchContext(videoId);
+  if (!context) {
+    throw new Error("context not found");
+  }
   const { metadata } = context;
 
   // check if the video is valid
@@ -186,13 +188,6 @@ export async function inspectChat(argv: any) {
   for await (const response of liveChatIter) {
     if (response.error) {
       const { error } = response;
-      switch (error.status) {
-        case FetchChatErrorStatus.Timeout: {
-          console.log(`Timeout error occured. Retrying...`);
-          await timeoutThen(5000);
-          continue;
-        }
-      }
       console.log(`Error(${error.status}): ${error.message}`);
       break;
     }
@@ -206,19 +201,18 @@ export async function inspectChat(argv: any) {
     if (actions.length > 0) {
       let aggregatedActions = actions;
 
-      for (const action of aggregatedActions) {
-        if (action.type === "addChatItemAction") {
-          // stringified message
-          (action as CustomAddChatAction).message = action.rawMessage
-            ? convertRunsToString(action.rawMessage)
-            : "";
-        }
-      }
-
       if (filter) {
-        aggregatedActions = aggregatedActions.filter(
-          (action) => action.type !== "addChatItemAction" || filter(action)
-        );
+        aggregatedActions = aggregatedActions.filter((action) => {
+          const filterContext = {
+            ...action,
+            isSuperchat: action.type === "addSuperChatItemAction",
+            message:
+              "rawMessage" in action && action.rawMessage
+                ? convertRunsToString(action.rawMessage)
+                : "",
+          };
+          return filter(filterContext);
+        });
       }
 
       const chat: string[] = stringifyActions(aggregatedActions, {
