@@ -349,6 +349,9 @@ export enum YTLiveChatPollType {
 }
 
 /**
+ * YTLiveChatModeChangeMessageRenderer
+ *
+ * ```
  * # Slow mode
  * icon:    YTIconType.SlowMode
  *          YTIconType.QuestionAnswer (?)
@@ -370,6 +373,7 @@ export enum YTLiveChatPollType {
  *          [{"text":"<channel name>","bold":true},{"text":" turned off subscribers-only mode","bold":true}]
  * subtext: [{"text":"Only channel subscribers of ","italics":true},{"text":"10 minutes","italics":true},{"text":" or longer can send messages","italics":true}]
  *          [{"text":"Anyone can send a message","italics":true}]
+ * ```
  */
 export interface YTLiveChatModeChangeMessageRenderer {
   id: string;
