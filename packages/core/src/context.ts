@@ -68,6 +68,10 @@ export async function fetchWebPlayerContext(
     context.initialData = JSON.parse(ytInitialDataMatch[1]);
   }
 
+  if (!context.config || !context.initialData) {
+    log("!config || !initialData", data);
+  }
+
   return context;
 }
 
@@ -155,7 +159,6 @@ export async function fetchContext(id: string): Promise<Context | undefined> {
 
   const context = await fetchWebPlayerContext(id);
   if (!context.config || !context.initialData) {
-    log("!config || !initialData", JSON.stringify(context));
     return undefined;
   }
 

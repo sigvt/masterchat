@@ -19,6 +19,7 @@ import {
   YTReplaceChatItemAction,
   YTRun,
   YTTooltipRenderer,
+  YTUpdateLiveChatPollAction,
 } from "./types/chat";
 import { log, timeoutThen } from "./util";
 
@@ -130,7 +131,8 @@ export type Action =
   | AddBannerAction
   | RemoveBannerAction
   | AddViewerEngagementMessageAction
-  | ShowTooltipAction;
+  | ShowTooltipAction
+  | UpdateLiveChatPollAction;
 
 export interface AddChatItemAction {
   type: "addChatItemAction";
@@ -221,6 +223,10 @@ export interface ShowTooltipAction extends YTTooltipRenderer {
 export interface AddViewerEngagementMessageAction
   extends YTLiveChatViewerEngagementMessageRenderer {
   type: "addViewerEngagementMessageAction";
+}
+
+export interface UpdateLiveChatPollAction extends YTUpdateLiveChatPollAction {
+  type: "updateLiveChatPollAction";
 }
 
 export interface UnknownAction {
@@ -610,6 +616,14 @@ function parseChatAction(action: YTAction): Action | UnknownAction {
       return {
         type: "showTooltipAction",
         ...payload["tooltip"]["tooltipRenderer"],
+      };
+    }
+
+    case "updateLiveChatPollAction": {
+      const payload = action[type]!;
+      return {
+        type: "updateLiveChatPollAction",
+        ...payload,
       };
     }
 
