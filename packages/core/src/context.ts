@@ -69,7 +69,12 @@ export async function fetchWebPlayerContext(
   }
 
   if (!context.config || !context.initialData) {
-    log("!config || !initialData", data);
+    log(
+      "!config || !initialData",
+      res.statusText,
+      "https://www.youtube.com/watch?v=" + id,
+      res.headers
+    );
   }
 
   return context;

@@ -5,7 +5,7 @@ yarn.lock
 *.jsonl
 *.schema.json
 .venv
-TODO
+TODO.md
 
 # Created by https://www.toptal.com/developers/gitignore/api/node
 # Edit at https://www.toptal.com/developers/gitignore?templates=node
