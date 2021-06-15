@@ -616,7 +616,7 @@ function parseChatAction(action: YTAction): Action | UnknownAction {
     default: {
       const _: never = type;
 
-      const actionString = JSON.stringify(action, null, 2);
+      const actionString = JSON.stringify(action);
       log("[action required] unrecognized action type:", actionString);
     }
   }
