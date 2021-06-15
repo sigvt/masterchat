@@ -18,6 +18,8 @@ export interface YTRunContainer<T = YTRun> {
 
 export interface YTTextRun {
   text: string;
+  bold?: boolean;
+  italics?: boolean;
   navigationEndpoint?: YTUrlEndpointContainer | YTBrowseEndpointContainer;
 }
 
@@ -140,7 +142,8 @@ export interface YTAddChatItemAction {
     | YTLiveChatPaidStickerRendererContainer
     | YTLiveChatMembershipItemRendererContainer
     | YTLiveChatPlaceholderItemRendererContainer
-    | YTLiveChatViewerEngagementMessageRendererContainer;
+    | YTLiveChatViewerEngagementMessageRendererContainer
+    | YTLiveChatModeChangeMessageRendererContainer;
   clientId?: string;
 }
 
@@ -175,34 +178,8 @@ export interface YTRemoveBannerForLiveChatCommand {
   targetActionId: string;
 }
 
-export interface YTLiveChatPollChoice {
-  text: YTSimpleText;
-  selected: boolean;
-  voteRatio: number; // 0.0 to 1.0
-  votePercentage: YTSimpleText; // 73%
-  signinEndpoint: YTSignInEndpointContainer;
-}
-
 export interface YTUpdateLiveChatPollAction {
-  pollToUpdate: {
-    pollRenderer: {
-      choices: YTLiveChatPollChoice[];
-      liveChatPollId: string;
-      header: {
-        pollHeaderRenderer: {
-          pollQuestion: YTSimpleText;
-          thumbnail: YTThumbnailList;
-          metadataText: YTRunContainer;
-          liveChatPollType: YTLiveChatPollType;
-          contextMenuButton: YTContextMenuButtonRendererContainer;
-        };
-      };
-    };
-  };
-}
-
-export enum YTLiveChatPollType {
-  Creator = "LIVE_CHAT_POLL_TYPE_CREATOR",
+  pollToUpdate: YYLiveChatPollRendererContainer;
 }
 
 // Containers
@@ -237,6 +214,14 @@ export interface YTLiveChatViewerEngagementMessageRendererContainer {
 
 export interface YTTooltipRendererContainer {
   tooltipRenderer: YTTooltipRenderer;
+}
+
+export interface YYLiveChatPollRendererContainer {
+  pollRenderer: YTLiveChatPollRenderer;
+}
+
+export interface YTLiveChatModeChangeMessageRendererContainer {
+  liveChatModeChangeMessageRenderer: YTLiveChatModeChangeMessageRenderer;
 }
 
 // LiveChat Renderers
@@ -335,6 +320,63 @@ export interface YTTooltipRenderer {
   suggestedPosition: YTType;
   dismissStrategy: YTType;
   trackingParams: string;
+}
+
+export interface YTLiveChatPollRenderer {
+  choices: YTLiveChatPollChoice[];
+  liveChatPollId: string;
+  header: {
+    pollHeaderRenderer: {
+      pollQuestion: YTSimpleText;
+      thumbnail: YTThumbnailList;
+      metadataText: YTRunContainer;
+      liveChatPollType: YTLiveChatPollType;
+      contextMenuButton: YTContextMenuButtonRendererContainer;
+    };
+  };
+}
+
+export interface YTLiveChatPollChoice {
+  text: YTSimpleText;
+  selected: boolean;
+  voteRatio: number; // 0.0 to 1.0
+  votePercentage: YTSimpleText; // 73%
+  signinEndpoint: YTSignInEndpointContainer;
+}
+
+export enum YTLiveChatPollType {
+  Creator = "LIVE_CHAT_POLL_TYPE_CREATOR",
+}
+
+/**
+ * # Slow mode
+ * icon:    YTIconType.SlowMode
+ *          YTIconType.QuestionAnswer (?)
+ * text:    [{"text":"Slow mode is on","bold":true}]
+ * subtext: [{"text":"Send a message every ","italics":true},{"text":"1 second","italics":true}]
+ *
+ * # Members-only mode
+ * icon:    YTIconType.MembersOnlyMode
+ *          YTIconType.QuestionAnswer
+ * text:    [{"text":"Members-only mode is on","bold":true}]
+ *          [{"text":"Members-only mode is off","bold":true}]
+ * subtext: [{"text":"Only members of this channel can send messages","italics":true}]
+ *          [{"text":"This channel owner has opened chat to everyone","italics":true}]
+ *
+ * # Subscribers-only mode
+ * icon:    YTIconType.TabSubscription
+ *          YTIconType.QuestionAnswer
+ * text:    [{"text":"<channel name>","bold":true},{"text":" turned on subscribers-only mode","bold":true}]
+ *          [{"text":"<channel name>","bold":true},{"text":" turned off subscribers-only mode","bold":true}]
+ * subtext: [{"text":"Only channel subscribers of ","italics":true},{"text":"10 minutes","italics":true},{"text":" or longer can send messages","italics":true}]
+ *          [{"text":"Anyone can send a message","italics":true}]
+ */
+export interface YTLiveChatModeChangeMessageRenderer {
+  id: string;
+  timestampUsec: string;
+  icon: YTIcon;
+  text: YTRunContainer;
+  subtext: YTRunContainer;
 }
 
 // Ticker Renderers
@@ -499,6 +541,10 @@ export interface YTIcon {
 export enum YTIconType {
   Keep = "KEEP",
   MoreVert = "MORE_VERT",
+  QuestionAnswer = "QUESTION_ANSWER",
+  SlowMode = "SLOW_MODE",
+  MembersOnlyMode = "MEMBERS_ONLY_MODE",
+  TabSubscriptions = "TAB_SUBSCRIPTIONS",
 }
 
 export interface YTPicker {

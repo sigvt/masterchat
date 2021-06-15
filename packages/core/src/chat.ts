@@ -11,6 +11,7 @@ import {
   YTLiveChatPaidMessageRenderer,
   YTLiveChatPaidStickerRenderer,
   YTLiveChatPlaceholderItemRenderer,
+  YTLiveChatPollRenderer,
   YTLiveChatTickerPaidMessageItemRenderer,
   YTLiveChatTickerPaidStickerItemRenderer,
   YTLiveChatTickerSponsorItemRenderer,
@@ -19,9 +20,8 @@ import {
   YTReplaceChatItemAction,
   YTRun,
   YTTooltipRenderer,
-  YTUpdateLiveChatPollAction,
 } from "./types/chat";
-import { log, timeoutThen } from "./util";
+import { convertRunsToString, log, timeoutThen } from "./util";
 
 /** References
  * @see https://developers.google.com/youtube/v3/live/docs/liveChatMessages
@@ -132,7 +132,8 @@ export type Action =
   | RemoveBannerAction
   | AddViewerEngagementMessageAction
   | ShowTooltipAction
-  | UpdateLiveChatPollAction;
+  | UpdateLiveChatPollAction
+  | ModeChangeAction;
 
 export interface AddChatItemAction {
   type: "addChatItemAction";
@@ -225,8 +226,22 @@ export interface AddViewerEngagementMessageAction
   type: "addViewerEngagementMessageAction";
 }
 
-export interface UpdateLiveChatPollAction extends YTUpdateLiveChatPollAction {
+export interface UpdateLiveChatPollAction extends YTLiveChatPollRenderer {
   type: "updateLiveChatPollAction";
+}
+
+export enum LiveChatMode {
+  MembersOnly = "MEMBERS_ONLY",
+  Slow = "SLOW",
+  SubscribersOnly = "SUBSCRIBERS_ONLY",
+  Unknown = "UNKNOWN",
+}
+
+export interface ModeChangeAction {
+  type: "modeChangeAction";
+  mode: LiveChatMode;
+  enabled: boolean;
+  description: string;
 }
 
 export interface UnknownAction {
@@ -481,6 +496,34 @@ function parseChatAction(action: YTAction): Action | UnknownAction {
           type: "addViewerEngagementMessageAction",
           ...renderer,
         };
+      } else if ("liveChatModeChangeMessageRenderer" in item) {
+        // Mode Change Message (e.g. toggle members-only)
+        const renderer = item["liveChatModeChangeMessageRenderer"]!;
+        const text = convertRunsToString(renderer.text.runs);
+        const subtext = convertRunsToString(renderer.subtext.runs);
+
+        let mode = LiveChatMode.Unknown;
+        if (/Slow mode/.test(text)) {
+          mode = LiveChatMode.Slow;
+        } else if (/Members-only mode/.test(text)) {
+          mode = LiveChatMode.MembersOnly;
+        } else if (/subscribers-only/.test(text)) {
+          mode = LiveChatMode.SubscribersOnly;
+        } else {
+          log(
+            "[action required] Unrecognized mode (modeChangeAction):",
+            JSON.stringify(renderer)
+          );
+        }
+
+        const enabled = /(is|turned) on/.test(text);
+
+        return {
+          type: "modeChangeAction",
+          mode,
+          enabled,
+          description: subtext,
+        };
       } else {
         log(
           "[action required] Unrecognized renderer type (addChatItemAction):",
@@ -563,7 +606,7 @@ function parseChatAction(action: YTAction): Action | UnknownAction {
         }
         default:
           log(
-            "Unrecognized renderer type (addLiveChatTickerItemAction):",
+            "[action required] Unrecognized renderer type (addLiveChatTickerItemAction):",
             rendererType,
             JSON.stringify(item)
           );
@@ -623,15 +666,16 @@ function parseChatAction(action: YTAction): Action | UnknownAction {
       const payload = action[type]!;
       return {
         type: "updateLiveChatPollAction",
-        ...payload,
+        ...payload["pollToUpdate"]["pollRenderer"],
       };
     }
 
     default: {
       const _: never = type;
-
-      const actionString = JSON.stringify(action);
-      log("[action required] unrecognized action type:", actionString);
+      log(
+        "[action required] Unrecognized action type:",
+        JSON.stringify(action)
+      );
     }
   }
 
@@ -717,7 +761,7 @@ export async function fetchChat({
       case YTChatErrorStatus.Internal:
         break;
       default:
-        log("[action required] unrecognized error code", JSON.stringify(res));
+        log("[action required] Unrecognized error code", JSON.stringify(res));
     }
 
     return {
