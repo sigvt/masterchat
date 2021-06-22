@@ -1,7 +1,7 @@
 {
   "name": "masterchat-cli",
   "description": "See YouTube Live Chat through flexible filtering engine.",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "author": "Yasuaki Uechi <y@uechi.io> (https://uechi.io/)",
   "scripts": {
     "build": "tsc --noEmit && npm run tsup -- --minify",
@@ -21,7 +21,7 @@
   ],
   "dependencies": {
     "epicfail": "^2.0.0",
-    "masterchat": "^0.4.0",
+    "masterchat": "^0.4.1",
     "vm2": "^3.9.3"
   },
   "devDependencies": {
