@@ -5,10 +5,14 @@ import {
   YTContextConfig,
   YTInitialData,
   YTReloadContinuationData,
-  YTWebPlayerContext,
 } from "./types/context";
 import { JSDOM } from "jsdom";
 import { convertRunsToString, log } from "./util";
+
+export interface WebPlayerContext {
+  apiKey?: string;
+  initialData?: YTInitialData;
+}
 
 export interface Context {
   auth: AuthParams;
@@ -49,31 +53,26 @@ export type ContinuationData =
 export async function fetchWebPlayerContext(
   id: string,
   requestInit?: RequestInit
-): Promise<YTWebPlayerContext> {
-  const context: YTWebPlayerContext = {};
+): Promise<WebPlayerContext> {
+  const context: WebPlayerContext = {};
 
   const res = await fetch("https://www.youtube.com/watch?v=" + id, requestInit);
   const data = await res.text();
 
-  // 1. web_player_context_config
-  const ytplayerMatch = data.match(
-    /ytplayer\.web_player_context_config = (.+?);/
-  );
-  if (ytplayerMatch) {
-    context.config = JSON.parse(ytplayerMatch[1]);
-  }
+  const apiKey = data.match(/"innertubeApiKey":"(.+?)"/)?.[1]
+  context.apiKey = apiKey
 
-  // 2. ytInitialData
+  // ytInitialData
   const ytInitialDataMatch = /var ytInitialData = (.+?);<\/script>/.exec(data);
   if (ytInitialDataMatch) {
     context.initialData = JSON.parse(ytInitialDataMatch[1]);
   }
 
-  if (!context.config && !context.initialData) {
+  if (!context.apiKey && !context.initialData) {
     const dom = new JSDOM(data);
     const bodyText = dom.window.document.body.textContent || "";
     log(
-      "!config && !initialData",
+      "!apiKey && !initialData",
       res.status,
       res.statusText,
       bodyText.slice(0, 1000),
@@ -82,18 +81,6 @@ export async function fetchWebPlayerContext(
   }  
 
   return context;
-}
-
-export function getClientFromContextConfig(
-  config: YTContextConfig
-): ClientInfo {
-  return {
-    clientName: config.device.interfaceName,
-    clientVersion: config.device.interfaceVersion,
-    // TODO: use value from YTContextConfig
-    utcOffsetMinutes: 540,
-    timeZone: "Asia/Tokyo",
-  };
 }
 
 export function getAPIKeyFromContextConfig(config: YTContextConfig): string {
@@ -168,23 +155,28 @@ export async function fetchContext(id: string): Promise<Context | undefined> {
 
   const context = await fetchWebPlayerContext(id);
 
-  if (!context.config && !context.initialData) {
+  if (!context.apiKey && !context.initialData) {
     const ytbanError = new Error('Possible YouTube BAN detected')
     ytbanError.name = 'EYTBAN'
     throw ytbanError
   }
 
-  if (!context.config || !context.initialData) {
+  if (!context.apiKey || !context.initialData) {
     return undefined;
   }
-
-  const apiKey = getAPIKeyFromContextConfig(context.config);
-  const client = getClientFromContextConfig(context.config);
+  
   const metadata = getMetadataFromInitialData(context.initialData);
   const continuations = getContinuationFromInitialData(context.initialData);
 
+  const client = {
+    clientName: 'WEB',
+    clientVersion: '2.20210618.05.00-canary_control',
+    utcOffsetMinutes: 540,
+    timeZone: "Asia/Tokyo",
+  };
+
   return {
-    auth: { apiKey, client },
+    auth: { apiKey: context.apiKey, client },
     continuations,
     metadata,
   };
