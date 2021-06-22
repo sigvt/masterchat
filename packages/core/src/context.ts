@@ -7,6 +7,7 @@ import {
   YTReloadContinuationData,
   YTWebPlayerContext,
 } from "./types/context";
+import { JSDOM } from "jsdom";
 import { convertRunsToString, log } from "./util";
 
 export interface Context {
@@ -69,11 +70,14 @@ export async function fetchWebPlayerContext(
   }
 
   if (!context.config || !context.initialData) {
+    const dom = new JSDOM(data);
+    const bodyText = dom.window.document.body.textContent || "";
     log(
       "!config || !initialData",
       res.statusText,
       "https://www.youtube.com/watch?v=" + id,
-      res.headers
+      res.headers,
+      bodyText.slice(0, 10000)
     );
   }
 
