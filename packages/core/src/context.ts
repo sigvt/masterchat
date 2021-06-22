@@ -69,17 +69,17 @@ export async function fetchWebPlayerContext(
     context.initialData = JSON.parse(ytInitialDataMatch[1]);
   }
 
-  if (!context.config || !context.initialData) {
+  if (!context.config && !context.initialData) {
     const dom = new JSDOM(data);
     const bodyText = dom.window.document.body.textContent || "";
     log(
-      "!config || !initialData",
+      "!config && !initialData",
+      res.status,
       res.statusText,
-      "https://www.youtube.com/watch?v=" + id,
-      res.headers,
-      bodyText.slice(0, 10000)
+      bodyText.slice(0, 1000),
+      "https://www.youtube.com/watch?v=" + id
     );
-  }
+  }  
 
   return context;
 }
@@ -167,6 +167,13 @@ export async function fetchContext(id: string): Promise<Context | undefined> {
   // TODO: Distinguish YT IP ban and other errors.
 
   const context = await fetchWebPlayerContext(id);
+
+  if (!context.config && !context.initialData) {
+    const ytbanError = new Error('Possible YouTube BAN detected')
+    ytbanError.name = 'EYTBAN'
+    throw ytbanError
+  }
+
   if (!context.config || !context.initialData) {
     return undefined;
   }
