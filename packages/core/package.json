@@ -4,35 +4,38 @@
   "version": "0.4.3",
   "author": "Yasuaki Uechi <y@uechi.io> (https://uechi.io/)",
   "scripts": {
-    "build": "tsc",
+    "build": "run-p build:*",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:esm": "tsc",
     "clean": "shx rm -rf lib",
-    "dev": "tsc -w",
+    "dev": "tsc -p tsconfig.cjs.json -w",
     "docs": "typedoc --out ../../docs --excludeExternals --excludePrivate --exclude '**/__tests__/*' src && shx touch ../../docs/.nojekyll",
     "prepublishOnly": "npm run clean && npm run build",
     "test": "jest"
   },
-  "types": "lib/index.d.ts",
-  "main": "lib/index.js",
+  "types": "./lib/cjs/index.d.ts",
+  "module": "./lib/esm/index.js",
+  "main": "./lib/cjs/index.js",
   "files": [
     "lib"
   ],
   "dependencies": {
     "debug": "^4.3.1",
-    "jsdom": "^16.6.0",
     "node-fetch": "^2.6.1"
   },
   "devDependencies": {
     "@types/debug": "^4.1.5",
     "@types/jest": "^26.0.23",
     "@types/jsdom": "^16.2.11",
-    "@types/node": "^15.12.2",
+    "@types/node": "^15.12.4",
     "@types/node-fetch": "^2.5.10",
-    "jest": "^27.0.4",
+    "jest": "^27.0.5",
+    "npm-run-all": "^4.1.5",
     "shx": "^0.3.3",
     "ts-jest": "^27.0.3",
     "ts-node": "^10.0.0",
-    "typedoc": "^0.20.36",
-    "typescript": "^4.3.2"
+    "typedoc": "^0.21.0",
+    "typescript": "^4.3.4"
   },
   "homepage": "https://github.com/holodata/masterchat",
   "repository": {

@@ -1,8 +1,13 @@
 import { logAndExit } from "epicfail";
 import fs from "fs";
-import { fetchContext, iterateChat, normalizeVideoId } from "masterchat";
-import { Action, ReloadContinuationType } from "masterchat/lib/chat";
-import { timeoutThen } from "masterchat/lib/util";
+import {
+  fetchContext,
+  iterateChat,
+  normalizeVideoId,
+  timeoutThen,
+  Action,
+  ReloadContinuationType,
+} from "masterchat";
 
 export async function collectEvents(argv: any) {
   console.log("Event collection mode is enabled");

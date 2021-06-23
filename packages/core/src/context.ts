@@ -1,12 +1,7 @@
 import fetch, { RequestInit } from "node-fetch";
 import { ReloadContinuationItems, ReloadContinuationType } from "./chat";
 import { YTTimedContinuationData } from "./types/chat";
-import {
-  YTContextConfig,
-  YTInitialData,
-  YTReloadContinuationData,
-} from "./types/context";
-import { JSDOM } from "jsdom";
+import { YTInitialData, YTReloadContinuationData } from "./types/context";
 import { convertRunsToString, log } from "./util";
 
 export interface WebPlayerContext {
@@ -50,7 +45,7 @@ export type ContinuationData =
  * @param {string} id video id
  * @param {RequestInit} [requestInit]
  */
-export async function fetchWebPlayerContext(
+async function fetchWebPlayerContext(
   id: string,
   requestInit?: RequestInit
 ): Promise<WebPlayerContext> {
@@ -59,8 +54,8 @@ export async function fetchWebPlayerContext(
   const res = await fetch("https://www.youtube.com/watch?v=" + id, requestInit);
   const data = await res.text();
 
-  const apiKey = data.match(/"innertubeApiKey":"(.+?)"/)?.[1]
-  context.apiKey = apiKey
+  const apiKey = data.match(/"innertubeApiKey":"(.+?)"/)?.[1];
+  context.apiKey = apiKey;
 
   // ytInitialData
   const ytInitialDataMatch = /var ytInitialData = (.+?);<\/script>/.exec(data);
@@ -69,28 +64,18 @@ export async function fetchWebPlayerContext(
   }
 
   if (!context.apiKey && !context.initialData) {
-    const dom = new JSDOM(data);
-    const bodyText = dom.window.document.body.textContent || "";
     log(
       "!apiKey && !initialData",
       res.status,
       res.statusText,
-      bodyText.slice(0, 1000),
       "https://www.youtube.com/watch?v=" + id
     );
-  }  
+  }
 
   return context;
 }
 
-export function getAPIKeyFromContextConfig(config: YTContextConfig): string {
-  if (!config?.innertubeApiKey) {
-    log(config);
-  }
-  return config.innertubeApiKey;
-}
-
-export function getContinuationFromInitialData(
+function getContinuationFromInitialData(
   initialData: YTInitialData
 ): ReloadContinuationItems | undefined {
   if (!initialData.contents) {
@@ -120,7 +105,7 @@ export function getContinuationFromInitialData(
 /**
  * Returns undefined if membership-only stream
  */
-export function getMetadataFromInitialData(
+function getMetadataFromInitialData(
   initialData: YTInitialData
 ): Metadata | undefined {
   if (!initialData.contents) return undefined;
@@ -156,21 +141,21 @@ export async function fetchContext(id: string): Promise<Context | undefined> {
   const context = await fetchWebPlayerContext(id);
 
   if (!context.apiKey && !context.initialData) {
-    const ytbanError = new Error('Possible YouTube BAN detected')
-    ytbanError.name = 'EYTBAN'
-    throw ytbanError
+    const ytbanError = new Error("Possible YouTube BAN detected");
+    ytbanError.name = "EYTBAN";
+    throw ytbanError;
   }
 
   if (!context.apiKey || !context.initialData) {
     return undefined;
   }
-  
+
   const metadata = getMetadataFromInitialData(context.initialData);
   const continuations = getContinuationFromInitialData(context.initialData);
 
   const client = {
-    clientName: 'WEB',
-    clientVersion: '2.20210618.05.00-canary_control',
+    clientName: "WEB",
+    clientVersion: "2.20210618.05.00-canary_control",
     utcOffsetMinutes: 540,
     timeZone: "Asia/Tokyo",
   };

@@ -1,18 +1,15 @@
 import chalk from "chalk";
 import { logAndExit } from "epicfail";
 import {
+  Action,
+  AddChatItemAction,
   convertRunsToString,
   fetchContext,
   iterateChat,
   normalizeVideoId,
-} from "masterchat";
-import {
-  Action,
-  AddChatItemAction,
-  FetchChatErrorStatus,
   ReloadContinuationType,
-} from "masterchat/lib/chat";
-import { timeoutThen } from "masterchat/lib/util";
+  timeoutThen,
+} from "masterchat";
 import { VM, VMScript } from "vm2";
 
 interface CustomAddChatAction extends AddChatItemAction {

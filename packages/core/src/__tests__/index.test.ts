@@ -3,7 +3,7 @@ import { ReloadContinuationType } from "../chat";
 
 it("can fetch initial chat", async () => {
   const context = await fetchContext("QK75uDJ9eyk");
-  if (!context.continuations || !context.metadata) {
+  if (!context?.continuations || !context.metadata) {
     console.log("invalid request");
     return;
   }

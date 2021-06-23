@@ -3,10 +3,11 @@
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig.json to read more about this file */
 
-    "target": "es2018",
-    "module": "commonjs",
+    "target": "es2019",
+    "module": "es2020",
+    "moduleResolution": "Node",
     "declaration": true /* Generates corresponding '.d.ts' file. */,
-    "outDir": "./lib" /* Redirect output structure to the directory. */,
+    "outDir": "./lib/esm" /* Redirect output structure to the directory. */,
     "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,

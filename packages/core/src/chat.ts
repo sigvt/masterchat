@@ -285,7 +285,7 @@ function parseColorCode(code: number): Color | undefined {
   return { r, g, b, opacity };
 }
 
-export function getTimedContinuation(
+function getTimedContinuation(
   continuationContents: YTContinuationContents
 ): TimedContinuation | undefined {
   /**
