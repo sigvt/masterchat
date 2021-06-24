@@ -1,8 +1,8 @@
 import chalk from "chalk";
 import { logAndExit } from "epicfail";
+import fs from "fs";
 import {
   Action,
-  AddChatItemAction,
   convertRunsToString,
   fetchContext,
   iterateChat,
@@ -122,6 +122,7 @@ export async function inspectChat(argv: any) {
   const verbose: boolean = argv.verbose;
   const showModeration: boolean = argv.mod;
   const showAuthor: boolean = argv.author;
+  const collectionMode: boolean = argv.collect;
   const type = argv.type as "top" | "all";
   const filterExp: string = Array.isArray(argv.filter)
     ? argv.filter[0]
@@ -137,7 +138,7 @@ export async function inspectChat(argv: any) {
 
   // check if the video is valid
   if (!metadata) {
-    logAndExit("video source is unavailable. wrong video id?");
+    logAndExit("metadata not found. wrong video id?");
   }
 
   // check if the stream is live
@@ -188,6 +189,15 @@ export async function inspectChat(argv: any) {
 
     if (verbose) {
       console.log("incoming actions:", actions.length, "delay:", delay);
+    }
+
+    if (collectionMode) {
+      for (const action of actions) {
+        const type = action.type;
+        const payload = action;
+
+        fs.appendFileSync(`${type}.jsonl`, JSON.stringify(payload) + "\n");
+      }
     }
 
     if (actions.length > 0) {

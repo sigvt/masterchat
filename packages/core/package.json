@@ -11,9 +11,9 @@
     "dev": "tsc -p tsconfig.cjs.json -w",
     "docs": "typedoc --out ../../docs --excludeExternals --excludePrivate --exclude '**/__tests__/*' src && shx touch ../../docs/.nojekyll",
     "prepublishOnly": "npm run clean && npm run build",
-    "test": "yarn build && jest"
+    "test": "yarn build:cjs && jest"
   },
-  "types": "./lib/esm/index.d.ts",
+  "types": "./lib/cjs/index.d.ts",
   "main": "./lib/cjs/index.js",
   "exports": {
     "import": "./lib/esm/index.js",

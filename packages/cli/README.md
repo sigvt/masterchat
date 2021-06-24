@@ -1,6 +1,6 @@
 # MasterChat CLI
 
-See YouTube Live Chat through flexible filtering engine.
+See YouTube Live Chat through flexible filtering engine. For GUI version, see [batten](https://github.com/holodata/batten).
 
 ## Install
 
