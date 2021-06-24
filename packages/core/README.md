@@ -13,14 +13,15 @@ npm i masterchat
 ```js
 import { iterateChat, fetchContext } from "masterchat";
 
+const { continuations, auth } = await fetchContext("<videoId>");
+
+const token = continuations.top.token;
 const history = [];
-const context = await fetchContext("<videoId>");
-const token = context.continuations.top.token;
 
-for await (const response of iterateChat({ ...context.auth, token })) {
-  if (response.error) break;
+for await (const res of iterateChat({ auth, token })) {
+  if (res.error) break;
 
-  const { actions } = response;
+  const { actions } = res;
 
   history.push(...actions);
 }

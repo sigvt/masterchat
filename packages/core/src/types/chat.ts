@@ -132,7 +132,10 @@ export interface YTAction {
 
   showLiveChatTooltipCommand?: YTShowLiveChatTooltipCommand;
 
+  // Poll related
+  showLiveChatActionPanelAction?: YTShowLiveChatActionPanelAction;
   updateLiveChatPollAction?: YTUpdateLiveChatPollAction;
+  closeLiveChatActionPanelAction?: YTCloseLiveChatActionPanelAction;
 }
 
 export interface YTAddChatItemAction {
@@ -182,6 +185,15 @@ export interface YTUpdateLiveChatPollAction {
   pollToUpdate: YYLiveChatPollRendererContainer;
 }
 
+export interface YTShowLiveChatActionPanelAction {
+  panelToShow: YTLiveChatActionPanelRendererContainer;
+}
+
+export interface YTCloseLiveChatActionPanelAction {
+  targetPanelId: string;
+  skipOnDismissCommand: boolean;
+}
+
 // Containers
 
 export interface YTLiveChatTextMessageRendererContainer {
@@ -222,6 +234,10 @@ export interface YYLiveChatPollRendererContainer {
 
 export interface YTLiveChatModeChangeMessageRendererContainer {
   liveChatModeChangeMessageRenderer: YTLiveChatModeChangeMessageRenderer;
+}
+
+export interface YTLiveChatActionPanelRendererContainer {
+  liveChatActionPanelRenderer: YTLiveChatActionPanelRenderer;
 }
 
 // LiveChat Renderers
@@ -334,6 +350,12 @@ export interface YTLiveChatPollRenderer {
       contextMenuButton: YTContextMenuButtonRendererContainer;
     };
   };
+}
+
+export interface YTLiveChatActionPanelRenderer {
+  contents: YYLiveChatPollRendererContainer;
+  id: string;
+  targetId: string;
 }
 
 export interface YTLiveChatPollChoice {

@@ -1,10 +1,11 @@
-import fetch from "node-fetch";
-import { ClientInfo } from "./context";
+import fetch, { FetchError } from "node-fetch";
+import { AuthParams, ClientInfo } from "./context";
 import {
   YTAction,
   YTAddLiveChatTickerItem,
   YTChatErrorStatus,
   YTChatResponse,
+  YTCloseLiveChatActionPanelAction,
   YTContinuationContents,
   YTLiveChatBannerRenderer,
   YTLiveChatMembershipItemRenderer,
@@ -16,6 +17,7 @@ import {
   YTLiveChatTickerPaidStickerItemRenderer,
   YTLiveChatTickerSponsorItemRenderer,
   YTLiveChatViewerEngagementMessageRenderer,
+  YTLiveChatActionPanelRenderer,
   YTRemoveBannerForLiveChatCommand,
   YTReplaceChatItemAction,
   YTRun,
@@ -100,13 +102,9 @@ export interface ReloadContinuation {
 }
 
 export type ReloadContinuationItems = {
-  [index in ReloadContinuationType]: ReloadContinuation;
+  top: ReloadContinuation;
+  all: ReloadContinuation;
 };
-
-export enum ReloadContinuationType {
-  Top = "top",
-  All = "all",
-}
 
 export interface TimedContinuation extends ReloadContinuation {
   timeoutMs: number;
@@ -132,6 +130,8 @@ export type Action =
   | RemoveBannerAction
   | AddViewerEngagementMessageAction
   | ShowTooltipAction
+  | ShowLiveChatActionPanelAction
+  | CloseLiveChatActionPanelAction
   | UpdateLiveChatPollAction
   | ModeChangeAction;
 
@@ -226,6 +226,16 @@ export interface AddViewerEngagementMessageAction
   type: "addViewerEngagementMessageAction";
 }
 
+export interface ShowLiveChatActionPanelAction
+  extends YTLiveChatActionPanelRenderer {
+  type: "showLiveChatActionPanelAction";
+}
+
+export interface CloseLiveChatActionPanelAction
+  extends YTCloseLiveChatActionPanelAction {
+  type: "closeLiveChatActionPanelAction";
+}
+
 export interface UpdateLiveChatPollAction extends YTLiveChatPollRenderer {
   type: "updateLiveChatPollAction";
 }
@@ -269,7 +279,8 @@ export interface ChatError {
 }
 
 export enum FetchChatErrorStatus {
-  ContinuationNotFound = "CONTINUATION_NOT_FOUND",
+  LiveChatDisabled = "LIVE_CHAT_DISABLED",
+  Unavailable = "UNAVAILABLE",
 }
 
 function parseColorCode(code: number): Color | undefined {
@@ -646,8 +657,6 @@ function parseChatAction(action: YTAction): Action | UnknownAction {
       // remove pinned item
       const payload = action[type]!;
 
-      log("removeBannerForLiveChatCommand", JSON.stringify(action[type]!));
-
       return {
         type: "removeBannerAction",
         ...payload,
@@ -670,6 +679,22 @@ function parseChatAction(action: YTAction): Action | UnknownAction {
       };
     }
 
+    case "showLiveChatActionPanelAction": {
+      const payload = action[type]!;
+      return {
+        type: "showLiveChatActionPanelAction",
+        ...payload["panelToShow"]["liveChatActionPanelRenderer"],
+      };
+    }
+
+    case "closeLiveChatActionPanelAction": {
+      const payload = action[type]!;
+      return {
+        type: "closeLiveChatActionPanelAction",
+        ...payload,
+      };
+    }
+
     default: {
       const _: never = type;
       log(
@@ -688,13 +713,11 @@ function parseChatAction(action: YTAction): Action | UnknownAction {
 
 export async function fetchChat({
   continuation,
-  apiKey,
-  client,
+  auth: { apiKey, client },
   isReplayChat = false,
 }: {
   continuation: string;
-  apiKey: string;
-  client: ClientInfo;
+  auth: AuthParams;
   isReplayChat?: boolean;
 }): Promise<SucceededChatResponse | FailedChatResponse> {
   const queryUrl = isReplayChat
@@ -704,7 +727,7 @@ export async function fetchChat({
   const requestBody = {
     continuation,
     context: {
-      client,
+      client: client,
     },
   };
 
@@ -718,15 +741,75 @@ export async function fetchChat({
         method: "POST",
         body: JSON.stringify(requestBody),
       }).then((res) => res.json());
-      retryRemaining = MAX_RETRY_COUNT;
+
+      if (res.error) {
+        /** error.code ->
+         * 400: request contains an invalid argument
+         *   - when attempting to access livechat while it is already in replay mode
+         * 403: no permission
+         *   - video was made private by uploader
+         *   - something went wrong (server-side)
+         * 404: not found
+         *   - removed by uploader
+         * 500: internal error
+         *   - server-side failure
+         * 503: The service is currently unavailable
+         *   - temporary server-side failure
+         *
+         * @see https://developers.google.com/youtube/v3/live/docs/liveChatMessages/list
+         */
+
+        const { status, message } = res.error;
+
+        switch (status) {
+          case YTChatErrorStatus.Invalid: {
+            return {
+              error: {
+                status: FetchChatErrorStatus.Unavailable,
+                message:
+                  "requested live chat is already in reply mode: " + message,
+              },
+            };
+          }
+          case YTChatErrorStatus.PermissionDenied:
+          case YTChatErrorStatus.NotFound: {
+            return {
+              error: {
+                status: FetchChatErrorStatus.Unavailable,
+                message,
+              },
+            };
+          }
+          case YTChatErrorStatus.Unavailable:
+          case YTChatErrorStatus.Internal: {
+            // it's temporary so should retry
+            const err = new FetchError(message, "system");
+            throw err;
+          }
+          default:
+            log(
+              "[action required] Unrecognized error code",
+              JSON.stringify(res)
+            );
+            return {
+              error: {
+                status,
+                message,
+              },
+            };
+        }
+      }
+
+      // res is ok
       break;
     } catch (err) {
-      log("fetchError", err, err.code, err.type);
+      log("fetchError", err.message, err.code, err.type);
       switch (err.type) {
         case "invalid-json":
-          // TODO: ???
+          // TODO: rarely occurs
           log("[action required] invalid-json", err.response.text());
         case "system":
+          // ECONNRESET, ETIMEOUT, etc
           if (retryRemaining > 0) {
             retryRemaining -= 1;
             log(`Retrying (remaining: ${retryRemaining})`);
@@ -738,57 +821,24 @@ export async function fetchChat({
     }
   }
 
-  if (res.error) {
-    /** error.code ->
-     * 400: request contains an invalid argument?
-     * 403:
-     *   - video is privated by uploader (no permission)
-     *   - something went wrong (?)
-     * 404: request entity was not found (removed by uploader)
-     * 500: internal error encountered
-     * 503: The service is currently unavailable (temporary?)
-     *
-     * @see https://developers.google.com/youtube/v3/live/docs/liveChatMessages/list
-     */
-
-    const { status, message } = res.error;
-
-    switch (status) {
-      case YTChatErrorStatus.PermissionDenied:
-      case YTChatErrorStatus.NotFound:
-      case YTChatErrorStatus.Invalid:
-      case YTChatErrorStatus.Unavailable:
-      case YTChatErrorStatus.Internal:
-        break;
-      default:
-        log("[action required] Unrecognized error code", JSON.stringify(res));
-    }
-
-    return {
-      error: {
-        status,
-        message,
-      },
-    };
-  }
-
   const { continuationContents } = res;
 
   if (!continuationContents) {
     /** there's several possibilities lied here:
-     * 1. live chat is over
+     * 1. live chat is over (primary)
      * 2. turned into membership-only stream
      * 3. given video is neither a live stream nor an archived stream
+     * 4. chat got disabled
      */
     const obj = Object.assign({}, res) as any;
     delete obj["responseContext"];
-    log("continuationNotFound", JSON.stringify(obj));
+    log("continuationNotFound(LiveChatDisabled)", JSON.stringify(obj));
 
     return {
       error: {
-        status: FetchChatErrorStatus.ContinuationNotFound,
+        status: FetchChatErrorStatus.LiveChatDisabled,
         message:
-          "continuation contents cannot be found. live chat is over, or turned into membership-only stream.",
+          "continuation contents cannot be found. live chat is over, or turned into membership-only stream, or chat got disabled",
       },
     };
   }
@@ -838,21 +888,18 @@ export async function fetchChat({
  */
 export async function* iterateChat({
   token,
-  apiKey,
-  client,
+  auth,
   isReplayChat = false,
 }: {
   token: string;
-  apiKey: string;
-  client: ClientInfo;
+  auth: AuthParams;
   isReplayChat?: boolean;
 }): AsyncGenerator<SucceededChatResponse | FailedChatResponse> {
   // continuously fetch chat fragments
   while (true) {
     const chatResponse = await fetchChat({
       continuation: token,
-      apiKey,
-      client,
+      auth,
       isReplayChat,
     });
 
@@ -870,7 +917,7 @@ export async function* iterateChat({
     if (!continuation) {
       // TODO: check if this scenario actually exists
       log(
-        "[action required] got chatResponse but no continuation event occured"
+        "[action required] got chatResponse but no continuation event occurred"
       );
       break;
     }

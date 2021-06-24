@@ -6,7 +6,6 @@ import {
   normalizeVideoId,
   timeoutThen,
   Action,
-  ReloadContinuationType,
 } from "masterchat";
 
 export async function collectEvents(argv: any) {
@@ -17,14 +16,14 @@ export async function collectEvents(argv: any) {
   });
 
   const videoId: string = normalizeVideoId(argv.video);
-  const type = argv.type as ReloadContinuationType;
+  const type = argv.type as "top" | "all";
 
   // get web player context
   const context = await fetchContext(videoId);
   if (!context) {
     throw new Error("context not found");
   }
-  const { metadata } = context;
+  const { metadata, continuations } = context;
 
   // check if the video is valid
   if (!metadata) {
@@ -40,7 +39,7 @@ export async function collectEvents(argv: any) {
     logAndExit("only live stream is supported");
   }
 
-  if (!context.continuations) {
+  if (!continuations) {
     logAndExit(
       "reload continuation not found. try again later or maybe it's a normal video."
     );
@@ -48,10 +47,10 @@ export async function collectEvents(argv: any) {
 
   console.log("title:", metadata.title);
 
-  const initialToken = context.continuations[type].token;
+  const initialToken = continuations[type].token;
 
   const liveChatIter = iterateChat({
-    ...context.auth,
+    auth: context.auth,
     token: initialToken,
   });
 

@@ -7,14 +7,9 @@ import {
   fetchContext,
   iterateChat,
   normalizeVideoId,
-  ReloadContinuationType,
   timeoutThen,
 } from "masterchat";
 import { VM, VMScript } from "vm2";
-
-interface CustomAddChatAction extends AddChatItemAction {
-  message?: string;
-}
 
 export function stringifyActions(
   actions: Action[],
@@ -127,7 +122,7 @@ export async function inspectChat(argv: any) {
   const verbose: boolean = argv.verbose;
   const showModeration: boolean = argv.mod;
   const showAuthor: boolean = argv.author;
-  const type = argv.type as ReloadContinuationType;
+  const type = argv.type as "top" | "all";
   const filterExp: string = Array.isArray(argv.filter)
     ? argv.filter[0]
     : argv.filter;
@@ -138,7 +133,7 @@ export async function inspectChat(argv: any) {
   if (!context) {
     throw new Error("context not found");
   }
-  const { metadata } = context;
+  const { metadata, continuations } = context;
 
   // check if the video is valid
   if (!metadata) {
@@ -152,7 +147,7 @@ export async function inspectChat(argv: any) {
     logAndExit("only live stream is supported");
   }
 
-  if (!context.continuations) {
+  if (!continuations) {
     logAndExit(
       "reload continuation not found. try again later or maybe it's a normal video."
     );
@@ -160,10 +155,10 @@ export async function inspectChat(argv: any) {
 
   console.log("title:", metadata.title);
 
-  const initialToken = context.continuations[type].token;
+  const initialToken = continuations[type].token;
 
   const liveChatIter = iterateChat({
-    ...context.auth,
+    auth: context.auth,
     token: initialToken,
   });
 
