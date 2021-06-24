@@ -5,17 +5,20 @@
   "author": "Yasuaki Uechi <y@uechi.io> (https://uechi.io/)",
   "scripts": {
     "build": "run-p build:*",
-    "build:cjs": "tsc -p tsconfig.cjs.json",
-    "build:esm": "tsc",
+    "build:cjs": "tsc -b src/tsconfig.cjs.json",
+    "build:esm": "tsc -b src/tsconfig.esm.json",
     "clean": "shx rm -rf lib",
     "dev": "tsc -p tsconfig.cjs.json -w",
     "docs": "typedoc --out ../../docs --excludeExternals --excludePrivate --exclude '**/__tests__/*' src && shx touch ../../docs/.nojekyll",
     "prepublishOnly": "npm run clean && npm run build",
-    "test": "jest"
+    "test": "yarn build && jest"
   },
-  "types": "./lib/cjs/index.d.ts",
-  "module": "./lib/esm/index.js",
+  "types": "./lib/esm/index.d.ts",
   "main": "./lib/cjs/index.js",
+  "exports": {
+    "import": "./lib/esm/index.js",
+    "require": "./lib/cjs/index.js"
+  },
   "files": [
     "lib"
   ],

@@ -1,9 +1,12 @@
-import { fetchChat, fetchContext } from "..";
-import { ReloadContinuationType } from "../chat";
+import { fetchChat, fetchContext } from "../src";
 
 it("can fetch initial chat", async () => {
   const context = await fetchContext("QK75uDJ9eyk");
-  if (!context?.continuations || !context.metadata) {
+  if (!context) {
+    throw new Error("Invalid context");
+  }
+  const { metadata, continuations, auth } = context;
+  if (!continuations || !metadata) {
     console.log("invalid request");
     return;
   }
@@ -11,9 +14,9 @@ it("can fetch initial chat", async () => {
   console.log(context);
 
   const res = await fetchChat({
-    ...context.auth,
-    continuation: context.continuations[ReloadContinuationType.All].token,
-    isReplayChat: context.metadata.isLive,
+    auth,
+    continuation: continuations.all.token,
+    isReplayChat: metadata.isLive,
   });
 
   expect(res).toHaveProperty("actions");
