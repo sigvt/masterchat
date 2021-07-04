@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>ReloadContinuationType | masterchat</title>
+	<title>LiveChatMode | masterchat</title>
 	<meta name="description" content="Documentation for masterchat">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -56,10 +56,10 @@
 					<a href="../modules/chat.html">chat</a>
 				</li>
 				<li>
-					<a href="chat.reloadcontinuationtype.html">ReloadContinuationType</a>
+					<a href="chat.livechatmode.html">LiveChatMode</a>
 				</li>
 			</ul>
-			<h1>Enumeration ReloadContinuationType</h1>
+			<h1>Enumeration LiveChatMode</h1>
 		</div>
 	</div>
 </header>
@@ -73,8 +73,10 @@
 						<section class="tsd-index-section ">
 							<h3>Enumeration members</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="chat.reloadcontinuationtype.html#all" class="tsd-kind-icon">All</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="chat.reloadcontinuationtype.html#top" class="tsd-kind-icon">Top</a></li>
+								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="chat.livechatmode.html#membersonly" class="tsd-kind-icon">Members<wbr>Only</a></li>
+								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="chat.livechatmode.html#slow" class="tsd-kind-icon">Slow</a></li>
+								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="chat.livechatmode.html#subscribersonly" class="tsd-kind-icon">Subscribers<wbr>Only</a></li>
+								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="chat.livechatmode.html#unknown" class="tsd-kind-icon">Unknown</a></li>
 							</ul>
 						</section>
 					</div>
@@ -83,22 +85,42 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Enumeration members</h2>
 				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="all" class="tsd-anchor"></a>
-					<h3>All</h3>
-					<div class="tsd-signature tsd-kind-icon">All<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;all&quot;</span></div>
+					<a name="membersonly" class="tsd-anchor"></a>
+					<h3>Members<wbr>Only</h3>
+					<div class="tsd-signature tsd-kind-icon">Members<wbr>Only<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;MEMBERS_ONLY&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/holodata/masterchat/blob/c3d5dec/packages/core/src/chat.ts#L107">chat.ts:107</a></li>
+							<li>Defined in <a href="https://github.com/holodata/masterchat/blob/881ae5e/packages/core/src/chat.ts#L244">chat.ts:244</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="top" class="tsd-anchor"></a>
-					<h3>Top</h3>
-					<div class="tsd-signature tsd-kind-icon">Top<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;top&quot;</span></div>
+					<a name="slow" class="tsd-anchor"></a>
+					<h3>Slow</h3>
+					<div class="tsd-signature tsd-kind-icon">Slow<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;SLOW&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/holodata/masterchat/blob/c3d5dec/packages/core/src/chat.ts#L106">chat.ts:106</a></li>
+							<li>Defined in <a href="https://github.com/holodata/masterchat/blob/881ae5e/packages/core/src/chat.ts#L245">chat.ts:245</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
+					<a name="subscribersonly" class="tsd-anchor"></a>
+					<h3>Subscribers<wbr>Only</h3>
+					<div class="tsd-signature tsd-kind-icon">Subscribers<wbr>Only<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;SUBSCRIBERS_ONLY&quot;</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/holodata/masterchat/blob/881ae5e/packages/core/src/chat.ts#L246">chat.ts:246</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
+					<a name="unknown" class="tsd-anchor"></a>
+					<h3>Unknown</h3>
+					<div class="tsd-signature tsd-kind-icon">Unknown<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;UNKNOWN&quot;</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/holodata/masterchat/blob/881ae5e/packages/core/src/chat.ts#L247">chat.ts:247</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -108,7 +130,7 @@
 			<nav class="tsd-navigation primary">
 				<ul>
 					<li class=" ">
-						<a href="../modules.html">Exports</a>
+						<a href="../modules.html">Modules</a>
 					</li>
 					<li class="current tsd-kind-module">
 						<a href="../modules/chat.html">chat</a>
@@ -138,13 +160,19 @@
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-enum tsd-parent-kind-module">
-						<a href="chat.reloadcontinuationtype.html" class="tsd-kind-icon">Reload<wbr>Continuation<wbr>Type</a>
+						<a href="chat.livechatmode.html" class="tsd-kind-icon">Live<wbr>Chat<wbr>Mode</a>
 						<ul>
 							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
-								<a href="chat.reloadcontinuationtype.html#all" class="tsd-kind-icon">All</a>
+								<a href="chat.livechatmode.html#membersonly" class="tsd-kind-icon">Members<wbr>Only</a>
 							</li>
 							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
-								<a href="chat.reloadcontinuationtype.html#top" class="tsd-kind-icon">Top</a>
+								<a href="chat.livechatmode.html#slow" class="tsd-kind-icon">Slow</a>
+							</li>
+							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
+								<a href="chat.livechatmode.html#subscribersonly" class="tsd-kind-icon">Subscribers<wbr>Only</a>
+							</li>
+							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
+								<a href="chat.livechatmode.html#unknown" class="tsd-kind-icon">Unknown</a>
 							</li>
 						</ul>
 					</li>
@@ -184,6 +212,9 @@
 						<a href="../interfaces/chat.chaterror.html" class="tsd-kind-icon">Chat<wbr>Error</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="../interfaces/chat.closelivechatactionpanelaction.html" class="tsd-kind-icon">Close<wbr>Live<wbr>Chat<wbr>Action<wbr>Panel<wbr>Action</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
 						<a href="../interfaces/chat.color.html" class="tsd-kind-icon">Color</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-module">
@@ -199,6 +230,9 @@
 						<a href="../interfaces/chat.membership.html" class="tsd-kind-icon">Membership</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="../interfaces/chat.modechangeaction.html" class="tsd-kind-icon">Mode<wbr>Change<wbr>Action</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
 						<a href="../interfaces/chat.reloadcontinuation.html" class="tsd-kind-icon">Reload<wbr>Continuation</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-module">
@@ -206,6 +240,9 @@
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-module">
 						<a href="../interfaces/chat.replacechatitemaction.html" class="tsd-kind-icon">Replace<wbr>Chat<wbr>Item<wbr>Action</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="../interfaces/chat.showlivechatactionpanelaction.html" class="tsd-kind-icon">Show<wbr>Live<wbr>Chat<wbr>Action<wbr>Panel<wbr>Action</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-module">
 						<a href="../interfaces/chat.showtooltipaction.html" class="tsd-kind-icon">Show<wbr>Tooltip<wbr>Action</a>
@@ -221,6 +258,9 @@
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-module">
 						<a href="../interfaces/chat.unknownaction.html" class="tsd-kind-icon">Unknown<wbr>Action</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="../interfaces/chat.updatelivechatpollaction.html" class="tsd-kind-icon">Update<wbr>Live<wbr>Chat<wbr>Poll<wbr>Action</a>
 					</li>
 					<li class=" tsd-kind-type-alias tsd-parent-kind-module">
 						<a href="../modules/chat.html#action" class="tsd-kind-icon">Action</a>
@@ -245,9 +285,6 @@
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-module">
 						<a href="../modules/chat.html#fetchchat" class="tsd-kind-icon">fetch<wbr>Chat</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-module">
-						<a href="../modules/chat.html#gettimedcontinuation" class="tsd-kind-icon">get<wbr>Timed<wbr>Continuation</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-module">
 						<a href="../modules/chat.html#iteratechat" class="tsd-kind-icon">iterate<wbr>Chat</a>
