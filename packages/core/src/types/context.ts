@@ -54,7 +54,7 @@ export interface YTInitialData {
 }
 
 export interface YTContents {
-  twoColumnWatchNextResults: YTTwoColumnWatchNextResults;
+  twoColumnWatchNextResults?: YTTwoColumnWatchNextResults;
 }
 
 export interface YTTwoColumnWatchNextResults {

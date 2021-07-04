@@ -56,7 +56,7 @@ function findContinuation(
   }
 
   const conversationBar =
-    initialData.contents.twoColumnWatchNextResults.conversationBar;
+    initialData.contents.twoColumnWatchNextResults?.conversationBar;
   if (!conversationBar || !conversationBar.liveChatRenderer) {
     return undefined;
   }
@@ -82,7 +82,11 @@ function findMetadata(initialData: YTInitialData): Metadata | undefined {
   if (!initialData.contents) return undefined;
 
   const results =
-    initialData.contents.twoColumnWatchNextResults.results.results;
+    initialData.contents.twoColumnWatchNextResults?.results.results;
+  if (!results) {
+    // maybe empty videoId
+    return undefined;
+  }
 
   const viewCount = results.contents[0].videoPrimaryInfoRenderer.viewCount;
   if (!viewCount) {
