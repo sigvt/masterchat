@@ -3,6 +3,7 @@
 package-lock.json
 yarn.lock
 /lib
+/tests/__nock-fixtures__
 
 # Created by https://www.toptal.com/developers/gitignore/api/node
 # Edit at https://www.toptal.com/developers/gitignore?templates=node

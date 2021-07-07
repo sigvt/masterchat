@@ -1,20 +1,27 @@
+import { fstat, writeFileSync } from "fs";
 import fetch from "node-fetch";
+import { Credentials, withAuthHeader } from "./auth";
 import { ReloadContinuationItems } from "./chat";
-import { YTTimedContinuationData } from "./types/chat";
+import { YTChatResponse, YTTimedContinuationData } from "./types/chat";
 import { YTInitialData, YTReloadContinuationData } from "./types/context";
-import { convertRunsToString, log } from "./util";
+import { convertRunsToString, log, normalizeVideoId } from "./util";
 
 export interface Context {
   apiKey: string;
-  continuations?: ReloadContinuationItems;
-  metadata?: Metadata;
+  metadata: Metadata;
+  chat?: {
+    continuations: ReloadContinuationItems;
+    params: LiveChatParams;
+  };
+}
+
+export interface LiveChatParams {
+  sendMessageParams: string | undefined;
 }
 
 export interface ClientInfo {
   clientName: string;
   clientVersion: string;
-  utcOffsetMinutes: number;
-  timeZone: string;
 }
 
 export interface Metadata {
@@ -34,10 +41,18 @@ function findApiKey(data: string): string | undefined {
   return apiKey;
 }
 
-async function findInitialData(
-  data: string
-): Promise<YTInitialData | undefined> {
-  const ytInitialDataMatch = /var ytInitialData = (.+?);<\/script>/.exec(data);
+// returns undefined if sending chat function is unavailable
+function findSendMessageParams(res: YTChatResponse): string | undefined {
+  return res.continuationContents?.liveChatContinuation.actionPanel
+    ?.liveChatMessageInputRenderer.sendButton.buttonRenderer.serviceEndpoint
+    ?.sendLiveChatMessageEndpoint.params;
+}
+
+function findInitialData(data: string): YTInitialData | undefined {
+  const ytInitialDataMatch =
+    /(?:var ytInitialData|window\["ytInitialData"\]) = (.+?);<\/script>/.exec(
+      data
+    );
   if (ytInitialDataMatch) {
     return JSON.parse(ytInitialDataMatch[1]);
   }
@@ -105,37 +120,82 @@ function findMetadata(initialData: YTInitialData): Metadata | undefined {
   };
 }
 
-export async function fetchContext(id: string): Promise<Context | undefined> {
-  // TODO: Distinguish YT IP ban and other errors.
+async function fetchLiveChatParams(
+  continuation: string,
+  { credentials }: { credentials?: Credentials } = {}
+): Promise<LiveChatParams | undefined> {
+  const url = "https://www.youtube.com/live_chat?continuation=" + continuation;
+  const headers = withAuthHeader(credentials);
+  const res = await fetch(url, { headers }).then((res) => res.text());
+  const initialData = findInitialData(res);
+  if (!initialData) {
+    // TODO: is this even possible?
+    log("!liveChatInitialData: " + url, initialData);
+    return undefined;
+  }
+  const sendMessageParams = findSendMessageParams(initialData);
+  return {
+    sendMessageParams,
+  };
+}
 
-  const res = await fetch("https://www.youtube.com/watch?v=" + id);
+export async function fetchContext(
+  idOrUrl: string,
+  { credentials }: { credentials?: Credentials } = {}
+): Promise<Context | undefined> {
+  const id = normalizeVideoId(idOrUrl);
+  const res = await fetch("https://www.youtube.com/watch?v=" + id, {
+    headers: withAuthHeader(credentials),
+  });
   const watchHtml = await res.text();
 
-  const initialData = await findInitialData(watchHtml);
+  const initialData = findInitialData(watchHtml);
   const apiKey = findApiKey(watchHtml);
 
-  if (!apiKey && !initialData) {
+  if (!apiKey || !initialData) {
     log(
-      "!apiKey && !initialData",
+      "!apiKey",
       res.status,
       res.statusText,
       "https://www.youtube.com/watch?v=" + id
     );
-    const ytbanError = new Error("Possible YouTube BAN detected");
-    ytbanError.name = "EYTBAN";
-    throw ytbanError;
-  }
+    // TODO: when this happens?
+    log("!initialData: " + initialData);
 
-  if (!apiKey || !initialData) {
-    return undefined;
+    const err = new Error("Possible YouTube BAN detected");
+    err.name = "EYTBAN";
+    throw err;
   }
 
   const metadata = findMetadata(initialData);
-  const continuations = findReloadContinuation(initialData);
+  if (!metadata) {
+    log("invalid video id, private, deleted: " + id);
+    return undefined;
+  }
 
-  return {
+  const context: Context = {
     apiKey,
-    continuations,
     metadata,
+    chat: undefined,
   };
+
+  const continuations = findReloadContinuation(initialData);
+  if (!continuations) {
+    log("archived with no replay, unarchived: " + id);
+  }
+
+  if (continuations) {
+    const params = await fetchLiveChatParams(continuations.top.token, {
+      credentials,
+    });
+
+    if (params) {
+      context.chat = {
+        continuations,
+        params,
+      };
+    }
+  }
+
+  return context;
 }

@@ -8,10 +8,10 @@
     "build:cjs": "tsc -b src/tsconfig.cjs.json",
     "build:esm": "tsc -b src/tsconfig.esm.json",
     "clean": "shx rm -rf lib",
-    "dev": "tsc -p tsconfig.cjs.json -w",
+    "dev": "tsc -p src/tsconfig.cjs.json -w",
     "docs": "typedoc --out ../../docs --excludeExternals --excludePrivate --exclude '**/__tests__/*' src && shx touch ../../docs/.nojekyll",
     "prepublishOnly": "npm run clean && npm run build",
-    "test": "yarn build:cjs && jest"
+    "test": "yarn build:cjs && DEBUG=masterchat jest"
   },
   "types": "./lib/cjs/index.d.ts",
   "main": "./lib/cjs/index.js",
@@ -34,6 +34,7 @@
     "@types/node-fetch": "^2.5.10",
     "jest": "^27.0.5",
     "nock": "^13.1.1",
+    "nock-record": "^0.3.9",
     "npm-run-all": "^4.1.5",
     "shx": "^0.3.3",
     "ts-jest": "^27.0.3",

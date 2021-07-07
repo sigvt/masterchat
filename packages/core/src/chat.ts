@@ -55,6 +55,20 @@ export const SUPERCHAT_COLOR_MAP = {
 } as const;
 
 /**
+ * Errors
+ */
+
+export interface YTLiveError {
+  message: string;
+  status: FetchChatErrorStatus | YTChatErrorStatus;
+}
+
+export enum FetchChatErrorStatus {
+  LiveChatDisabled = "LIVE_CHAT_DISABLED",
+  Unavailable = "UNAVAILABLE",
+}
+
+/**
  * Components
  */
 
@@ -270,17 +284,7 @@ export interface SucceededChatResponse {
 }
 
 export interface FailedChatResponse {
-  error: ChatError;
-}
-
-export interface ChatError {
-  message: string;
-  status: FetchChatErrorStatus | YTChatErrorStatus;
-}
-
-export enum FetchChatErrorStatus {
-  LiveChatDisabled = "LIVE_CHAT_DISABLED",
-  Unavailable = "UNAVAILABLE",
+  error: YTLiveError;
 }
 
 function parseColorCode(code: number): Color | undefined {

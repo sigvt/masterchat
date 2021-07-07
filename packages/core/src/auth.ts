@@ -13,11 +13,22 @@ export const DEFAULT_CLIENT = {
   clientVersion: "2.20210618.05.00-canary_control",
 };
 
-export function withAuthHeader(creds: Credentials, headers: any = {}) {
-  return {
+export function withAuthHeader(
+  creds: Credentials | undefined,
+  headers: any = {}
+) {
+  const defaultHeaders = {
     ...headers,
+    "User-Agent":
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36",
+  };
+
+  if (!creds) return defaultHeaders;
+
+  return {
+    ...defaultHeaders,
     Cookie: genCookieString(creds) + (headers.Cookie ?? ""),
-    Authorization: genAuthToken(creds.SAPISID, origin),
+    Authorization: genAuthToken(creds.SAPISID, "https://www.youtube.com"),
     "X-Origin": "https://www.youtube.com",
   };
 }

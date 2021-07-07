@@ -1,5 +1,10 @@
+import { setupRecorder } from "nock-record";
 import fetch from "node-fetch";
 import { Context, fetchChat, fetchContext, timeoutThen } from "..";
+
+const record = setupRecorder({
+  mode: (process.env.NOCK_BACK_MODE as any) || "record",
+});
 
 async function fetchUpcomingStreams() {
   const data = await fetch(
@@ -15,9 +20,14 @@ describe("wildlife test", () => {
   let ctx: Context | undefined;
 
   beforeAll(async () => {
+    const { completeRecording, assertScopesFinished } = await record(
+      "wildlife"
+    );
     const index = await fetchUpcomingStreams();
     subject = index[0];
     ctx = await fetchContext(subject.id);
+    completeRecording();
+    assertScopesFinished();
   });
 
   it("context match", async () => {
@@ -28,8 +38,10 @@ describe("wildlife test", () => {
   });
 
   it("can fetch live chat", async () => {
+    const { completeRecording } = await record("wildlife2");
+
     const chat = await fetchChat({
-      continuation: ctx?.continuations?.all.token!,
+      continuation: ctx?.chat?.continuations.all.token!,
       apiKey: ctx?.apiKey!,
       isReplayChat: false,
     });
@@ -59,6 +71,7 @@ describe("wildlife test", () => {
       apiKey: ctx?.apiKey!,
       isReplayChat: false,
     });
+    completeRecording();
     if (consecutiveChat.error) {
       throw new Error(consecutiveChat.error.message);
     }

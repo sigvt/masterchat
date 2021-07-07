@@ -1,15 +1,16 @@
 import fetch from "node-fetch";
 import { Credentials, DEFAULT_CLIENT, withAuthHeader } from "./auth";
+import { LiveChatParams } from "./context";
 import { log } from "./util";
 
 export interface SendMessageOptions {
-  apikey: string;
-  creds: Credentials;
-  params: string;
+  apiKey: string;
+  credentials: Credentials;
+  params: LiveChatParams;
 }
 export async function sendMessage(
   message: string,
-  { apikey, creds, params }: SendMessageOptions
+  { apiKey, credentials, params }: SendMessageOptions
 ) {
   const body = {
     richMessage: {
@@ -22,17 +23,21 @@ export async function sendMessage(
     context: {
       client: DEFAULT_CLIENT,
     },
-    params,
+    params: params.sendMessageParams,
   };
 
+  const headers = withAuthHeader(credentials, {
+    "content-type": "application/json",
+  });
+
   const res = await fetch(
-    "https://www.youtube.com/youtubei/v1/live_chat/send_message?key=" + apikey,
+    "https://www.youtube.com/youtubei/v1/live_chat/send_message?key=" + apiKey,
     {
       method: "POST",
-      headers: withAuthHeader(creds),
+      headers,
       body: JSON.stringify(body),
     }
   );
-  log(res);
-  return res;
+  const json = await res.json();
+  return json;
 }
