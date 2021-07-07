@@ -13,6 +13,8 @@ export const DEFAULT_CLIENT = {
   clientVersion: "2.20210618.05.00-canary_control",
 };
 
+const DEFAULT_ORIGIN = "https://www.youtube.com";
+
 export function withAuthHeader(
   creds: Credentials | undefined,
   headers: any = {}
@@ -28,8 +30,8 @@ export function withAuthHeader(
   return {
     ...defaultHeaders,
     Cookie: genCookieString(creds) + (headers.Cookie ?? ""),
-    Authorization: genAuthToken(creds.SAPISID, "https://www.youtube.com"),
-    "X-Origin": "https://www.youtube.com",
+    Authorization: genAuthToken(creds.SAPISID, DEFAULT_ORIGIN),
+    "X-Origin": DEFAULT_ORIGIN,
   };
 }
 

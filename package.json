@@ -1,13 +1,14 @@
 {
   "name": "masterchat",
-  "description": "masterchat",
+  "description": "A Node.js library for YouTube Live Chat.",
   "version": "0.0.0",
   "author": "Yasuaki Uechi <y@uechi.io> (https://uechi.io/)",
   "scripts": {
     "bootstrap": "lerna bootstrap",
     "build": "lerna link && lerna run build",
     "dev": "lerna run dev --parallel",
-    "docs": "lerna run --scope masterchat docs"
+    "docs": "lerna run --scope masterchat docs",
+    "test": "lerna run test"
   },
   "devDependencies": {
     "lerna": "^4.0.0",

@@ -129,7 +129,7 @@ async function fetchLiveChatParams(
   const res = await fetch(url, { headers }).then((res) => res.text());
   const initialData = findInitialData(res);
   if (!initialData) {
-    // TODO: is this even possible?
+    // TODO: could this actually happen?
     log("!liveChatInitialData: " + url, initialData);
     return undefined;
   }
@@ -159,7 +159,7 @@ export async function fetchContext(
       res.statusText,
       "https://www.youtube.com/watch?v=" + id
     );
-    // TODO: when this happens?
+    // TODO: when does this happen?
     log("!initialData: " + initialData);
 
     const err = new Error("Possible YouTube BAN detected");

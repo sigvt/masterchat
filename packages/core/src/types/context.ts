@@ -1,7 +1,5 @@
 import { YTRun, YTRunContainer } from "./chat";
 
-// TODO: sort out interfaces
-
 export interface YTContextConfig {
   transparentBackground: boolean;
   useFastSizingOnWatchDefault: boolean;

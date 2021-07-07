@@ -708,7 +708,7 @@ function parseChatAction(action: YTAction): Action | UnknownAction {
     }
   }
 
-  // TODO: remove unknown type in future
+  // TODO: remove unknown type in the future
   return {
     type: "unknown",
     payload: action,
@@ -862,7 +862,7 @@ export async function fetchChat({
   // unwrap replay actions into YTActions
   if (isReplayChat) {
     rawActions = rawActions.map(
-      // TODO: verify actions actually brace single item all the time
+      // TODO: verify that an action always holds a single item.
       (action): YTAction => {
         const replayAction = Object.values(
           omitTrackingParams(action)
@@ -922,7 +922,7 @@ export async function* iterateChat({
     // refresh continuation token
     const { continuation } = chatResponse;
     if (!continuation) {
-      // TODO: check if this scenario actually exists
+      // TODO: verify that this scenario actually exists
       log(
         "[action required] got chatResponse but no continuation event occurred"
       );

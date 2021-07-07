@@ -13,9 +13,9 @@ npm i masterchat
 ```js
 import { iterateChat, fetchContext } from "masterchat";
 
-const { continuations, apiKey } = await fetchContext("<videoId>");
+const { chat, apiKey } = await fetchContext("<videoId>");
 
-const token = continuations.top.token;
+const token = chat.continuations.top.token;
 const history = [];
 
 for await (const res of iterateChat({ apiKey, token })) {

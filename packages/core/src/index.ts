@@ -1,5 +1,5 @@
-export * from "./context";
+export { Credentials, DEFAULT_CLIENT, withAuthHeader } from "./auth";
 export * from "./chat";
-export { normalizeVideoId, convertRunsToString, timeoutThen } from "./util";
-export { withAuthHeader, DEFAULT_CLIENT, Credentials } from "./auth";
+export * from "./context";
 export { sendMessage, SendMessageOptions } from "./message";
+export { convertRunsToString, normalizeVideoId, timeoutThen } from "./util";

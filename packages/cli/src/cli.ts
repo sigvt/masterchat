@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import yargs from "yargs";
-import { inspectChat } from "./commands/inspectChat";
+import { inspectChat } from "./commands/liveChat";
 import epicfail from "epicfail";
 
 epicfail();

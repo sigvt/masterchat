@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>AuthParams | masterchat</title>
+	<title>message | masterchat</title>
 	<meta name="description" content="Documentation for masterchat">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -53,62 +53,62 @@
 					<a href="../modules.html">masterchat</a>
 				</li>
 				<li>
-					<a href="../modules/context.html">context</a>
-				</li>
-				<li>
-					<a href="context.authparams.html">AuthParams</a>
+					<a href="message.html">message</a>
 				</li>
 			</ul>
-			<h1>Interface AuthParams</h1>
+			<h1>Module message</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
-			<section class="tsd-panel tsd-hierarchy">
-				<h3>Hierarchy</h3>
-				<ul class="tsd-hierarchy">
-					<li>
-						<span class="target">AuthParams</span>
-					</li>
-				</ul>
-			</section>
 			<section class="tsd-panel-group tsd-index-group">
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
-							<h3>Properties</h3>
+							<h3>Interfaces</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="context.authparams.html#apikey" class="tsd-kind-icon">api<wbr>Key</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="context.authparams.html#client" class="tsd-kind-icon">client</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-module"><a href="../interfaces/message.sendmessageoptions.html" class="tsd-kind-icon">Send<wbr>Message<wbr>Options</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Functions</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-function tsd-parent-kind-module"><a href="message.html#sendmessage" class="tsd-kind-icon">send<wbr>Message</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Properties</h2>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="apikey" class="tsd-anchor"></a>
-					<h3>api<wbr>Key</h3>
-					<div class="tsd-signature tsd-kind-icon">api<wbr>Key<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/holodata/masterchat/blob/881ae5e/packages/core/src/context.ts#L14">context.ts:14</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="client" class="tsd-anchor"></a>
-					<h3>client</h3>
-					<div class="tsd-signature tsd-kind-icon">client<span class="tsd-signature-symbol">:</span> <a href="context.clientinfo.html" class="tsd-signature-type" data-tsd-kind="Interface">ClientInfo</a></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/holodata/masterchat/blob/881ae5e/packages/core/src/context.ts#L15">context.ts:15</a></li>
-						</ul>
-					</aside>
+				<h2>Functions</h2>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
+					<a name="sendmessage" class="tsd-anchor"></a>
+					<h3>send<wbr>Message</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
+						<li class="tsd-signature tsd-kind-icon">send<wbr>Message<span class="tsd-signature-symbol">(</span>message<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, __namedParameters<span class="tsd-signature-symbol">: </span><a href="../interfaces/message.sendmessageoptions.html" class="tsd-signature-type" data-tsd-kind="Interface">SendMessageOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/holodata/masterchat/blob/475f0a4/packages/core/src/message.ts#L10">message.ts:10</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>message: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>__namedParameters: <a href="../interfaces/message.sendmessageoptions.html" class="tsd-signature-type" data-tsd-kind="Interface">SendMessageOptions</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
 				</section>
 			</section>
 		</div>
@@ -119,56 +119,38 @@
 						<a href="../modules.html">Modules</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="../modules/chat.html">chat</a>
+						<a href="auth.html">auth</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="chat.html">chat</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="context.html">context</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="index.html">index</a>
 					</li>
 					<li class="current tsd-kind-module">
-						<a href="../modules/context.html">context</a>
+						<a href="message.html">message</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="../modules/index.html">index</a>
+						<a href="types_chat.html">types/chat</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="../modules/types_chat.html">types/chat</a>
+						<a href="types_context.html">types/context</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="../modules/types_context.html">types/context</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="../modules/util.html">util</a>
+						<a href="util.html">util</a>
 					</li>
 				</ul>
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
-				</ul>
-				<ul class="current">
-					<li class="current tsd-kind-interface tsd-parent-kind-module">
-						<a href="context.authparams.html" class="tsd-kind-icon">Auth<wbr>Params</a>
-						<ul>
-							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="context.authparams.html#apikey" class="tsd-kind-icon">api<wbr>Key</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="context.authparams.html#client" class="tsd-kind-icon">client</a>
-							</li>
-						</ul>
-					</li>
-				</ul>
-				<ul class="after-current">
 					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="context.clientinfo.html" class="tsd-kind-icon">Client<wbr>Info</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="context.context-1.html" class="tsd-kind-icon">Context</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="context.metadata.html" class="tsd-kind-icon">Metadata</a>
-					</li>
-					<li class=" tsd-kind-type-alias tsd-parent-kind-module">
-						<a href="../modules/context.html#continuationdata" class="tsd-kind-icon">Continuation<wbr>Data</a>
+						<a href="../interfaces/message.sendmessageoptions.html" class="tsd-kind-icon">Send<wbr>Message<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-module">
-						<a href="../modules/context.html#fetchcontext" class="tsd-kind-icon">fetch<wbr>Context</a>
+						<a href="message.html#sendmessage" class="tsd-kind-icon">send<wbr>Message</a>
 					</li>
 				</ul>
 			</nav>
@@ -189,7 +171,6 @@
 			<ul class="tsd-legend">
 				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
 				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
-				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
 			</ul>
 			<ul class="tsd-legend">
 				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>

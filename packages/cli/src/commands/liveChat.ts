@@ -134,12 +134,7 @@ export async function inspectChat(argv: any) {
   if (!context) {
     throw new Error("context not found");
   }
-  const { metadata, continuations, apiKey } = context;
-
-  // check if the video is valid
-  if (!metadata) {
-    logAndExit("metadata not found. wrong video id?");
-  }
+  const { metadata, chat, apiKey } = context;
 
   // check if the stream is live
   const isLive = metadata.isLive;
@@ -148,7 +143,7 @@ export async function inspectChat(argv: any) {
     logAndExit("only live stream is supported");
   }
 
-  if (!continuations) {
+  if (!chat) {
     logAndExit(
       "reload continuation not found. try again later or maybe it's a normal video."
     );
@@ -156,7 +151,7 @@ export async function inspectChat(argv: any) {
 
   console.log("title:", metadata.title);
 
-  const initialToken = continuations[type].token;
+  const initialToken = chat.continuations[type].token;
 
   const liveChatIter = iterateChat({
     apiKey,

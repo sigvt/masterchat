@@ -1,7 +1,6 @@
 import fetch from "node-fetch";
 import { Credentials, DEFAULT_CLIENT, withAuthHeader } from "./auth";
 import { LiveChatParams } from "./context";
-import { log } from "./util";
 
 export interface SendMessageOptions {
   apiKey: string;
