@@ -24,11 +24,17 @@ See YouTube Live Chat through flexible filtering engine.
 npm install -g masterchat-cli
 ```
 
+### MasterChat Desktop
+
+For the desktop app, see [Komet](https://github.com/holodata/komet).
+
 ## Roadmap
 
 - [x] Release `masterchat`
 - [x] Release `masterchat-cli`
-- [ ] Auth support
+- [x] Auth support
+- [x] Ability to send chat
+- [ ] Ability to block/report spam
 
 ## Contribution
 

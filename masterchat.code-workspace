@@ -12,5 +12,13 @@
       "name": "📦 masterchat-cli",
       "path": "packages/cli"
     }
-  ]
+  ],
+  "settings": {
+    "cSpell.words": [
+      "HSID",
+      "SAPISID",
+      "SAPISIDHASH",
+      "SSID"
+    ]
+  }
 }

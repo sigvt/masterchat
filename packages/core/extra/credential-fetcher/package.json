@@ -1,0 +1,11 @@
+{
+  "name": "credential-fetcher",
+  "version": "0.0.0",
+  "scripts": {
+    "start": "electron ."
+  },
+  "main": "main.js",
+  "devDependencies": {
+    "electron": "^13.1.6"
+  }
+}

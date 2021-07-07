@@ -134,7 +134,7 @@ export async function inspectChat(argv: any) {
   if (!context) {
     throw new Error("context not found");
   }
-  const { metadata, continuations } = context;
+  const { metadata, continuations, apiKey } = context;
 
   // check if the video is valid
   if (!metadata) {
@@ -159,7 +159,7 @@ export async function inspectChat(argv: any) {
   const initialToken = continuations[type].token;
 
   const liveChatIter = iterateChat({
-    auth: context.auth,
+    apiKey,
     token: initialToken,
   });
 

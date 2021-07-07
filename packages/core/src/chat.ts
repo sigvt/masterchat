@@ -1,5 +1,5 @@
 import fetch, { FetchError } from "node-fetch";
-import { AuthParams, ClientInfo } from "./context";
+import { DEFAULT_CLIENT } from "./auth";
 import {
   YTAction,
   YTAddLiveChatTickerItem,
@@ -713,11 +713,11 @@ function parseChatAction(action: YTAction): Action | UnknownAction {
 
 export async function fetchChat({
   continuation,
-  auth: { apiKey, client },
+  apiKey,
   isReplayChat = false,
 }: {
   continuation: string;
-  auth: AuthParams;
+  apiKey: string;
   isReplayChat?: boolean;
 }): Promise<SucceededChatResponse | FailedChatResponse> {
   const queryUrl = isReplayChat
@@ -727,7 +727,7 @@ export async function fetchChat({
   const requestBody = {
     continuation,
     context: {
-      client: client,
+      client: DEFAULT_CLIENT,
     },
   };
 
@@ -740,6 +740,9 @@ export async function fetchChat({
       res = await fetch(queryUrl, {
         method: "POST",
         body: JSON.stringify(requestBody),
+        headers: {
+          "accept-language": "en",
+        },
       }).then((res) => res.json());
 
       if (res.error) {
@@ -888,18 +891,18 @@ export async function fetchChat({
  */
 export async function* iterateChat({
   token,
-  auth,
+  apiKey,
   isReplayChat = false,
 }: {
   token: string;
-  auth: AuthParams;
+  apiKey: string;
   isReplayChat?: boolean;
 }): AsyncGenerator<SucceededChatResponse | FailedChatResponse> {
   // continuously fetch chat fragments
   while (true) {
     const chatResponse = await fetchChat({
       continuation: token,
-      auth,
+      apiKey,
       isReplayChat,
     });
 

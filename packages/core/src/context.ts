@@ -5,14 +5,9 @@ import { YTInitialData, YTReloadContinuationData } from "./types/context";
 import { convertRunsToString, log } from "./util";
 
 export interface Context {
-  auth: AuthParams;
+  apiKey: string;
   continuations?: ReloadContinuationItems;
   metadata?: Metadata;
-}
-
-export interface AuthParams {
-  apiKey: string;
-  client: ClientInfo;
 }
 
 export interface ClientInfo {
@@ -48,7 +43,7 @@ async function findInitialData(
   }
 }
 
-function findContinuation(
+function findReloadContinuation(
   initialData: YTInitialData
 ): ReloadContinuationItems | undefined {
   if (!initialData.contents) {
@@ -76,7 +71,7 @@ function findContinuation(
 }
 
 /**
- * Returns undefined if membership-only stream
+ * Returns undefined if it is a membership-only stream
  */
 function findMetadata(initialData: YTInitialData): Metadata | undefined {
   if (!initialData.contents) return undefined;
@@ -114,16 +109,10 @@ export async function fetchContext(id: string): Promise<Context | undefined> {
   // TODO: Distinguish YT IP ban and other errors.
 
   const res = await fetch("https://www.youtube.com/watch?v=" + id);
-  const data = await res.text();
+  const watchHtml = await res.text();
 
-  const initialData = await findInitialData(data);
-  const apiKey = findApiKey(data);
-  const client = {
-    clientName: "WEB",
-    clientVersion: "2.20210618.05.00-canary_control",
-    utcOffsetMinutes: 540,
-    timeZone: "Asia/Tokyo",
-  };
+  const initialData = await findInitialData(watchHtml);
+  const apiKey = findApiKey(watchHtml);
 
   if (!apiKey && !initialData) {
     log(
@@ -142,10 +131,10 @@ export async function fetchContext(id: string): Promise<Context | undefined> {
   }
 
   const metadata = findMetadata(initialData);
-  const continuations = findContinuation(initialData);
+  const continuations = findReloadContinuation(initialData);
 
   return {
-    auth: { apiKey, client },
+    apiKey,
     continuations,
     metadata,
   };

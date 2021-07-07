@@ -694,6 +694,11 @@ export interface YTSendButton {
     icon: YTIcon;
     accessibility: YTAccessibilityLabel;
     trackingParams: string;
+    serviceEndpoint: {
+      sendLiveChatMessageEndpoint: {
+        params: string;
+      };
+    };
   };
 }
 
