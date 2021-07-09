@@ -467,7 +467,7 @@ export interface YTRendererContainer<T> {
 }
 
 export interface YTActionPanel {
-  liveChatMessageInputRenderer: {
+  liveChatMessageInputRenderer?: {
     inputField: YTInputField;
     sendButton: YTSendButton;
     pickers: YTPicker[];

@@ -1,8 +1,13 @@
 # MasterChat
 
+[![Open in Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/holodata/masterchat)
+
 ## Packages
 
 ### MasterChat
+
+[![npm](https://badgen.net/npm/v/masterchat)](https://npmjs.org/package/masterchat)
+[![npm: total downloads](https://badgen.net/npm/dt/masterchat)](https://npmjs.org/package/masterchat)
 
 A Node.js library for YouTube Live Chat.
 
@@ -14,6 +19,9 @@ npm install masterchat
 ```
 
 ### MasterChat CLI
+
+[![npm](https://badgen.net/npm/v/masterchat-cli)](https://npmjs.org/package/masterchat-cli)
+[![npm: total downloads](https://badgen.net/npm/dt/masterchat-cli)](https://npmjs.org/package/masterchat-cli)
 
 See YouTube Live Chat through flexible filtering engine.
 

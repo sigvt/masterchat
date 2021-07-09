@@ -1,4 +1,3 @@
-import { fstat, writeFileSync } from "fs";
 import fetch from "node-fetch";
 import { Credentials, withAuthHeader } from "./auth";
 import { ReloadContinuationItems } from "./chat";
@@ -43,8 +42,10 @@ function findApiKey(data: string): string | undefined {
 
 // returns undefined if sending chat function is unavailable
 function findSendMessageParams(res: YTChatResponse): string | undefined {
+  // NOTE: liveChatMessageInputRenderer set to undefined during subscribers-only mode
+  // NOTE: serviceEndpoint set to undefined for unauthorized access
   return res.continuationContents?.liveChatContinuation.actionPanel
-    ?.liveChatMessageInputRenderer.sendButton.buttonRenderer.serviceEndpoint
+    ?.liveChatMessageInputRenderer?.sendButton.buttonRenderer.serviceEndpoint
     ?.sendLiveChatMessageEndpoint.params;
 }
 

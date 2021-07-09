@@ -8,7 +8,7 @@ const enabled = id && credentialsB64;
 const itif = enabled ? it : it.skip;
 
 const record = setupRecorder({
-  mode: (process.env.NOCK_BACK_MODE as any) || "record",
+  mode: (process.env.NOCK_BACK_MODE as any) || "wild",
 });
 
 itif("send message", async () => {

@@ -3,8 +3,8 @@
     /* https://www.typescriptlang.org/docs/handbook/project-references.html */
 
     "target": "es2019",
-    "module": "esnext",
-    "moduleResolution": "Node",
+    "module": "es2020",
+    "moduleResolution": "node",
     "declaration": true /* Generates corresponding '.d.ts' file. */,
     "outDir": "../lib/esm" /* Redirect output structure to the directory. */,
     "sourceMap": true,

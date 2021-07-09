@@ -11,9 +11,9 @@
     "dev": "tsc -p src/tsconfig.cjs.json -w",
     "docs": "typedoc --out ../../docs --excludeExternals --excludePrivate --exclude '**/__tests__/*' src && shx touch ../../docs/.nojekyll",
     "prepublishOnly": "npm run clean && npm run build",
-    "test": "yarn build:cjs && DEBUG=masterchat jest"
+    "test": "yarn build && DEBUG=masterchat jest"
   },
-  "types": "./lib/cjs/index.d.ts",
+  "types": "./lib/esm/index.d.ts",
   "main": "./lib/cjs/index.js",
   "exports": {
     "import": "./lib/esm/index.js",
