@@ -9,6 +9,7 @@
     "dev": "lerna run dev --parallel",
     "docs": "lerna run --scope masterchat docs",
     "prepare": "husky install",
+    "release": "lerna publish",
     "test": "lerna run test"
   },
   "devDependencies": {

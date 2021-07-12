@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>CommandOpenPopupAction | masterchat</title>
+    <title>Context | masterchat</title>
     <meta name="description" content="Documentation for masterchat" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="../assets/css/main.css" />
@@ -71,15 +71,13 @@
               <a href="../modules.html">masterchat</a>
             </li>
             <li>
-              <a href="../modules/types_context.html">types/context</a>
+              <a href="../modules/context.html">context</a>
             </li>
             <li>
-              <a href="types_context.CommandOpenPopupAction.html"
-                >CommandOpenPopupAction</a
-              >
+              <a href="context.Context.html">Context</a>
             </li>
           </ul>
-          <h1>Interface CommandOpenPopupAction</h1>
+          <h1>Interface Context</h1>
         </div>
       </div>
     </header>
@@ -90,7 +88,7 @@
             <h3>Hierarchy</h3>
             <ul class="tsd-hierarchy">
               <li>
-                <span class="target">CommandOpenPopupAction</span>
+                <span class="target">Context</span>
               </li>
             </ul>
           </section>
@@ -103,23 +101,21 @@
                   <ul class="tsd-index-list">
                     <li class="tsd-kind-property tsd-parent-kind-interface">
                       <a
-                        href="types_context.CommandOpenPopupAction.html#beReused"
+                        href="context.Context.html#apiKey"
                         class="tsd-kind-icon"
-                        >be<wbr />Reused</a
+                        >api<wbr />Key</a
+                      >
+                    </li>
+                    <li class="tsd-kind-property tsd-parent-kind-interface">
+                      <a href="context.Context.html#chat" class="tsd-kind-icon"
+                        >chat</a
                       >
                     </li>
                     <li class="tsd-kind-property tsd-parent-kind-interface">
                       <a
-                        href="types_context.CommandOpenPopupAction.html#popup"
+                        href="context.Context.html#metadata"
                         class="tsd-kind-icon"
-                        >popup</a
-                      >
-                    </li>
-                    <li class="tsd-kind-property tsd-parent-kind-interface">
-                      <a
-                        href="types_context.CommandOpenPopupAction.html#popupType"
-                        class="tsd-kind-icon"
-                        >popup<wbr />Type</a
+                        >metadata</a
                       >
                     </li>
                   </ul>
@@ -134,61 +130,10 @@
                 tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface
               "
             >
-              <a name="beReused" class="tsd-anchor"></a>
-              <h3>be<wbr />Reused</h3>
+              <a name="apiKey" class="tsd-anchor"></a>
+              <h3>api<wbr />Key</h3>
               <div class="tsd-signature tsd-kind-icon">
-                be<wbr />Reused<span class="tsd-signature-symbol">:</span>
-                <span class="tsd-signature-type">boolean</span>
-              </div>
-              <aside class="tsd-sources">
-                <ul>
-                  <li>
-                    Defined in
-                    <a
-                      href="https://github.com/holodata/masterchat/blob/0eb8640/packages/core/src/types/context.ts#L564"
-                      >types/context.ts:564</a
-                    >
-                  </li>
-                </ul>
-              </aside>
-            </section>
-            <section
-              class="
-                tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface
-              "
-            >
-              <a name="popup" class="tsd-anchor"></a>
-              <h3>popup</h3>
-              <div class="tsd-signature tsd-kind-icon">
-                popup<span class="tsd-signature-symbol">:</span>
-                <a
-                  href="types_context.FluffyPopup.html"
-                  class="tsd-signature-type"
-                  data-tsd-kind="Interface"
-                  >FluffyPopup</a
-                >
-              </div>
-              <aside class="tsd-sources">
-                <ul>
-                  <li>
-                    Defined in
-                    <a
-                      href="https://github.com/holodata/masterchat/blob/0eb8640/packages/core/src/types/context.ts#L562"
-                      >types/context.ts:562</a
-                    >
-                  </li>
-                </ul>
-              </aside>
-            </section>
-            <section
-              class="
-                tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface
-              "
-            >
-              <a name="popupType" class="tsd-anchor"></a>
-              <h3>popup<wbr />Type</h3>
-              <div class="tsd-signature tsd-kind-icon">
-                popup<wbr />Type<span class="tsd-signature-symbol">:</span>
+                api<wbr />Key<span class="tsd-signature-symbol">:</span>
                 <span class="tsd-signature-type">string</span>
               </div>
               <aside class="tsd-sources">
@@ -196,8 +141,104 @@
                   <li>
                     Defined in
                     <a
-                      href="https://github.com/holodata/masterchat/blob/0eb8640/packages/core/src/types/context.ts#L563"
-                      >types/context.ts:563</a
+                      href="https://github.com/holodata/masterchat/blob/0eb8640/packages/core/src/context.ts#L9"
+                      >context.ts:9</a
+                    >
+                  </li>
+                </ul>
+              </aside>
+            </section>
+            <section
+              class="
+                tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface
+              "
+            >
+              <a name="chat" class="tsd-anchor"></a>
+              <h3>
+                <span class="tsd-flag ts-flagOptional">Optional</span> chat
+              </h3>
+              <div class="tsd-signature tsd-kind-icon">
+                chat<span class="tsd-signature-symbol">:</span>
+                <span class="tsd-signature-symbol">{ </span>continuations<span
+                  class="tsd-signature-symbol"
+                  >: </span
+                ><a
+                  href="../modules/chat.html#ReloadContinuationItems"
+                  class="tsd-signature-type"
+                  data-tsd-kind="Type alias"
+                  >ReloadContinuationItems</a
+                ><span class="tsd-signature-symbol">; </span>params<span
+                  class="tsd-signature-symbol"
+                  >: </span
+                ><a
+                  href="context.LiveChatParams.html"
+                  class="tsd-signature-type"
+                  data-tsd-kind="Interface"
+                  >LiveChatParams</a
+                ><span class="tsd-signature-symbol"> }</span>
+              </div>
+              <aside class="tsd-sources">
+                <ul>
+                  <li>
+                    Defined in
+                    <a
+                      href="https://github.com/holodata/masterchat/blob/0eb8640/packages/core/src/context.ts#L11"
+                      >context.ts:11</a
+                    >
+                  </li>
+                </ul>
+              </aside>
+              <div class="tsd-type-declaration">
+                <h4>Type declaration</h4>
+                <ul class="tsd-parameters">
+                  <li class="tsd-parameter">
+                    <h5>
+                      continuations<span class="tsd-signature-symbol">: </span
+                      ><a
+                        href="../modules/chat.html#ReloadContinuationItems"
+                        class="tsd-signature-type"
+                        data-tsd-kind="Type alias"
+                        >ReloadContinuationItems</a
+                      >
+                    </h5>
+                  </li>
+                  <li class="tsd-parameter">
+                    <h5>
+                      params<span class="tsd-signature-symbol">: </span
+                      ><a
+                        href="context.LiveChatParams.html"
+                        class="tsd-signature-type"
+                        data-tsd-kind="Interface"
+                        >LiveChatParams</a
+                      >
+                    </h5>
+                  </li>
+                </ul>
+              </div>
+            </section>
+            <section
+              class="
+                tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface
+              "
+            >
+              <a name="metadata" class="tsd-anchor"></a>
+              <h3>metadata</h3>
+              <div class="tsd-signature tsd-kind-icon">
+                metadata<span class="tsd-signature-symbol">:</span>
+                <a
+                  href="context.Metadata.html"
+                  class="tsd-signature-type"
+                  data-tsd-kind="Interface"
+                  >Metadata</a
+                >
+              </div>
+              <aside class="tsd-sources">
+                <ul>
+                  <li>
+                    Defined in
+                    <a
+                      href="https://github.com/holodata/masterchat/blob/0eb8640/packages/core/src/context.ts#L10"
+                      >context.ts:10</a
                     >
                   </li>
                 </ul>
@@ -217,7 +258,7 @@
               <li class="tsd-kind-module">
                 <a href="../modules/chat.html">chat</a>
               </li>
-              <li class="tsd-kind-module">
+              <li class="current tsd-kind-module">
                 <a href="../modules/context.html">context</a>
               </li>
               <li class="tsd-kind-module">
@@ -229,7 +270,7 @@
               <li class="tsd-kind-module">
                 <a href="../modules/types_chat.html">types/chat</a>
               </li>
-              <li class="current tsd-kind-module">
+              <li class="tsd-kind-module">
                 <a href="../modules/types_context.html">types/context</a>
               </li>
               <li class="tsd-kind-module">
@@ -238,40 +279,63 @@
             </ul>
           </nav>
           <nav class="tsd-navigation secondary menu-sticky">
-            <ul class="before-current"></ul>
+            <ul class="before-current">
+              <li class="tsd-kind-interface tsd-parent-kind-module">
+                <a href="context.ClientInfo.html" class="tsd-kind-icon"
+                  >Client<wbr />Info</a
+                >
+              </li>
+            </ul>
             <ul class="current">
               <li class="current tsd-kind-interface tsd-parent-kind-module">
-                <a
-                  href="types_context.CommandOpenPopupAction.html"
-                  class="tsd-kind-icon"
-                  >Command<wbr />Open<wbr />Popup<wbr />Action</a
-                >
+                <a href="context.Context.html" class="tsd-kind-icon">Context</a>
                 <ul>
                   <li class="tsd-kind-property tsd-parent-kind-interface">
-                    <a
-                      href="types_context.CommandOpenPopupAction.html#beReused"
-                      class="tsd-kind-icon"
-                      >be<wbr />Reused</a
+                    <a href="context.Context.html#apiKey" class="tsd-kind-icon"
+                      >api<wbr />Key</a
+                    >
+                  </li>
+                  <li class="tsd-kind-property tsd-parent-kind-interface">
+                    <a href="context.Context.html#chat" class="tsd-kind-icon"
+                      >chat</a
                     >
                   </li>
                   <li class="tsd-kind-property tsd-parent-kind-interface">
                     <a
-                      href="types_context.CommandOpenPopupAction.html#popup"
+                      href="context.Context.html#metadata"
                       class="tsd-kind-icon"
-                      >popup</a
-                    >
-                  </li>
-                  <li class="tsd-kind-property tsd-parent-kind-interface">
-                    <a
-                      href="types_context.CommandOpenPopupAction.html#popupType"
-                      class="tsd-kind-icon"
-                      >popup<wbr />Type</a
+                      >metadata</a
                     >
                   </li>
                 </ul>
               </li>
             </ul>
-            <ul class="after-current"></ul>
+            <ul class="after-current">
+              <li class="tsd-kind-interface tsd-parent-kind-module">
+                <a href="context.LiveChatParams.html" class="tsd-kind-icon"
+                  >Live<wbr />Chat<wbr />Params</a
+                >
+              </li>
+              <li class="tsd-kind-interface tsd-parent-kind-module">
+                <a href="context.Metadata.html" class="tsd-kind-icon"
+                  >Metadata</a
+                >
+              </li>
+              <li class="tsd-kind-type-alias tsd-parent-kind-module">
+                <a
+                  href="../modules/context.html#ContinuationData"
+                  class="tsd-kind-icon"
+                  >Continuation<wbr />Data</a
+                >
+              </li>
+              <li class="tsd-kind-function tsd-parent-kind-module">
+                <a
+                  href="../modules/context.html#fetchContext"
+                  class="tsd-kind-icon"
+                  >fetch<wbr />Context</a
+                >
+              </li>
+            </ul>
           </nav>
         </div>
       </div>
