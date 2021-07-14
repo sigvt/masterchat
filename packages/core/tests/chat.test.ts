@@ -7,9 +7,9 @@ const record = setupRecorder({
 });
 
 async function fetchUpcomingStreams() {
-  const data = await fetch(
-    "https://holodex.net/api/v2/live?status=upcoming"
-  ).then((res) => res.json());
+  const data = await fetch("https://holodex.net/api/v2/live?status=live").then(
+    (res) => res.json()
+  );
   return data;
 }
 
@@ -24,7 +24,8 @@ describe("wildlife test", () => {
       "wildlife"
     );
     const index = await fetchUpcomingStreams();
-    subject = index[0];
+    subject = index[Math.round(index.length / 2)];
+    console.log(subject);
     ctx = await fetchContext(subject.id);
     completeRecording();
     assertScopesFinished();

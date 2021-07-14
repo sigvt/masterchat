@@ -130,10 +130,11 @@ async function fetchLiveChatParams(
   const res = await fetch(url, { headers }).then((res) => res.text());
   const initialData = findInitialData(res);
   if (!initialData) {
-    // TODO: could this actually happen?
-    log("!liveChatInitialData: " + url, initialData);
-    return undefined;
+    // happens when accessing to replay chat
+    log("!liveChatInitialData: replay");
+    return { sendMessageParams: undefined };
   }
+
   const sendMessageParams = findSendMessageParams(initialData);
   return {
     sendMessageParams,
