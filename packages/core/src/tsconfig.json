@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    /* https://www.typescriptlang.org/docs/handbook/project-references.html */
+
+    "target": "es2019",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "declaration": true /* Generates corresponding '.d.ts' file. */,
+    "outDir": "../lib" /* Redirect output structure to the directory. */,
+    "sourceMap": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true /* Skip type checking of declaration files. */,
+    "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */
+  }
+}
