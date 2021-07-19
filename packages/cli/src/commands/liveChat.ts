@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import { logAndExit } from "epicfail";
-import fs from "fs";
+import fs from "node:fs";
 import {
   Action,
   convertRunsToString,

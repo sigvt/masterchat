@@ -25,7 +25,7 @@
   },
   "devDependencies": {
     "@types/jest": "^26.0.24",
-    "@types/node": "^16.3.1",
+    "@types/node": "^16.3.3",
     "execa": "^5.1.1",
     "jest": "^27.0.6",
     "shx": "^0.3.3",
