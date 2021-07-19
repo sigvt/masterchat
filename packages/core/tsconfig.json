@@ -3,7 +3,7 @@
   "composite": true,
   "references": [
     {
-      "path": "./src/tsconfig.esm.json"
+      "path": "./src/tsconfig.json"
     },
     {
       "path": "./tests"

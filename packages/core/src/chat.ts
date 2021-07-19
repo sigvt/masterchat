@@ -1,4 +1,4 @@
-import fetch, { FetchError } from "node-fetch";
+import fetch from "cross-fetch";
 import { DEFAULT_CLIENT } from "./auth";
 import {
   YTAction,
@@ -790,7 +790,8 @@ export async function fetchChat({
           case YTChatErrorStatus.Unavailable:
           case YTChatErrorStatus.Internal: {
             // it's temporary so should retry
-            const err = new FetchError(message, "system");
+            const err = new Error(message);
+            (err as any).type = "system";
             throw err;
           }
           default:

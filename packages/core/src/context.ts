@@ -1,4 +1,4 @@
-import fetch from "node-fetch";
+import fetch from "cross-fetch";
 import { Credentials, withAuthHeader } from "./auth";
 import { ReloadContinuationItems } from "./chat";
 import { YTChatResponse, YTTimedContinuationData } from "./types/chat";

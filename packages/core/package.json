@@ -6,6 +6,7 @@
   "scripts": {
     "build": "run-p build:*",
     "build:cjs": "tsc -b src/tsconfig.json",
+    "build:esm": "tsc -b src/tsconfig.esm.json",
     "clean": "shx rm -rf lib",
     "dev": "tsc -p src/tsconfig.json -w",
     "docs": "typedoc --out ../../docs --excludeExternals --excludePrivate --exclude '**/__tests__/*' src && shx touch ../../docs/.nojekyll",
@@ -14,12 +15,13 @@
   },
   "types": "./lib/index.d.ts",
   "main": "./lib/index.js",
+  "module": "./lib/esm/index.js",
   "files": [
     "lib"
   ],
   "dependencies": {
-    "debug": "^4.3.2",
-    "node-fetch": "^2.6.1"
+    "cross-fetch": "^3.1.4",
+    "debug": "^4.3.2"
   },
   "devDependencies": {
     "@types/debug": "^4.1.6",

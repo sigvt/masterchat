@@ -1,5 +1,5 @@
 import { setupRecorder } from "nock-record";
-import fetch from "node-fetch";
+import fetch from "cross-fetch";
 import { Context, fetchChat, fetchContext, timeoutThen } from "..";
 
 const record = setupRecorder({

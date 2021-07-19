@@ -1,4 +1,4 @@
-import fetch from "node-fetch";
+import fetch from "cross-fetch";
 import { Credentials, DEFAULT_CLIENT, withAuthHeader } from "./auth";
 import { LiveChatParams } from "./context";
 
