@@ -58,7 +58,9 @@ it("archived stream with no chat replay", async () => {
   if (!ctx) throw new Error("Invalid ctx");
 
   expect(ctx.apiKey).toBe("AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8");
-  expect(ctx.chat).toBeUndefined();
+  expect(ctx.chat?.continuations.all.token).toBe(
+    "op2w0wRgGlhDaWtxSndvWVZVTndMVFYwT1ZOeVQxRjNXRTFWTjJsSmFsRm1RVkpuRWd0blFXeFJkM1JNYm5CQ1FSb1Q2cWpkdVFFTkNndG5RV3hSZDNSTWJuQkNRU0FCQAFyAggB"
+  );
   expect(ctx.metadata.isLive).toBe(false);
   expect(ctx.metadata.id).toBe("gAlQwtLnpBA");
   expect(ctx.metadata.title).toBe(
