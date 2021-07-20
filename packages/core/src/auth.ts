@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import sha1 from "sha1";
 
 export interface Credentials {
   SAPISID: string;
@@ -41,19 +41,18 @@ function genCookieString(creds: Credentials) {
     .join(" ");
 }
 
-function genAuthToken(sid: string, origin: string) {
+function genAuthToken(sid: string, origin: string): string {
   return `SAPISIDHASH ${genSapisidHash(sid, origin)}`;
 }
 
-function genSapisidHash(sid: string, origin: string) {
+function genSapisidHash(sid: string, origin: string): string {
   const now = Math.floor(new Date().getTime() / 1e3);
   const payload = [now, sid, origin];
   const digest = sha1Digest(payload.join(" "));
   return [now, digest].join("_");
 }
 
-function sha1Digest(payload: string) {
-  const hash = crypto.createHash("sha1");
-  hash.update(payload);
-  return hash.copy().digest("hex");
+function sha1Digest(payload: string): string {
+  const hash = sha1(payload);
+  return hash;
 }
