@@ -23,7 +23,7 @@ itif("send message", async () => {
   const res = await sendMessage(msg, {
     apiKey,
     credentials,
-    params: chat?.params!,
+    params: chat?.data.sendMessageParams!,
   });
   completeRecording();
 

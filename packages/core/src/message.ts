@@ -1,11 +1,10 @@
 import fetch from "cross-fetch";
 import { Credentials, DEFAULT_CLIENT, withAuthHeader } from "./auth";
-import { LiveChatParams } from "./context";
 
 export interface SendMessageOptions {
   apiKey: string;
   credentials: Credentials;
-  params: LiveChatParams;
+  params: string;
 }
 export async function sendMessage(
   message: string,
@@ -22,7 +21,7 @@ export async function sendMessage(
     context: {
       client: DEFAULT_CLIENT,
     },
-    params: params.sendMessageParams,
+    params,
   };
 
   const headers = withAuthHeader(credentials, {

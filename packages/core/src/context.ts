@@ -8,13 +8,15 @@ import { convertRunsToString, log, normalizeVideoId } from "./util";
 export interface Context {
   apiKey: string;
   metadata: Metadata;
-  chat?: {
-    continuations: ReloadContinuationItems;
-    params: LiveChatParams;
-  };
+  chat?: LiveChatContext;
 }
 
-export interface LiveChatParams {
+export interface LiveChatContext {
+  continuations: ReloadContinuationItems;
+  data: LiveChatData;
+}
+
+export interface LiveChatData {
   sendMessageParams: string | undefined;
 }
 
@@ -25,7 +27,7 @@ export interface ClientInfo {
 
 export interface Metadata {
   id: string;
-  title: string | undefined;
+  title: string;
   channelId: string;
   channelName: string;
   isLive: boolean;
@@ -121,17 +123,22 @@ function findMetadata(initialData: YTInitialData): Metadata | undefined {
   };
 }
 
-async function fetchLiveChatParams(
+export async function fetchLiveChatData(
   continuation: string,
-  { credentials }: { credentials?: Credentials } = {}
-): Promise<LiveChatParams | undefined> {
-  const url = "https://www.youtube.com/live_chat?continuation=" + continuation;
+  {
+    credentials,
+    isReplay = false,
+  }: { credentials?: Credentials; isReplay?: boolean } = {}
+): Promise<LiveChatData | undefined> {
+  const endpoint = isReplay ? "live_chat_replay" : "live_chat";
+  const url =
+    `https://www.youtube.com/${endpoint}?continuation=` + continuation;
   const headers = withAuthHeader(credentials);
   const res = await fetch(url, { headers }).then((res) => res.text());
   const initialData = findInitialData(res);
   if (!initialData) {
     // happens when accessing to replay chat
-    log("!liveChatInitialData: replay");
+    log("!liveChatInitialData", initialData, url);
     return { sendMessageParams: undefined };
   }
 
@@ -187,14 +194,14 @@ export async function fetchContext(
   }
 
   if (continuations) {
-    const params = await fetchLiveChatParams(continuations.top.token, {
+    const liveChatContext = await fetchLiveChatData(continuations.top.token, {
       credentials,
     });
 
-    if (params) {
+    if (liveChatContext) {
       context.chat = {
         continuations,
-        params,
+        data: liveChatContext,
       };
     }
   }
