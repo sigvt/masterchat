@@ -1,24 +1,15 @@
 {
   "folders": [
     {
-      "name": "✨ masterchat",
+      "name": "📦 masterchat",
       "path": "."
     },
     {
-      "name": "📦 masterchat",
-      "path": "packages/core"
-    },
-    {
       "name": "📦 masterchat-cli",
-      "path": "packages/cli"
+      "path": "../masterchat-cli"
     }
   ],
   "settings": {
-    "cSpell.words": [
-      "HSID",
-      "SAPISID",
-      "SAPISIDHASH",
-      "SSID"
-    ]
+    "cSpell.words": ["HSID", "SAPISID", "SAPISIDHASH", "SSID"]
   }
 }

@@ -3,25 +3,24 @@
 ## Setup
 
 ```bash
-yarn install
-yarn bootstrap
-yarn build
+npm install
+npm run build
 ```
 
 ## Development Flow
 
 ```bash
-yarn dev
+npm run dev
 ```
 
 ```bash
-DEBUG=masterchat ./packages/cli/lib/cli.js -c -t all <videoId>
+DEBUG=masterchat ./lib/cli.js -c -t all <videoId>
 ```
 
 ## Release Flow (Maintainers only)
 
 ```
-yarn lerna publish
+np
 ```
 
 ## References
