@@ -1,7 +1,8 @@
 import debug from "debug";
+import { DEFAULT_CLIENT } from "./constants";
 import { YTEmoji, YTRun } from "./types/chat";
 
-export const log = debug("masterchat");
+export const debugLog = debug("masterchat");
 
 export function guessFreeChat(title: string) {
   return /(?:[fF]ree\s?[cC]hat|(?:ふりー|フリー)(?:ちゃっと|チャット))/.test(
@@ -19,33 +20,26 @@ export function convertRunsToString(
     emojiHandler = undefined,
   }: { emojiHandler?: (emoji: YTEmoji) => string } = {}
 ): string {
-  try {
-    return runs
-      .map((run) => {
-        if ("text" in run) {
-          return run.text;
+  return runs
+    .map((run) => {
+      if ("text" in run) {
+        return run.text;
+      }
+
+      if ("emoji" in run) {
+        if (emojiHandler) {
+          return emojiHandler(run.emoji);
         }
 
-        if ("emoji" in run) {
-          if (emojiHandler) {
-            return emojiHandler(run.emoji);
-          }
+        const isCustomEmoji = run.emoji.isCustomEmoji;
+        const term = isCustomEmoji
+          ? ":" + run.emoji.searchTerms[run.emoji.searchTerms.length - 1] + ":"
+          : run.emoji.emojiId;
 
-          const isCustomEmoji = run.emoji.isCustomEmoji;
-          const term = isCustomEmoji
-            ? ":" +
-              run.emoji.searchTerms[run.emoji.searchTerms.length - 1] +
-              ":"
-            : run.emoji.emojiId;
-
-          return term;
-        }
-      })
-      .join("");
-  } catch (err) {
-    console.log(err, runs);
-    throw new Error("failed to render runs into string");
-  }
+        return term;
+      }
+    })
+    .join("");
 }
 
 export function timeoutThen(duration: number): Promise<number> {
@@ -62,6 +56,16 @@ export function groupBy<T, K extends keyof T, S extends Extract<T[K], string>>(
     result[index].push(o as any);
     return result;
   }, {} as { [k in S]: (T extends { [s in K]: k } ? T : never)[] });
+}
+
+export function withContext(input: any = {}) {
+  return {
+    ...input,
+    context: {
+      ...input?.context,
+      client: DEFAULT_CLIENT,
+    },
+  };
 }
 
 /*

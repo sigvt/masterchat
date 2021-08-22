@@ -1,6 +1,6 @@
 import { setupRecorder } from "nock-record";
 import fetch from "cross-fetch";
-import { Context, fetchChat, fetchContext, timeoutThen } from "..";
+import { Masterchat, timeoutThen } from "..";
 
 const record = setupRecorder({
   mode: (process.env.NOCK_BACK_MODE as any) || "record",
@@ -17,7 +17,7 @@ describe("wildlife test", () => {
   jest.setTimeout(60000);
 
   let subject: any;
-  let ctx: Context | undefined;
+  let mc: Masterchat;
 
   beforeAll(async () => {
     const { completeRecording, assertScopesFinished } = await record(
@@ -25,26 +25,24 @@ describe("wildlife test", () => {
     );
     const index = await fetchUpcomingStreams();
     subject = index[Math.round(index.length / 2)];
-    console.log(subject);
-    ctx = await fetchContext(subject.id);
+    // console.log(subject);
+    mc = await Masterchat.init(subject.id);
     completeRecording();
     assertScopesFinished();
   });
 
   it("context match", async () => {
-    expect(ctx?.metadata?.id).toBe(subject.id);
-    expect(ctx?.metadata?.title).toBe(subject.title);
-    expect(ctx?.metadata?.channelId).toBe(subject.channel.id);
-    expect(ctx?.metadata?.channelName).toBe(subject.channel.name);
+    expect(mc.metadata.id).toBe(subject.id);
+    expect(mc.metadata.title).toBe(subject.title);
+    expect(mc.metadata.channelId).toBe(subject.channel.id);
+    expect(mc.metadata.channelName).toBe(subject.channel.name);
   });
 
   it("can fetch live chat", async () => {
     const { completeRecording } = await record("wildlife2");
 
-    const chat = await fetchChat({
-      continuation: ctx?.chat?.continuations.all.token!,
-      apiKey: ctx?.apiKey!,
-      isReplayChat: false,
+    const chat = await mc.fetchChat({
+      continuation: mc.continuation.all.token,
     });
 
     if (chat.error) {
@@ -57,6 +55,34 @@ describe("wildlife test", () => {
         expect.objectContaining({ type: "addChatItemAction" }),
       ])
     );
+    const chats = chat.actions.filter(
+      (action) => action.type === "addChatItemAction"
+    );
+    expect(chats[0]).toEqual(
+      expect.objectContaining({
+        authorName: expect.any(String),
+        authorChannelId: expect.any(String),
+        authorPhoto: expect.stringMatching(/^https:\/\/yt\d\.ggpht/),
+        contextMenuEndpointParams: expect.any(String),
+        id: expect.any(String),
+        isModerator: expect.any(Boolean),
+        isVerified: expect.any(Boolean),
+        isOwner: expect.any(Boolean),
+        membership: {
+          since: expect.stringMatching(/^(2 months)$/),
+          status: expect.stringMatching(/^(Member)$/),
+          thumbnail: expect.stringMatching(/^https:\/\/yt\d\.ggpht/),
+        },
+        timestamp: expect.any(Date),
+        timestampUsec: expect.stringMatching(/^\d+$/),
+        type: "addChatItemAction",
+        rawMessage: expect.arrayContaining([
+          {
+            text: expect.any(String),
+          },
+        ]),
+      })
+    );
 
     const token = chat?.continuation?.token;
     const timeoutMs = chat?.continuation?.timeoutMs;
@@ -64,13 +90,11 @@ describe("wildlife test", () => {
       throw new Error("timeoutMs or token not found");
     }
 
-    console.log("waiting for", timeoutMs);
+    // console.log("waiting for", timeoutMs);
     await timeoutThen(timeoutMs);
 
-    const consecutiveChat = await fetchChat({
+    const consecutiveChat = await mc.fetchChat({
       continuation: token,
-      apiKey: ctx?.apiKey!,
-      isReplayChat: false,
     });
     completeRecording();
     if (consecutiveChat.error) {
@@ -80,5 +104,18 @@ describe("wildlife test", () => {
     expect(consecutiveChat.error).toBeNull();
     expect(consecutiveChat?.continuation?.token).toEqual(expect.any(String));
     expect(consecutiveChat).toHaveProperty("actions");
+    const chats2 = consecutiveChat.actions.filter(
+      (action) => action.type === "addChatItemAction"
+    );
+    expect(chats2[0]).toEqual(
+      expect.objectContaining({
+        authorName: expect.any(String),
+        rawMessage: expect.arrayContaining([
+          {
+            text: expect.any(String),
+          },
+        ]),
+      })
+    );
   });
 });

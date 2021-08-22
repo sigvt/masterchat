@@ -1,4 +1,5 @@
 import sha1 from "sha1";
+import { DEFAULT_ORIGIN } from "./constants";
 
 export interface Credentials {
   SAPISID: string;
@@ -8,28 +9,11 @@ export interface Credentials {
   SSID: string;
 }
 
-export const DEFAULT_CLIENT = {
-  clientName: "WEB",
-  clientVersion: "2.20210618.05.00-canary_control",
-};
-
-const DEFAULT_ORIGIN = "https://www.youtube.com";
-
-export function withAuthHeader(
-  creds: Credentials | undefined,
-  headers: any = {}
-) {
-  const defaultHeaders = {
-    ...headers,
-    "User-Agent":
-      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36",
-  };
-
-  if (!creds) return defaultHeaders;
+export function buildAuthHeaders(creds: Credentials | undefined) {
+  if (!creds) return undefined;
 
   return {
-    ...defaultHeaders,
-    Cookie: genCookieString(creds) + (headers.Cookie ?? ""),
+    Cookie: genCookieString(creds),
     Authorization: genAuthToken(creds.SAPISID, DEFAULT_ORIGIN),
     "X-Origin": DEFAULT_ORIGIN,
   };

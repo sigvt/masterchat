@@ -37,7 +37,7 @@ export interface YTEmoji {
 
 export interface YTUrlEndpointContainer {
   urlEndpoint: YTUrlEndpoint;
-  commandMetadata: YTWebCommandMetadataContainer;
+  commandMetadata: YTWebPageMetadataContainer;
   clickTrackingParams: string;
 }
 
@@ -50,6 +50,8 @@ export interface YTUrlEndpoint {
 export enum YTTarget {
   NewWindow = "TARGET_NEW_WINDOW",
 }
+
+// Errors
 
 export interface YTChatError {
   code: number;
@@ -66,18 +68,36 @@ export enum YTChatErrorStatus {
   NotFound = "NOT_FOUND",
 }
 
-export interface YTChatResponse {
-  responseContext: YTResponseContext;
-  trackingParams: string;
-  continuationContents?: YTContinuationContents;
-  error?: YTChatError;
-}
-
 export interface YTChatErrorDetail {
   message: string;
   domain: "global";
   reason: "forbidden" | "backendError" | "badRequest" | "notFound";
 }
+
+// Responses
+
+export interface YTChatResponse {
+  responseContext: YTResponseContext;
+  continuationContents?: YTContinuationContents;
+  error?: YTChatError;
+  trackingParams: string;
+}
+
+export interface YTGetItemContextMenuResponse {
+  responseContext: YTResponseContext;
+  liveChatItemContextMenuSupportedRenderers?: YTLiveChatItemContextMenuSupportedRenderers;
+  error?: YTChatError;
+}
+
+// TODO: complete it
+// moderate, pin, manage_user
+export interface YTActionResponse {
+  responseContext: YTResponseContext;
+  actions: YTAction[];
+  success: boolean;
+}
+
+// Interfaces
 
 export interface YTContinuationContents {
   liveChatContinuation: YTLiveChatContinuation;
@@ -104,6 +124,77 @@ export interface YTTimedContinuationData {
   timeoutMs: number;
   continuation: string;
   clickTrackingParams: string;
+}
+
+// Menu
+
+export interface YTLiveChatItemContextMenuSupportedRenderers {
+  menuRenderer: YTMenuRenderer;
+}
+
+export interface YTMenuRenderer {
+  items: YTMenuRendererItem[];
+  trackingParams: string;
+  openImmediately: boolean;
+}
+
+export interface YTMenuRendererItem {
+  menuServiceItemRenderer?: YTMenuServiceItemRenderer;
+  menuNavigationItemRenderer?: YTMenuNavigationItemRenderer;
+}
+
+export interface YTMenuServiceItemRenderer {
+  text: YTRunContainer<YTTextRun>;
+  icon: YTIcon;
+  trackingParams: string;
+  isDisabled?: boolean;
+  serviceEndpoint: YTLiveChatServiceEndpointContainer;
+}
+
+export interface YTMenuNavigationItemRenderer {
+  text: YTRunContainer<YTTextRun>;
+  icon: YTIcon;
+  navigationEndpoint: YTLiveChatNavigationEndpointContainer;
+}
+
+export interface YTOverflowMenu {
+  menuRenderer: YTMenuRenderer;
+}
+
+export interface YTCommandContainer<T> {
+  clickTrackingParams: string;
+  commandMetadata: T;
+}
+
+export type YTLiveChatServiceEndpointContainer =
+  YTCommandContainer<YTApiEndpointMetadataContainer> & {
+    liveChatActionEndpoint?: YTEndpointParamsContainer;
+    moderateLiveChatEndpoint?: YTEndpointParamsContainer;
+    getReportFormEndpoint?: YTEndpointParamsContainer;
+  };
+
+export interface YTLiveChatNavigationEndpointContainer
+  extends YTCommandContainer<YTIgnoreCommandMetadata> {
+  clickTrackingParams: string;
+  showLiveChatParticipantsEndpoint?: YTSEndpoint;
+  toggleLiveChatTimestampsEndpoint?: YTSEndpoint;
+  popoutLiveChatEndpoint?: YTPopoutLiveChatEndpoint;
+  feedbackEndpoint?: YTFeedbackEndpoint;
+  confirmDialogEndpoint?: YTConfirmDialogEndpoint;
+}
+
+export interface YTConfirmDialogEndpoint {
+  content: {
+    confirmDialogRenderer: YTConfirmDialogRenderer;
+  };
+}
+
+export interface YTConfirmDialogRenderer {
+  title: YTRunContainer;
+  trackingParams: string;
+  dialogMessages: YTRunContainer;
+  confirmButton: YTServiceButtonRendererContainer<YTLiveChatServiceEndpointContainer>;
+  cancelButton: YTButtonRenderer;
 }
 
 // Action and Commands
@@ -330,7 +421,8 @@ export interface YTLiveChatViewerEngagementMessageRenderer {
 }
 
 export interface YTTooltipRenderer {
-  promoConfig: YTPromoConfig;
+  // TODO: type promoConfig
+  promoConfig: any;
   targetId: string;
   detailsText: YTRunContainer;
   suggestedPosition: YTType;
@@ -455,15 +547,27 @@ export interface YTLiveChatTickerSponsorItemRenderer {
 
 // Misc
 
-export interface YTShowLiveChatItemEndpointContainer<T> {
-  clickTrackingParams: string;
-  commandMetadata: YTWebCommandMetadataContainer;
+export type YTShowLiveChatItemEndpointContainer<T> = {
   showLiveChatItemEndpoint: YTRendererContainer<T>;
-}
+} & YTCommandContainer<YTWebPageMetadataContainer>;
 
 export interface YTRendererContainer<T> {
   renderer: T;
   trackingParams: string;
+}
+
+export type YTLiveChatItemContextMenuEndpointContainer =
+  YTCommandContainer<YTIgnoreCommandMetadata> & {
+    liveChatItemContextMenuEndpoint: YTEndpointParamsContainer;
+  };
+
+export type YTUserFeedbackEndpointContainer =
+  YTCommandContainer<YTIgnoreCommandMetadata> & {
+    userFeedbackEndpoint: YTUserFeedbackEndpoint;
+  };
+
+export interface YTEndpointParamsContainer {
+  params: string;
 }
 
 export interface YTActionPanel {
@@ -509,9 +613,13 @@ export interface YTPopoutLiveChatEndpoint {
   url: string;
 }
 
+export interface YTSendLiveChatMessageEndpoint {
+  sendLiveChatMessageEndpoint: YTEndpointParamsContainer;
+}
+
 export interface YTSignInEndpointContainer {
   signInEndpoint: YTSignInEndpoint;
-  commandMetadata: YTWebCommandMetadataContainer;
+  commandMetadata: YTWebPageMetadataContainer;
   clickTrackingParams: string;
 }
 
@@ -536,14 +644,28 @@ export interface YTIgnoreWebCommandMetadata {
   ignoreNavigation: boolean;
 }
 
-export interface YTWebCommandMetadataContainer {
-  webCommandMetadata: YTWebCommandMetadata;
+export interface YTWebPageMetadataContainer {
+  webCommandMetadata: YTWebPageMetadata;
 }
 
-export interface YTWebCommandMetadata {
+export interface YTWebPageMetadata {
   url: string;
   webPageType: YTWebPageType | string;
   rootVe: number; // 83769
+}
+
+export interface YTApiEndpointMetadataContainer {
+  webCommandMetadata: YTApiEndpointMetadata;
+}
+
+export interface YTApiEndpointMetadata {
+  sendPost: boolean; // POST or GET
+  apiUrl: string; // endpoint url
+}
+
+export interface YTPopoutLiveChatEndpointContainer {
+  clickTrackingParams: string;
+  popoutLiveChatEndpoint: YTPopoutLiveChatEndpoint;
 }
 
 export enum YTWebPageType {
@@ -571,6 +693,7 @@ export enum YTIconType {
   SlowMode = "SLOW_MODE",
   MembersOnlyMode = "MEMBERS_ONLY_MODE",
   TabSubscriptions = "TAB_SUBSCRIPTIONS",
+  BlockUser = "BLOCK_USER",
 }
 
 export interface YTPicker {
@@ -625,20 +748,6 @@ export interface YTLiveChatBannerRendererHeader {
   };
 }
 
-export interface YTButtonRendererServiceEndpoint {
-  clickTrackingParams: string;
-  popoutLiveChatEndpoint: YTPopoutLiveChatEndpoint;
-}
-
-export interface YTAcceptCommandCommandMetadata {
-  webCommandMetadata: YTTentacledWebCommandMetadata;
-}
-
-export interface YTTentacledWebCommandMetadata {
-  sendPost: boolean;
-  apiUrl: string;
-}
-
 export interface YTContextMenuButtonRendererContainer<
   Command = YTLiveChatItemContextMenuEndpointContainer
 > {
@@ -651,13 +760,15 @@ export interface YTContextMenuButtonRendererContainer<
   };
 }
 
-export interface YTFluffyButton {
-  buttonRenderer: {
-    text: YTRunContainer;
-    style: string;
-    serviceEndpoint: YTButtonRendererServiceEndpoint;
-    trackingParams: string;
-  };
+export interface YTServiceButtonRendererContainer<T> {
+  buttonRenderer: YTServiceButtonRenderer<T>;
+}
+
+export interface YTServiceButtonRenderer<Endpoint> {
+  text: YTRunContainer;
+  style: string;
+  serviceEndpoint: Endpoint;
+  trackingParams: string;
 }
 
 export interface YTButtonRenderer {
@@ -668,16 +779,16 @@ export interface YTButtonRenderer {
   trackingParams: string;
 }
 
-export interface YTTextButtonRenderer<Endpoint> extends YTButtonRenderer {
-  text: YTSimpleText;
-  navigationEndpoint: Endpoint;
-}
-
 export interface YTIconButtonRenderer {
   icon: YTIcon;
   tooltip: string;
   categoryId?: string;
   accessibility: YTAccessibilityData;
+}
+
+export interface YTNavigationButtonRenderer<Endpoint> extends YTButtonRenderer {
+  text: YTSimpleText;
+  navigationEndpoint: Endpoint;
 }
 
 export interface YTIconToggleButtonRenderer {
@@ -694,20 +805,16 @@ export interface YTSendButton {
     icon: YTIcon;
     accessibility: YTAccessibilityLabel;
     trackingParams: string;
-    serviceEndpoint?: {
-      sendLiveChatMessageEndpoint: {
-        params: string;
-      };
-    };
-  };
+    serviceEndpoint?: YTSendLiveChatMessageEndpoint;
+  }; //YTServiceButtonRenderer
 }
 
 export interface YTSigninButtonRendererContainer {
-  buttonRenderer: YTTextButtonRenderer<YTSignInEndpointContainer>;
+  buttonRenderer: YTNavigationButtonRenderer<YTSignInEndpointContainer>;
 }
 
 export interface YTActionButtonRendererContainer {
-  buttonRenderer: YTTextButtonRenderer<YTUrlEndpointContainer> & {
+  buttonRenderer: YTNavigationButtonRenderer<YTUrlEndpointContainer> & {
     accessibilityData: YTAccessibilityData;
   };
 }
@@ -724,31 +831,6 @@ export interface YTCategoryButton {
   emojiPickerCategoryButtonRenderer: YTIconButtonRenderer;
 }
 
-export interface YTMenuNavigationItemRendererServiceEndpointContainer {
-  showLiveChatParticipantsEndpoint?: YTSEndpoint;
-  toggleLiveChatTimestampsEndpoint?: YTSEndpoint;
-  popoutLiveChatEndpoint?: YTPopoutLiveChatEndpoint;
-  clickTrackingParams: string;
-}
-
-export interface YTLiveChatItemContextMenuEndpointContainer {
-  liveChatItemContextMenuEndpoint: YTLiveChatItemContextMenuEndpoint;
-  commandMetadata: YTIgnoreCommandMetadata;
-  clickTrackingParams: string;
-}
-
-export interface YTFeedbackEndpointContainer {
-  commandMetadata: YTAcceptCommandCommandMetadata;
-  feedbackEndpoint: YTFeedbackEndpoint;
-  clickTrackingParams: string;
-}
-
-export interface YTUserFeedbackEndpointContainer {
-  userFeedbackEndpoint: YTUserFeedbackEndpoint;
-  commandMetadata: YTIgnoreCommandMetadata;
-  clickTrackingParams: string;
-}
-
 export interface YTUserFeedbackEndpoint {
   hack: boolean;
   bucketIdentifier: string;
@@ -756,10 +838,6 @@ export interface YTUserFeedbackEndpoint {
 
 export interface YTSEndpoint {
   hack: boolean;
-}
-
-export interface YTLiveChatItemContextMenuEndpoint {
-  params: string;
 }
 
 export interface YTFeedbackEndpoint {
@@ -780,13 +858,6 @@ export interface YTType {
   type: string;
 }
 
-export interface YTPromoConfig {
-  promoId: string;
-  impressionEndpoints: YTFeedbackEndpointContainer[];
-  acceptCommand: YTFeedbackEndpointContainer;
-  dismissCommand: YTFeedbackEndpointContainer;
-}
-
 export interface UIActions {
   hideEnclosingContainer: boolean;
 }
@@ -805,27 +876,6 @@ export interface YTLiveChatContinuationHeader {
     collapseButton: CollapseButton;
     viewSelector: YTViewSelector;
   };
-}
-
-export interface YTOverflowMenu {
-  menuRenderer: {
-    items: YTMenuItemElement[];
-    trackingParams: string;
-    accessibility: YTAccessibilityData;
-  };
-}
-
-export interface YTMenuItemElement {
-  menuServiceItemRenderer?: YTMenuItemRenderer;
-  menuNavigationItemRenderer?: YTMenuItemRenderer;
-}
-
-export interface YTMenuItemRenderer {
-  icon: YTIcon;
-  text: YTRunContainer;
-  navigationEndpoint?: YTUserFeedbackEndpointContainer;
-  trackingParams: string;
-  serviceEndpoint?: YTMenuNavigationItemRendererServiceEndpointContainer;
 }
 
 export interface YTViewSelector {
@@ -872,7 +922,7 @@ export interface YTPopoutMessage {
   messageRenderer: {
     text: YTRunContainer;
     trackingParams: string;
-    button: YTFluffyButton;
+    button: YTServiceButtonRendererContainer<YTPopoutLiveChatEndpointContainer>;
   };
 }
 

@@ -17,19 +17,19 @@ npm i masterchat
 ## Use
 
 ```js
-import { iterateChat, fetchContext } from "masterchat";
+import { Masterchat, convertRunsToString } from "masterchat";
 
-const { chat, apiKey } = await fetchContext("<videoId>");
+const mc = await Masterchat.init("<videoId>");
 
-const token = chat.continuations.top.token;
-const history = [];
-
-for await (const res of iterateChat({ apiKey, token })) {
+for await (const res of mc.iterateChat({ tokenType: "top" })) {
   if (res.error) break;
 
   const { actions } = res;
+  const chats = actions.filter((action) => action.type === "addChatItemAction");
 
-  history.push(...actions);
+  for (const chat of chats) {
+    console.log(chat.authorName, convertRunsToString(chat.rawMessage));
+  }
 }
 ```
 
@@ -62,3 +62,7 @@ For a desktop app, see [Komet](https://github.com/holodata/komet).
 ## Contribution
 
 See [Contribution Guide](./CONTRIBUTING.md) for more information.
+
+## Community
+
+Ask questions in `#masterchat` channel on [holodata Discord server](https://holodata.org/discord).

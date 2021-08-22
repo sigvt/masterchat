@@ -1,5 +1,5 @@
 import { setupRecorder } from "nock-record";
-import { fetchContext } from "..";
+import { Masterchat } from "..";
 
 const record = setupRecorder({
   mode: (process.env.NOCK_BACK_MODE as any) || "record",
@@ -8,109 +8,124 @@ const record = setupRecorder({
 it("normal prechat", async () => {
   const { completeRecording, assertScopesFinished } = await record("prechat");
 
-  const ctx = await fetchContext("g9KTW9kWGFo");
+  const mc = await Masterchat.init("R2LuOQF_dIs");
 
   completeRecording();
   assertScopesFinished();
 
-  if (!ctx) throw new Error("Invalid ctx");
-
-  expect(ctx.apiKey).toBe("AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8");
-  expect(ctx.chat?.continuations.all.token).toBe(
-    "0ofMyANhGlhDaWtxSndvWVZVTk1YM0ZvWjNSUGVUQmtlVEZCWjNBNGRtdDVVMUZuRWd0bk9VdFVWemxyVjBkR2J4b1Q2cWpkdVFFTkNndG5PVXRVVnpsclYwZEdieUFCMAGCAQIIAQ%3D%3D"
+  expect(mc.continuation.all.token).toBe(
+    "0ofMyANhGlhDaWtxSndvWVZVTkdTMDlXWjFaaVIyMVlOalZTZUU4elJYUklNMmwzRWd0U01reDFUMUZHWDJSSmN4b1Q2cWpkdVFFTkNndFNNa3gxVDFGR1gyUkpjeUFCMAGCAQIIAQ%3D%3D"
   );
-  expect(ctx.chat?.continuations.top.token).toBe(
-    "0ofMyANhGlhDaWtxSndvWVZVTk1YM0ZvWjNSUGVUQmtlVEZCWjNBNGRtdDVVMUZuRWd0bk9VdFVWemxyVjBkR2J4b1Q2cWpkdVFFTkNndG5PVXRVVnpsclYwZEdieUFCMAGCAQIIBA%3D%3D"
+  expect(mc.continuation.top.token).toBe(
+    "0ofMyANhGlhDaWtxSndvWVZVTkdTMDlXWjFaaVIyMVlOalZTZUU4elJYUklNMmwzRWd0U01reDFUMUZHWDJSSmN4b1Q2cWpkdVFFTkNndFNNa3gxVDFGR1gyUkpjeUFCMAGCAQIIBA%3D%3D"
   );
-  expect(ctx.metadata.isLive).toBe(true);
-  expect(ctx.metadata.id).toBe("g9KTW9kWGFo");
-  expect(ctx.metadata.channelId).toBe("UCL_qhgtOy0dy1Agp8vkySQg");
-  expect(ctx.metadata.title).toBe(
-    "【Phantasy Star Online 2 New Genesis】S P A C E.... A D V E N T U R E ?!?! #hololiveEnglish #ad"
+  expect(mc.metadata.isLive).toBe(true);
+  expect(mc.metadata.id).toBe("R2LuOQF_dIs");
+  expect(mc.metadata.channelId).toBe("UCFKOVgVbGmX65RxO3EtH3iw");
+  expect(mc.metadata.title).toBe(
+    "【帰り道/The Night Way Home】一緒に…帰る？【雪花ラミィ/ホロライブ】"
   );
-  expect(ctx.metadata.channelName).toBe("Mori Calliope Ch. hololive-EN");
+  expect(mc.metadata.channelName).toBe("Lamy Ch. 雪花ラミィ");
 });
 
 it("forever waiting stream", async () => {
   const { completeRecording, assertScopesFinished } = await record(
     "forever_waiting"
   );
-  const ctx = await fetchContext("N5XoLCMQrFY");
+  const mc = await Masterchat.init("N5XoLCMQrFY");
+
   completeRecording();
   assertScopesFinished();
-  if (!ctx) throw new Error("Invalid ctx");
-  expect(ctx.apiKey).toBe("AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8");
-  expect(ctx.chat?.continuations.top.token).toBe(
+
+  expect(mc.continuation.top.token).toBe(
     "0ofMyANhGlhDaWtxSndvWVZVTmlOVXA0VmpaMlMyeFpWbXR1YjBwQ09GUnVlVmxuRWd0T05WaHZURU5OVVhKR1dSb1Q2cWpkdVFFTkNndE9OVmh2VEVOTlVYSkdXU0FCMAGCAQIIBA%3D%3D"
   );
-  expect(ctx.metadata.isLive).toBe(true);
-  expect(ctx.metadata.id).toBe("N5XoLCMQrFY");
-  expect(ctx.metadata.title).toBe("こんばんは");
+  expect(mc.metadata.isLive).toBe(true);
+  expect(mc.metadata.id).toBe("N5XoLCMQrFY");
+  expect(mc.metadata.title).toBe("こんばんは");
 });
 
 it("archived stream with no chat replay", async () => {
   const { completeRecording, assertScopesFinished } = await record(
     "no_chat_replay"
   );
-  const ctx = await fetchContext("gAlQwtLnpBA");
+  const mc = await Masterchat.init("gAlQwtLnpBA");
+
   completeRecording();
   assertScopesFinished();
-  if (!ctx) throw new Error("Invalid ctx");
 
-  expect(ctx.apiKey).toBe("AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8");
-  expect(ctx.chat?.continuations.all.token).toBe(
+  expect(mc.continuation.all.token).toBe(
     "op2w0wRgGlhDaWtxSndvWVZVTndMVFYwT1ZOeVQxRjNXRTFWTjJsSmFsRm1RVkpuRWd0blFXeFJkM1JNYm5CQ1FSb1Q2cWpkdVFFTkNndG5RV3hSZDNSTWJuQkNRU0FCQAFyAggB"
   );
-  expect(ctx.metadata.isLive).toBe(false);
-  expect(ctx.metadata.id).toBe("gAlQwtLnpBA");
-  expect(ctx.metadata.title).toBe(
+  expect(mc.metadata.isLive).toBe(false);
+  expect(mc.metadata.id).toBe("gAlQwtLnpBA");
+  expect(mc.metadata.title).toBe(
     "【マイクラ】マップアート準備！羊毛自動回収機をつくった！【 ホロライブ / 大神ミオ 】"
   );
 });
 
 it("unarchived stream", async () => {
   const { completeRecording, assertScopesFinished } = await record(
-    "no_recording_available"
+    "unarchived"
   );
-  const ctx = await fetchContext("xCKYp2lxywE");
-  completeRecording();
-  assertScopesFinished();
-  if (!ctx) throw new Error("Invalid ctx");
-  expect(ctx.apiKey).toBe("AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8");
-  expect(ctx.chat).toBeUndefined();
-  expect(ctx.metadata.isLive).toBe(false);
-  expect(ctx.metadata.id).toBe("xCKYp2lxywE");
-  expect(ctx.metadata.title).toBe(
-    "【爆弾コラボ】美人爆弾処理班いっきまーーす！！【Keep Talking and Nobody Explodes】"
-  );
+  try {
+    await Masterchat.init("xCKYp2lxywE");
+  } catch (err) {
+    expect(err.message).toContain("Continuation");
+  } finally {
+    completeRecording();
+    assertScopesFinished();
+  }
+  // const { completeRecording, assertScopesFinished } = await record(
+  //   "no_recording_available"
+  // );
+  // const mc = await Masterchat.init("xCKYp2lxywE");
+  // completeRecording();
+  // assertScopesFinished();
+  // // expect(mc.chat).toBeUndefined();
+  // expect(mc.metadata.isLive).toBe(false);
+  // expect(mc.metadata.id).toBe("xCKYp2lxywE");
+  // expect(mc.metadata.title).toBe(
+  //   "【爆弾コラボ】美人爆弾処理班いっきまーーす！！【Keep Talking and Nobody Explodes】"
+  // );
 });
 
 it("invalid video id", async () => {
   const { completeRecording, assertScopesFinished } = await record(
     "invalid_video_id"
   );
-  const ctx = await fetchContext("invalid_video_id");
-  completeRecording();
-  assertScopesFinished();
-  expect(ctx).toBeUndefined();
+  try {
+    await Masterchat.init("invalid_video_id");
+  } catch (err) {
+    expect(err.message).toContain("Context");
+  } finally {
+    completeRecording();
+    assertScopesFinished();
+  }
 });
 
 it("private stream", async () => {
   const { completeRecording, assertScopesFinished } = await record("private");
-  const ctx = await fetchContext("l65XbEUHiw4");
-  completeRecording();
-  assertScopesFinished();
-  expect(ctx).toBeUndefined();
+  try {
+    await Masterchat.init("l65XbEUHiw4");
+  } catch (err) {
+    expect(err.message).toContain("Context");
+  } finally {
+    completeRecording();
+    assertScopesFinished();
+  }
 });
 
 it("deleted stream", async () => {
-  const { completeRecording, assertScopesFinished } = await record(
-    "unavailable"
-  );
-  const ctx = await fetchContext("XBmtJiYt8Tw");
-  completeRecording();
-  assertScopesFinished();
-  expect(ctx).toBeUndefined();
+  const { completeRecording, assertScopesFinished } = await record("deleted");
+  try {
+    await Masterchat.init("XBmtJiYt8Tw");
+  } catch (err) {
+    expect(err.message).toContain("Context");
+  } finally {
+    completeRecording();
+    assertScopesFinished();
+  }
 });
 
 // const SNAPSHOT_ROOT = join(__dirname, "snapshots", "context");
