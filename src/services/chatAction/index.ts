@@ -76,7 +76,7 @@
 
 import { Base } from "../../base";
 import {
-  YTActionResponse,
+  YTAction,
   YTGetItemContextMenuResponse,
   YTLiveChatServiceEndpointContainer,
 } from "../../types/chat";
@@ -111,7 +111,7 @@ function buildMeta(endpoint: YTLiveChatServiceEndpointContainer) {
 
 export interface ChatActionService extends Base {}
 export class ChatActionService {
-  // TODO: verify request body
+  // TODO: narrow down return type
   async report(contextMenuEndpointParams: string) {
     const catalog = await this.getActionCatalog(contextMenuEndpointParams);
     const actionInfo = catalog?.report;
@@ -119,6 +119,7 @@ export class ChatActionService {
     return await this.sendAction(actionInfo);
   }
 
+  // TODO: narrow down return type
   async block(contextMenuEndpointParams: string) {
     const catalog = await this.getActionCatalog(contextMenuEndpointParams);
     const actionInfo = catalog?.block;
@@ -126,6 +127,7 @@ export class ChatActionService {
     return await this.sendAction(actionInfo);
   }
 
+  // TODO: narrow down return type
   async unblock(contextMenuEndpointParams: string) {
     const catalog = await this.getActionCatalog(contextMenuEndpointParams);
     const actionInfo = catalog?.unblock;
@@ -133,6 +135,7 @@ export class ChatActionService {
     return await this.sendAction(actionInfo);
   }
 
+  // TODO: narrow down return type
   async pin(contextMenuEndpointParams: string) {
     const catalog = await this.getActionCatalog(contextMenuEndpointParams);
     const actionInfo = catalog?.pin;
@@ -140,6 +143,7 @@ export class ChatActionService {
     return await this.sendAction(actionInfo);
   }
 
+  // TODO: narrow down return type
   async unpin(contextMenuEndpointParams: string) {
     const catalog = await this.getActionCatalog(contextMenuEndpointParams);
     const actionInfo = catalog?.unpin;
@@ -151,9 +155,11 @@ export class ChatActionService {
     const catalog = await this.getActionCatalog(contextMenuEndpointParams);
     const actionInfo = catalog?.remove;
     if (!actionInfo) return;
-    return await this.sendAction(actionInfo);
+    const res = await this.sendAction(actionInfo);
+    return res[0].markChatItemAsDeletedAction;
   }
 
+  // TODO: narrow down return type
   async timeout(contextMenuEndpointParams: string) {
     const catalog = await this.getActionCatalog(contextMenuEndpointParams);
     const actionInfo = catalog?.timeout;
@@ -161,6 +167,7 @@ export class ChatActionService {
     return await this.sendAction(actionInfo);
   }
 
+  // TODO: narrow down return type
   async hide(contextMenuEndpointParams: string) {
     const catalog = await this.getActionCatalog(contextMenuEndpointParams);
     const actionInfo = catalog?.hide;
@@ -168,6 +175,7 @@ export class ChatActionService {
     return await this.sendAction(actionInfo);
   }
 
+  // TODO: narrow down return type
   async unhide(contextMenuEndpointParams: string) {
     const catalog = await this.getActionCatalog(contextMenuEndpointParams);
     const actionInfo = catalog?.unhide;
@@ -175,6 +183,7 @@ export class ChatActionService {
     return await this.sendAction(actionInfo);
   }
 
+  // TODO: narrow down return type
   async addModerator(contextMenuEndpointParams: string) {
     const catalog = await this.getActionCatalog(contextMenuEndpointParams);
     const actionInfo = catalog?.addModerator;
@@ -182,6 +191,7 @@ export class ChatActionService {
     return await this.sendAction(actionInfo);
   }
 
+  // TODO: narrow down return type
   async removeModerator(contextMenuEndpointParams: string) {
     const catalog = await this.getActionCatalog(contextMenuEndpointParams);
     const actionInfo = catalog?.removeModerator;
@@ -189,23 +199,25 @@ export class ChatActionService {
     return await this.sendAction(actionInfo);
   }
 
-  private async sendAction<T = YTActionResponse>(
-    actionInfo: ActionInfo
-  ): Promise<T> {
+  private async sendAction<T = YTAction[]>(actionInfo: ActionInfo): Promise<T> {
     const url = actionInfo.url;
+    let res;
     if (actionInfo.isPost) {
-      const res = await this.post(url, {
+      res = await this.post(url, {
         body: JSON.stringify(
           withContext({
             params: actionInfo.params,
           })
         ),
       });
-      return await res.json();
     } else {
-      const res = await this.get(url);
-      return await res.json();
+      res = await this.get(url);
     }
+    const json = await res.json();
+    if (!json.success) {
+      throw new Error(`Failed to perform action: ` + JSON.stringify(json));
+    }
+    return json.actions;
   }
 
   /**

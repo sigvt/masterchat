@@ -114,14 +114,9 @@ export class ContextService {
   }
 
   private async fetchContext(id: string): Promise<Context | undefined> {
-    const res = await this.get("https://www.youtube.com/watch?v=" + id);
+    const res = await this.get("/watch?v=" + id);
     if (res.status === 429) {
-      debugLog(
-        "429",
-        res.status,
-        res.statusText,
-        "https://www.youtube.com/watch?v=" + id
-      );
+      debugLog("429", res.status, res.statusText, id);
 
       const err = new Error("BAN detected");
       err.name = "EYTBAN";
@@ -134,12 +129,7 @@ export class ContextService {
     const apiKey = findApiKey(watchHtml);
 
     if (!apiKey || !initialData) {
-      debugLog(
-        "!apiKey",
-        res.status,
-        res.statusText,
-        "https://www.youtube.com/watch?v=" + id
-      );
+      debugLog("!apiKey", res.status, res.statusText, id);
       // TODO: when does this happen?
       debugLog("!initialData: " + initialData);
 

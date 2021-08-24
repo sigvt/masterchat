@@ -29,6 +29,13 @@ export class Masterchat {
     return mc;
   }
 
+  public async setVideoId(videoIdOrUrl: string) {
+    const videoId = normalizeVideoId(videoIdOrUrl);
+    this.videoId = videoId;
+    await this.populateMetadata();
+    if (this.credentials) await this.populateLiveChatContext();
+  }
+
   private constructor(
     videoId: string,
     { apiKey = DEFAULT_API_KEY, credentials }: MasterchatOptions = {}

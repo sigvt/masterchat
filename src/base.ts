@@ -1,8 +1,8 @@
-import { Credentials, buildAuthHeaders } from "./auth";
-import { DEFAULT_HEADERS, DEFAULT_ORIGIN } from "./constants";
 import fetch from "cross-fetch";
-import { LiveChatContext, Metadata } from "./services/context/exports";
+import { buildAuthHeaders, Credentials } from "./auth";
+import { DEFAULT_HEADERS, DEFAULT_ORIGIN } from "./constants";
 import { ReloadContinuationItems } from "./services/chat/exports";
+import { LiveChatContext, Metadata } from "./services/context/exports";
 import { debugLog } from "./util";
 
 export class Base {
@@ -38,6 +38,11 @@ export class Base {
       ...init,
       headers,
     });
+  }
+
+  protected async postJson<T>(input: string, init?: RequestInit): Promise<T> {
+    const res = await this.post(input, init);
+    return await res.json();
   }
 
   protected post(input: string, init?: RequestInit) {

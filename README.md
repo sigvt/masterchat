@@ -14,7 +14,9 @@ A JavaScript library for YouTube Live Chat.
 npm i masterchat
 ```
 
-## Use
+## Examples
+
+### Iterate live chats
 
 ```js
 import { Masterchat, convertRunsToString } from "masterchat";
@@ -29,6 +31,33 @@ for await (const res of mc.iterateChat({ tokenType: "top" })) {
 
   for (const chat of chats) {
     console.log(chat.authorName, convertRunsToString(chat.rawMessage));
+  }
+}
+```
+
+### Auto-moderation bot
+
+```js
+import { Masterchat, convertRunsToString } from "masterchat";
+import { isSpam } from "spamreaper";
+
+// YouTube session cookie
+const credentials = {
+  SAPISID: "<value>",
+  APISID: "<value>",
+  HSID: "<value>",
+  SID: "<value>",
+  SSID: "<value>",
+};
+const mc = await Masterchat.init("<videoId>", { credentials });
+
+for await (const { actions } of mc.iterateChat({ tokenType: "all" })) {
+  for (const action of actions) {
+    if (action.type !== "addChatItemAction") continue;
+
+    if (isSpam(convertRunsToString(action.rawMessage))) {
+      await mc.remove(action.contextMenuEndpointParams);
+    }
   }
 }
 ```

@@ -93,8 +93,8 @@ export interface YTGetItemContextMenuResponse {
 // moderate, pin, manage_user
 export interface YTActionResponse {
   responseContext: YTResponseContext;
-  actions: YTAction[];
   success: boolean;
+  actions: YTAction[];
 }
 
 // Interfaces
