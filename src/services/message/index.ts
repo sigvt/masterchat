@@ -33,9 +33,6 @@ export class MessageService {
         body: JSON.stringify(body),
       }
     );
-    if (!res.success) {
-      throw new Error(`Failed to send message: ` + JSON.stringify(res));
-    }
     const item = res.actions[0].addChatItemAction?.item;
     if (!(item && "liveChatTextMessageRenderer" in item)) {
       throw new Error(`Invalid response: ` + item);

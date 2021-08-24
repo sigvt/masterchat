@@ -31,8 +31,8 @@ describe("send message", () => {
     const res = await mc.sendMessage(msg);
     completeRecording();
 
-    if ("error" in res) {
-      throw res.error;
+    if (!res || "error" in res) {
+      throw new Error("invalid res");
     }
 
     expect(res).toMatchObject({
