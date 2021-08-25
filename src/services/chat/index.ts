@@ -551,13 +551,18 @@ export class ChatService {
       }
     } catch (err) {
       debugLog("fetchError", err.message, err.code, err.type);
+
       switch (err.type) {
-        case "invalid-json":
-          // TODO: rarely occurs
+        case "invalid-json": {
+          // NOTE: rarely occurs
           debugLog("[action required] invalid-json", err.response.text());
-        case "system":
-        // ECONNRESET, ETIMEOUT, etc
+        }
+        case "system": {
+          // ECONNRESET, ETIMEOUT, etc
+          // Currently unavailable
+        }
       }
+
       throw err;
     }
 
@@ -572,7 +577,19 @@ export class ChatService {
        */
       const obj = Object.assign({}, res) as any;
       delete obj["responseContext"];
-      debugLog("continuationNotFound(LiveChatDisabled)", JSON.stringify(obj));
+
+      // {} => Live stream ended
+      // {"contents": {"messageRenderer": {"text": {"runs": [{"text": "Sorry, live chat is currently unavailable"}]}}}} => ?
+      // {"trackingParams": ...} => ?
+      if ("contents" in obj) {
+        debugLog("continuationNotFound(with contents)", JSON.stringify(obj));
+      }
+      if ("trackingParams" in obj) {
+        debugLog(
+          "continuationNotFound(with trackingParams)",
+          JSON.stringify(obj)
+        );
+      }
 
       return {
         error: {

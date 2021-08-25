@@ -4,22 +4,11 @@ import { YTChatResponse } from "../../types/chat";
 import { YTInitialData, YTPlayabilityStatus } from "../../types/context";
 import { convertRunsToString, debugLog } from "../../util";
 import { ReloadContinuationItems } from "../chat/exports";
-import { Context, LiveChatContext } from "./exports";
-
-const ABANDONED_DAY_THRESHOLD = 3;
+import { Context, LiveChatContext, Metadata } from "./exports";
 
 function findApiKey(data: string): string | undefined {
   const apiKey = data.match(/"innertubeApiKey":"(.+?)"/)?.[1];
   return apiKey;
-}
-
-// returns undefined if sending chat function is unavailable
-function findSendMessageParams(res: YTChatResponse): string | undefined {
-  // NOTE: liveChatMessageInputRenderer set to undefined during subscribers-only mode
-  // NOTE: serviceEndpoint set to undefined for unauthorized access
-  return res.continuationContents?.liveChatContinuation.actionPanel
-    ?.liveChatMessageInputRenderer?.sendButton.buttonRenderer.serviceEndpoint
-    ?.sendLiveChatMessageEndpoint.params;
 }
 
 function findPlayabilityStatus(data: string): YTPlayabilityStatus | undefined {
@@ -66,53 +55,13 @@ function findReloadContinuation(
   };
 }
 
-function findMetadata(initialData: YTInitialData) {
-  if (!initialData.contents) {
-    // when initialData only contains responseContext
-    // - invalid video id
-    // - privated
-    // - deleted
-    // ↑ these should be handled already
-    throw new MasterchatError("unknown", "Missing initialData.contents");
-  }
-
-  const results =
-    initialData.contents.twoColumnWatchNextResults?.results.results;
-  if (!results) {
-    throw new MasterchatError(
-      "unknown",
-      "Missing initialData.contents.twoColumnWatchNextResults"
-    );
-  }
-
-  const videoPrimaryInfoRenderer = results.contents[0].videoPrimaryInfoRenderer;
-  const isMembersOnly =
-    videoPrimaryInfoRenderer.badges?.some(
-      (badge) => badge.metadataBadgeRenderer.label === "Members only"
-    ) ?? false;
-  if (isMembersOnly) {
-    throw new MasterchatError("unknown", "Indicates members-only stream");
-  }
-
-  const viewCount = results.contents[0].videoPrimaryInfoRenderer.viewCount;
-  if (!viewCount) {
-    throw new MasterchatError("unknown", "Missing viewCount");
-  }
-
-  return {
-    id: initialData.currentVideoEndpoint.watchEndpoint.videoId,
-    title: convertRunsToString(
-      results.contents[0].videoPrimaryInfoRenderer.title.runs
-    ),
-    channelName: convertRunsToString(
-      results.contents[1].videoSecondaryInfoRenderer.owner.videoOwnerRenderer
-        .title.runs
-    ),
-    channelId:
-      results.contents[1].videoSecondaryInfoRenderer.owner.videoOwnerRenderer
-        .navigationEndpoint.browseEndpoint.browseId,
-    isLive: viewCount.videoViewCountRenderer.isLive ?? false,
-  };
+// returns undefined if sending chat function is unavailable
+function findSendMessageParams(res: YTChatResponse): string | undefined {
+  // NOTE: liveChatMessageInputRenderer set to undefined during subscribers-only mode
+  // NOTE: serviceEndpoint set to undefined for unauthorized access
+  return res.continuationContents?.liveChatContinuation.actionPanel
+    ?.liveChatMessageInputRenderer?.sendButton.buttonRenderer.serviceEndpoint
+    ?.sendLiveChatMessageEndpoint.params;
 }
 
 export interface ContextService extends Base {}
@@ -136,24 +85,36 @@ export class ContextService {
 
     // Check ban status
     if (res.status === 429) {
-      debugLog("429", res.status, res.statusText, id);
       throw new MasterchatError("denied", "Rate limit exceeded: " + id);
     }
 
     const watchHtml = await res.text();
+    const apiKey = findApiKey(watchHtml);
     const initialData = findInitialData(watchHtml);
     const playabilityStatus = findPlayabilityStatus(watchHtml);
 
+    if (!apiKey || !initialData) {
+      const apiKeyPresent = apiKey != undefined;
+      const initialDataPresent = initialData != undefined;
+      throw new MasterchatError(
+        "unknown",
+        `Unrecognized error: id=${id} status=${res.status} (${res.statusText}) apiKey=${apiKeyPresent} initialData=${initialDataPresent}`
+      );
+    }
+
+    // TODO
+    // initialData.contents.twoColumnWatchNextResults.conversationBar.conversationBarRenderer.availabilityMessage.messageRenderer.text.runs[0].text === 'Chat is disabled for this live stream.'
+
     // Check live stream availability
     if (!playabilityStatus) {
-      throw new MasterchatError("invalid", "Missing playabilityStatus");
+      throw new MasterchatError("unknown", "Missing playabilityStatus: " + id);
     }
     switch (playabilityStatus.status) {
       case "ERROR":
         throw new MasterchatError("unavailable", playabilityStatus.reason!);
       case "LOGIN_REQUIRED":
         throw new MasterchatError("private", playabilityStatus.reason!);
-      case "UNPLAYABLE":
+      case "UNPLAYABLE": {
         if (
           "playerLegacyDesktopYpcOfferRenderer" in
           playabilityStatus.errorScreen!
@@ -161,58 +122,62 @@ export class ContextService {
           throw new MasterchatError("membersOnly", playabilityStatus.reason!);
         }
         throw new MasterchatError("unarchived", playabilityStatus.reason!);
-      case "LIVE_STREAM_OFFLINE": {
-        const scheduledStartTime = parseInt(
-          playabilityStatus.liveStreamability!.liveStreamabilityRenderer
-            .offlineSlate.liveStreamOfflineSlateRenderer.scheduledStartTime,
-          10
-        );
-        const daysPassed =
-          (Date.now() - new Date(scheduledStartTime * 1000).getTime()) /
-          1000 /
-          60 /
-          60 /
-          24;
-        if (daysPassed > ABANDONED_DAY_THRESHOLD) {
-          throw new MasterchatError("abandoned", playabilityStatus.reason!);
-        }
       }
+      case "LIVE_STREAM_OFFLINE":
+      case "OK":
     }
-    const apiKey = findApiKey(watchHtml);
 
-    // writeFileSync("./initialData.json", JSON.stringify(initialData, null, 2));
+    // Check live chat availability
+    const continuations = findReloadContinuation(initialData);
 
-    if (!apiKey || !initialData) {
-      const apiKeyPresent = apiKey != undefined;
-      const initialDataPresent = initialData != undefined;
+    if (!continuations) {
+      throw new MasterchatError("disabled", `Missing continuations: ` + id);
+    }
+
+    const results =
+      initialData.contents?.twoColumnWatchNextResults?.results.results;
+    if (!results) {
       throw new MasterchatError(
         "unknown",
-        `Unrecognized error: status=${res.status} (${res.statusText}) apiKey=${apiKeyPresent} initialData=${initialDataPresent}`
+        "Missing initialData.contents.twoColumnWatchNextResults: " + id
       );
     }
 
-    const metadata = findMetadata(initialData);
-    const continuations = findReloadContinuation(initialData);
+    const primaryInfo = results.contents[0].videoPrimaryInfoRenderer;
+    const videoOwner =
+      results.contents[1].videoSecondaryInfoRenderer.owner.videoOwnerRenderer;
 
-    // Check live chat availability
-    if (!continuations) {
-      throw new MasterchatError("disabled", `Missing continuations`);
-    }
+    // const isMembersOnly =
+    //   primaryInfo.badges?.some(
+    //     (badge) => badge.metadataBadgeRenderer.label === "Members only"
+    //   ) ?? false;
 
-    const context: Context = {
-      apiKey,
-      metadata,
-      continuations,
+    // if (isMembersOnly) {
+    //   throw new MasterchatError(
+    //     "unknown",
+    //     "Detects members-only stream, contradicting pre-condition check"
+    //   );
+    // }
+
+    const metadata: Metadata = {
+      id: initialData.currentVideoEndpoint.watchEndpoint.videoId,
+      title: convertRunsToString(primaryInfo.title.runs),
+      channelName: convertRunsToString(videoOwner.title.runs),
+      channelId: videoOwner.navigationEndpoint.browseEndpoint.browseId,
+      isLive: primaryInfo.viewCount!.videoViewCountRenderer.isLive ?? false,
     };
 
-    return context;
+    return {
+      metadata,
+      continuations,
+      apiKey,
+    };
   }
 
   private async fetchLiveChatContext(
-    continuation: string,
-    { isReplay = false }: { isReplay?: boolean } = {}
-  ): Promise<LiveChatContext | undefined> {
-    const endpoint = isReplay ? "live_chat_replay" : "live_chat";
+    continuation: string
+  ): Promise<LiveChatContext> {
+    const endpoint = this.isReplay ? "live_chat_replay" : "live_chat";
     const url = `/${endpoint}?continuation=` + continuation;
 
     const res = await this.get(url).then((res) => res.text());

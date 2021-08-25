@@ -21,10 +21,27 @@ npm i masterchat
 ```js
 import { Masterchat, convertRunsToString } from "masterchat";
 
-const mc = await Masterchat.init("<videoId>");
+let mc;
+try {
+  mc = await Masterchat.init("<videoId>");
+} catch (err) {
+  console.log(err.code);
+  // "private" => Private video
+  // "unavailable" => Deleted video OR wrong video id
+  // "unarchived" => Live stream recording is not available
+  // "disabled" => Live chat is disabled
+  // "abandoned" => Abandoned stream
+  // "membersOnly" => No permission (members-only)
+  // "denied" => Access denied
+  // "invalid" => Invalid request
+  // "unknown"; => Unknown error
+}
 
 for await (const res of mc.iterateChat({ tokenType: "top" })) {
-  if (res.error) break;
+  if (res.error) {
+    console.log(res.error);
+    break;
+  }
 
   const { actions } = res;
   const chats = actions.filter((action) => action.type === "addChatItemAction");

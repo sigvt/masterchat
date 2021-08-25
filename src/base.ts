@@ -18,7 +18,7 @@ export class Base {
   public metadata!: Metadata;
   public continuation!: ReloadContinuationItems;
   protected isReplay!: boolean;
-  protected liveChatContext?: LiveChatContext;
+  protected liveChatContext!: LiveChatContext;
 
   protected get(input: string, init?: RequestInit) {
     if (!input.startsWith("http")) {

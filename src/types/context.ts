@@ -12,7 +12,7 @@ export interface YTPlayabilityStatus {
     | "LOGIN_REQUIRED" // -> Privated
     | "UNPLAYABLE" // -> Unarchived OR members-only stream
     | "LIVE_STREAM_OFFLINE" // -> Offline (pre-stream OR abandoned stream)
-    | "OK";
+    | "OK"; // -> Live chat OR replay chat is available
   contextParams: string;
   // if not OK
   reason?: string;

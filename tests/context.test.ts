@@ -26,6 +26,26 @@ it("live chat", async () => {
   expect(mc.metadata.channelName).toBe("Ouro Kronii Ch. hololive-EN");
 });
 
+it("premiere", async () => {
+  const { completeRecording, assertScopesFinished } = await record("premiere");
+
+  const mc = await Masterchat.init("OJNb6lYcd_0");
+
+  completeRecording();
+  assertScopesFinished();
+
+  expect(mc.continuation.top.token).toBe(
+    "0ofMyANhGlhDaWtxSndvWVZVTnpaeTFaY1dSeFVTMUxSa1l3VEU1ck1qTkNXVFJCRWd0UFNrNWlObXhaWTJSZk1Cb1Q2cWpkdVFFTkNndFBTazVpTm14WlkyUmZNQ0FCMAGCAQIIBA%3D%3D"
+  );
+  expect(mc.metadata.isLive).toBe(true);
+  expect(mc.metadata.id).toBe("OJNb6lYcd_0");
+  expect(mc.metadata.channelId).toBe("UCsg-YqdqQ-KFF0LNk23BY4A");
+  expect(mc.metadata.title).toBe(
+    "【全曲試聴動画】メジャー2ndシングル『Baddest』/ 樋口楓"
+  );
+  expect(mc.metadata.channelName).toBe("樋口楓【にじさんじ所属】");
+});
+
 it("prechat", async () => {
   const { completeRecording, assertScopesFinished } = await record("prechat");
 
@@ -49,12 +69,21 @@ it("prechat", async () => {
   expect(mc.metadata.channelName).toBe("Lamy Ch. 雪花ラミィ");
 });
 
+it("abandoned stream", async () => {
+  const { completeRecording, assertScopesFinished } = await record("abandoned");
+  const res = await Masterchat.init("N5XoLCMQrFY");
+  completeRecording();
+  assertScopesFinished();
+  expect(res.metadata.isLive).toBe(true);
+});
+
 it("members-only stream", async () => {
   const { completeRecording, assertScopesFinished } = await record(
     "members_only"
   );
   try {
     await Masterchat.init("M-sdpgv3gMQ");
+    throw new Error("this should not occur");
   } catch (err) {
     expect(err.code).toBe("membersOnly");
   } finally {
@@ -63,12 +92,15 @@ it("members-only stream", async () => {
   }
 });
 
-it("abandoned stream", async () => {
-  const { completeRecording, assertScopesFinished } = await record("abandoned");
+it("pre stream but chat disabled", async () => {
+  const { completeRecording, assertScopesFinished } = await record(
+    "prechat_disabled"
+  );
   try {
-    await Masterchat.init("N5XoLCMQrFY");
+    await Masterchat.init("l3T2COhIouU");
+    throw new Error("this should not occur");
   } catch (err) {
-    expect(err.code).toBe("abandoned");
+    expect(err.code).toBe("disabled");
   } finally {
     completeRecording();
     assertScopesFinished();
@@ -83,6 +115,7 @@ it("archived stream with chat replay being prepared", async () => {
   );
   try {
     await Masterchat.init("32qr8wO1mV4");
+    throw new Error("this should not occur");
   } catch (err) {
     expect(err.code).toBe("disabled");
   } finally {
@@ -97,6 +130,7 @@ it("unarchived stream", async () => {
   );
   try {
     await Masterchat.init("xCKYp2lxywE");
+    throw new Error("this should not occur");
   } catch (err) {
     expect(err.code).toBe("unarchived");
   } finally {
@@ -111,6 +145,7 @@ it("invalid video id", async () => {
   );
   try {
     await Masterchat.init("invalid_video_id");
+    throw new Error("this should not occur");
   } catch (err) {
     expect(err.code).toBe("unavailable");
   } finally {
@@ -123,6 +158,7 @@ it("private stream", async () => {
   const { completeRecording, assertScopesFinished } = await record("private");
   try {
     await Masterchat.init("wchTnTjAiHg");
+    throw new Error("this should not occur");
   } catch (err) {
     expect(err.code).toBe("private");
   } finally {
@@ -135,6 +171,7 @@ it("deleted stream", async () => {
   const { completeRecording, assertScopesFinished } = await record("deleted");
   try {
     await Masterchat.init("XBmtJiYt8Tw");
+    throw new Error("this should not occur");
   } catch (err) {
     expect(err.code).toBe("unavailable");
   } finally {
