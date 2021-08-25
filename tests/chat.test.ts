@@ -13,7 +13,7 @@ async function fetchUpcomingStreams() {
   return data;
 }
 
-describe("wildlife test", () => {
+describe("normal live chat", () => {
   jest.setTimeout(60000);
 
   let subject: any;
@@ -25,7 +25,6 @@ describe("wildlife test", () => {
     );
     const index = await fetchUpcomingStreams();
     subject = index[Math.round(index.length / 2)];
-    // console.log(subject);
     mc = await Masterchat.init(subject.id);
     completeRecording();
     assertScopesFinished();

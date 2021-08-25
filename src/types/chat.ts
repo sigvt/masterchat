@@ -694,6 +694,7 @@ export enum YTIconType {
   MembersOnlyMode = "MEMBERS_ONLY_MODE",
   TabSubscriptions = "TAB_SUBSCRIPTIONS",
   BlockUser = "BLOCK_USER",
+  ErrorOutline = "ERROR_OUTLINE",
 }
 
 export interface YTPicker {

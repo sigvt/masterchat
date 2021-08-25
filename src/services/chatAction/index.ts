@@ -231,10 +231,13 @@ export class ChatActionService {
     });
     const endpoint =
       "/youtubei/v1/live_chat/get_item_context_menu?" + query.toString();
-    const res = await this.post(endpoint, {
-      body: JSON.stringify(withContext()),
-    });
-    const response = (await res.json()) as YTGetItemContextMenuResponse;
+    const response = await this.postJson<YTGetItemContextMenuResponse>(
+      endpoint,
+      {
+        body: JSON.stringify(withContext()),
+        retry: 2,
+      }
+    );
 
     if (response.error) {
       // TODO: handle this

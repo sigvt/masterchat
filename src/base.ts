@@ -3,7 +3,12 @@ import { buildAuthHeaders, Credentials } from "./auth";
 import { DEFAULT_HEADERS, DEFAULT_ORIGIN } from "./constants";
 import { ReloadContinuationItems } from "./services/chat/exports";
 import { LiveChatContext, Metadata } from "./services/context/exports";
-import { debugLog } from "./util";
+import { debugLog, timeoutThen } from "./util";
+
+export type RequestInitWithRetryOption = RequestInit & {
+  retry?: number;
+  retryInterval?: number;
+};
 
 export class Base {
   public videoId!: string;
@@ -32,7 +37,7 @@ export class Base {
       ...init?.headers,
     };
 
-    debugLog("GET", parsedUrl.toString());
+    // debugLog("GET", parsedUrl.toString());
 
     return fetch(parsedUrl.toString(), {
       ...init,
@@ -40,9 +45,35 @@ export class Base {
     });
   }
 
-  protected async postJson<T>(input: string, init?: RequestInit): Promise<T> {
-    const res = await this.post(input, init);
-    return await res.json();
+  protected async postJson<T>(
+    input: string,
+    init?: RequestInitWithRetryOption
+  ): Promise<T> {
+    const errors = [];
+
+    let remaining = init?.retry ?? 0;
+    const retryInterval = init?.retryInterval ?? 1000;
+
+    while (true) {
+      try {
+        const res = await this.post(input, init);
+        return await res.json();
+      } catch (err) {
+        if (err.name === "AbortError") throw err;
+
+        errors.push(err);
+
+        if (remaining > 0) {
+          await timeoutThen(retryInterval);
+          remaining -= 1;
+          debugLog("postJson failed: retry remaining " + remaining);
+          continue;
+        }
+
+        err.errors = errors;
+        throw err;
+      }
+    }
   }
 
   protected post(input: string, init?: RequestInit) {
@@ -63,7 +94,7 @@ export class Base {
       "Content-Type": "application/json",
     };
 
-    debugLog("POST", parsedUrl.toString(), init?.body);
+    // debugLog("POST", parsedUrl.toString(), init?.body);
 
     return fetch(parsedUrl.toString(), {
       ...init,

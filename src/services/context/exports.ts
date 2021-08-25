@@ -5,7 +5,7 @@ import { YTReloadContinuationData } from "../../types/context";
 export interface Context {
   apiKey: string;
   metadata: Metadata;
-  continuations?: ReloadContinuationItems;
+  continuations: ReloadContinuationItems;
 }
 
 export interface ClientInfo {

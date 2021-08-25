@@ -1,4 +1,65 @@
-import { YTRun, YTRunContainer } from "./chat";
+import {
+  YTIcon,
+  YTRun,
+  YTRunContainer,
+  YTSimpleText,
+  YTThumbnailList,
+} from "./chat";
+
+export interface YTPlayabilityStatus {
+  status:
+    | "ERROR" // -> Deleted OR mistyped video id
+    | "LOGIN_REQUIRED" // -> Privated
+    | "UNPLAYABLE" // -> Unarchived OR members-only stream
+    | "LIVE_STREAM_OFFLINE" // -> Offline (pre-stream OR abandoned stream)
+    | "OK";
+  contextParams: string;
+  // if not OK
+  reason?: string;
+  errorScreen?: {
+    playerErrorMessageRenderer?: {
+      reason: YTSimpleText;
+      thumbnail: YTThumbnailList;
+      icon: YTIcon;
+    };
+    // if UNPLAYABLE (members-only)
+    playerLegacyDesktopYpcOfferRenderer?: {
+      itemTitle: "Members-only content";
+      itemThumbnail: string;
+      offerDescription: string;
+      offerId: "sponsors_only_video";
+    };
+  };
+  // if UNPLAYABLE (members-only)
+  skip?: {
+    playabilityErrorSkipConfig: {
+      skipOnPlayabilityError: boolean;
+    };
+  };
+  // if OK
+  miniplayer?: {
+    miniplayerRenderer: {
+      playbackMode: "PLAYBACK_MODE_ALLOW"; // TODO: find others
+    };
+  };
+  // if LIVE_STREAM_OFFLINE
+  liveStreamability?: {
+    liveStreamabilityRenderer: {
+      videoId: string;
+      offlineSlate: {
+        liveStreamOfflineSlateRenderer: {
+          scheduledStartTime: string;
+          mainText: YTRunContainer;
+          subtitleText: YTSimpleText;
+          thumbnail: YTThumbnailList;
+          pollDelayMs: string;
+        };
+      };
+    };
+  };
+  // if OK or LIVE_STREAM_OFFLINE
+  playableInEmbed?: boolean;
+}
 
 export interface YTContextConfig {
   transparentBackground: boolean;
@@ -311,12 +372,8 @@ export interface PurplePopup {
 }
 
 export interface NotificationActionRenderer {
-  responseText: CancelText;
+  responseText: YTSimpleText;
   trackingParams: string;
-}
-
-export interface CancelText {
-  simpleText: string;
 }
 
 export interface LengthText {
@@ -368,8 +425,8 @@ export interface YTShowHideButton {
 export interface ShowHideButtonToggleButtonRenderer {
   isToggled: boolean;
   isDisabled: boolean;
-  defaultText: CancelText;
-  toggledText: CancelText;
+  defaultText: YTSimpleText;
+  toggledText: YTSimpleText;
   trackingParams: string;
 }
 
@@ -394,8 +451,9 @@ export interface VideoPrimaryInfoRenderer {
   trackingParams: string;
   updatedMetadataEndpoint: UpdatedMetadataEndpoint;
   sentimentBar: SentimentBar;
+  badges?: MetadataBadgeRendererContainer[];
   superTitleLink: SuperTitleLink;
-  dateText: CancelText;
+  dateText: YTSimpleText;
 }
 
 export interface SentimentBar {
@@ -417,26 +475,11 @@ export interface SuperTitleLink {
 export interface SuperTitleLinkRun {
   text: string;
   navigationEndpoint?: PurpleNavigationEndpoint;
-  loggingDirectives?: LoggingDirectives;
-}
-
-export interface LoggingDirectives {
-  trackingParams: TrackingParams;
-  visibility: Visibility;
-}
-
-export enum TrackingParams {
-  CJ4BENzXBCITCJrA6OPW7E0CFTRC9QUd9KQHIG = "CJ4BENzXBCITCJrA6oPW7e0CFTRC9QUd9kQHig==",
-  CJgBEM2RARgBIhMImsDqg9Bt7QIVNEL1BR32RAEKSPKOisjbvurV3QE = "CJgBEM2rARgBIhMImsDqg9bt7QIVNEL1BR32RAeKSPKOisjbvurV3QE=",
-  CKMBEKW3AyITCJrA6OPW7E0CFTRC9QUd9KQHIG = "CKMBEKW3AyITCJrA6oPW7e0CFTRC9QUd9kQHig==",
-}
-
-export interface Visibility {
-  types: string;
+  loggingDirectives?: any;
 }
 
 export interface PurpleNavigationEndpoint {
-  clickTrackingParams: TrackingParams;
+  clickTrackingParams: string;
   commandMetadata: YTAutoplayVideoCommandMetadata;
   browseEndpoint?: PurpleBrowseEndpoint;
   urlEndpoint?: PurpleURLEndpoint;
@@ -506,7 +549,7 @@ export interface PurpleModal {
 }
 
 export interface PurpleModalWithTitleAndButtonRenderer {
-  title: CancelText;
+  title: YTSimpleText;
   content: ShortViewCountText;
   button: PurpleButton;
 }
@@ -519,7 +562,7 @@ export interface PurpleButtonRenderer {
   style: string;
   size: string;
   isDisabled: boolean;
-  text: CancelText;
+  text: YTSimpleText;
   navigationEndpoint: TentacledNavigationEndpoint;
   trackingParams: string;
 }
@@ -606,8 +649,8 @@ export interface FluffyModal {
 }
 
 export interface FluffyModalWithTitleAndButtonRenderer {
-  title: CancelText;
-  content: CancelText;
+  title: YTSimpleText;
+  content: YTSimpleText;
   button: FluffyButton;
 }
 
@@ -619,7 +662,7 @@ export interface FluffyButtonRenderer {
   style: string;
   size: string;
   isDisabled: boolean;
-  text: CancelText;
+  text: YTSimpleText;
   navigationEndpoint: StickyNavigationEndpoint;
   trackingParams: string;
 }
@@ -695,9 +738,9 @@ export interface RichMetadataRowRendererContent {
 export interface RichMetadataRenderer {
   style: string;
   thumbnail: Background;
-  title: CancelText;
-  subtitle?: CancelText;
-  callToAction: CancelText;
+  title: YTSimpleText;
+  subtitle?: YTSimpleText;
+  callToAction: YTSimpleText;
   callToActionIcon: Icon;
   endpoint: YTBrowseEndpointContainer;
   trackingParams: string;
@@ -733,17 +776,18 @@ export interface VideoOwnerRenderer {
   navigationEndpoint: VideoOwnerRendererNavigationEndpoint;
   subscriberCountText: YTRunContainer;
   trackingParams: string;
-  badges: OwnerBadgeElement[];
+  badges: MetadataBadgeRendererContainer[];
   membershipButton: MembershipButton;
 }
 
-export interface OwnerBadgeElement {
+export interface MetadataBadgeRendererContainer {
   metadataBadgeRenderer: OwnerBadgeMetadataBadgeRenderer;
 }
 
 export interface OwnerBadgeMetadataBadgeRenderer {
   icon: Icon;
   style: PurpleStyle;
+  label?: string;
   tooltip: Tooltip;
   trackingParams: string;
 }
@@ -785,8 +829,8 @@ export interface TentacledModal {
 }
 
 export interface TentacledModalWithTitleAndButtonRenderer {
-  title: CancelText;
-  content: CancelText;
+  title: YTSimpleText;
+  content: YTSimpleText;
   button: TentacledButton;
 }
 
@@ -798,7 +842,7 @@ export interface TentacledButtonRenderer {
   style: string;
   size: string;
   isDisabled: boolean;
-  text: CancelText;
+  text: YTSimpleText;
   navigationEndpoint: IndecentNavigationEndpoint;
   trackingParams: string;
 }
@@ -858,8 +902,8 @@ export interface StickyModal {
 }
 
 export interface StickyModalWithTitleAndButtonRenderer {
-  title: CancelText;
-  content: CancelText;
+  title: YTSimpleText;
+  content: YTSimpleText;
   button: StickyButton;
 }
 
@@ -871,7 +915,7 @@ export interface StickyButtonRenderer {
   style: string;
   size: string;
   isDisabled: boolean;
-  text: CancelText;
+  text: YTSimpleText;
   navigationEndpoint: AmbitiousNavigationEndpoint;
   trackingParams: string;
 }
@@ -905,7 +949,7 @@ export interface SecondaryResultsResult {
 }
 
 export interface CompactAutoplayRenderer {
-  title: CancelText;
+  title: YTSimpleText;
   toggleDescription: YTRunContainer;
   infoIcon: Icon;
   infoText: YTRunContainer;
@@ -922,16 +966,16 @@ export interface ContentCompactVideoRenderer {
   thumbnail: Background;
   title: LengthText;
   longBylineText: BylineText;
-  publishedTimeText: CancelText;
-  viewCountText: CancelText;
+  publishedTimeText: YTSimpleText;
+  viewCountText: YTSimpleText;
   lengthText: LengthText;
   navigationEndpoint: CompactVideoRendererNavigationEndpoint;
   shortBylineText: BylineText;
   badges: PurpleBadge[];
   channelThumbnail: Background;
-  ownerBadges: OwnerBadgeElement[];
+  ownerBadges: MetadataBadgeRendererContainer[];
   trackingParams: string;
-  shortViewCountText: CancelText;
+  shortViewCountText: YTSimpleText;
   menu: Menu;
   thumbnailOverlays: CompactVideoRendererThumbnailOverlay[];
   accessibility: YTAccessibilityData;
@@ -1094,14 +1138,14 @@ export interface ResultCompactVideoRenderer {
   thumbnail: Background;
   title: LengthText;
   longBylineText: BylineText;
-  publishedTimeText?: CancelText;
+  publishedTimeText?: YTSimpleText;
   viewCountText: ShortViewCountText;
   lengthText?: LengthText;
   navigationEndpoint: CompactVideoRendererNavigationEndpoint;
   shortBylineText: BylineText;
   badges?: PurpleBadge[];
   channelThumbnail: Background;
-  ownerBadges?: OwnerBadgeElement[];
+  ownerBadges?: MetadataBadgeRendererContainer[];
   trackingParams: string;
   shortViewCountText: ShortViewCountText;
   menu: Menu;
@@ -1229,21 +1273,21 @@ export interface PlayerOverlayRendererAutoplay {
 }
 
 export interface PlayerOverlayAutoplayRenderer {
-  title: CancelText;
-  videoTitle: CancelText;
+  title: YTSimpleText;
+  videoTitle: YTSimpleText;
   byline: Byline;
-  cancelText: CancelText;
-  pauseText: CancelText;
+  cancelText: YTSimpleText;
+  pauseText: YTSimpleText;
   background: Background;
   countDownSecs: number;
   nextButton: NextButton;
   trackingParams: string;
   preferImmediateRedirect: boolean;
   videoId: string;
-  publishedTimeText: CancelText;
+  publishedTimeText: YTSimpleText;
   webShowNewAutonavCountdown: boolean;
   webShowBigThumbnailEndscreen: boolean;
-  shortViewCountText: CancelText;
+  shortViewCountText: YTSimpleText;
 }
 
 export interface NextButton {
@@ -1262,7 +1306,7 @@ export interface EndScreen {
 
 export interface WatchNextEndScreenRenderer {
   results: WatchNextEndScreenRendererResult[];
-  title: CancelText;
+  title: YTSimpleText;
   trackingParams: string;
 }
 
@@ -1280,7 +1324,7 @@ export interface EndScreenVideoRenderer {
   navigationEndpoint: CurrentVideoEndpointClass;
   trackingParams: string;
   shortViewCountText: ShortViewCountText;
-  publishedTimeText: CancelText;
+  publishedTimeText: YTSimpleText;
   thumbnailOverlays: EndScreenVideoRendererThumbnailOverlay[];
 }
 
