@@ -25,7 +25,7 @@ export class Masterchat {
     const videoId = normalizeVideoId(videoIdOrUrl);
     const mc = new Masterchat(videoId, options);
     await mc.populateMetadata();
-    if (options.credentials) await mc.populateLiveChatContext();
+    // if (options.credentials) await mc.populateLiveChatContext();
     return mc;
   }
 
@@ -33,7 +33,7 @@ export class Masterchat {
     const videoId = normalizeVideoId(videoIdOrUrl);
     this.videoId = videoId;
     await this.populateMetadata();
-    if (this.credentials) await this.populateLiveChatContext();
+    // if (this.credentials) await this.populateLiveChatContext();
   }
 
   private constructor(

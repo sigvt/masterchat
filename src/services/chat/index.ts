@@ -583,20 +583,33 @@ export class ChatService {
       // {"trackingParams": ...} => ?
       if ("contents" in obj) {
         debugLog("continuationNotFound(with contents)", JSON.stringify(obj));
+        return {
+          error: {
+            status: FetchChatErrorStatus.LiveChatDisabled,
+            message:
+              "continuation contents cannot be found. live chat is over, or turned into membership-only stream, or chat got disabled",
+          },
+        };
       }
       if ("trackingParams" in obj) {
         debugLog(
           "continuationNotFound(with trackingParams)",
           JSON.stringify(obj)
         );
+        return {
+          error: {
+            status: FetchChatErrorStatus.LiveChatDisabled,
+            message:
+              "continuation contents cannot be found. live chat is over, or turned into membership-only stream, or chat got disabled",
+          },
+        };
       }
 
+      // Live stream ended
       return {
-        error: {
-          status: FetchChatErrorStatus.LiveChatDisabled,
-          message:
-            "continuation contents cannot be found. live chat is over, or turned into membership-only stream, or chat got disabled",
-        },
+        actions: [],
+        continuation: undefined,
+        error: null,
       };
     }
 
@@ -658,7 +671,6 @@ export class ChatService {
 
       // handle errors
       if (chatResponse.error) {
-        // TODO: break if live stream is ended
         yield chatResponse;
         continue;
       }
@@ -668,11 +680,9 @@ export class ChatService {
 
       // refresh continuation token
       const { continuation } = chatResponse;
+
       if (!continuation) {
-        // TODO: verify that this scenario actually exists
-        debugLog(
-          "[action required] got chatResponse but no continuation event occurred"
-        );
+        debugLog("live stream ended");
         break;
       }
 

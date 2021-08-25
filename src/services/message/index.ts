@@ -1,4 +1,5 @@
 import { Base } from "../../base";
+import { generateSendMessageParams } from "../../protobuf";
 import {
   YTActionResponse,
   YTLiveChatTextMessageRenderer,
@@ -13,8 +14,12 @@ export class MessageService {
   async sendMessage(
     message: string
   ): Promise<YTLiveChatTextMessageRenderer | undefined> {
-    const params = this.liveChatContext?.sendMessageParams;
-    if (!params) return undefined;
+    // const params = this.liveChatContext?.sendMessageParams;
+    // if (!params) return undefined;
+    const params = generateSendMessageParams(
+      this.metadata.channelId,
+      this.videoId
+    );
 
     const body = withContext({
       richMessage: {

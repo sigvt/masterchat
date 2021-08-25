@@ -1,3 +1,9 @@
+function encodeWeirdB64(payload: Buffer) {
+  return Buffer.from(encodeURIComponent(payload.toString("base64"))).toString(
+    "base64"
+  );
+}
+
 /**
 ```
 0a = 00001 010 field=1 wire=2 length-delimited
@@ -11,13 +17,18 @@
 		0b = 11bytes
 			<omitted> (video id)
 		10 = 00010 000 field=2 wire=0
-			02 = decimal=2 (unknown enum)
+			decimal, 1 if other's chat, 2 if own chat
 		18 = 00011 000 field=3 wire=0
 			04 = decimal=4 (unknown enum)
 ```
  */
-export function generateSendMessageParams(channelId: string, videoId: string) {
-  return Buffer.from([
+export function generateSendMessageParams(
+  channelId: string,
+  videoId: string,
+  magic1: number = 1,
+  magic2: number = 4
+) {
+  const buf = Buffer.from([
     ...lenDelim(
       1,
       lenDelim(
@@ -28,9 +39,10 @@ export function generateSendMessageParams(channelId: string, videoId: string) {
         ])
       )
     ),
-    ...variant(2, 2),
-    ...variant(3, 4),
+    ...variant(2, magic1),
+    ...variant(3, magic2),
   ]);
+  return encodeWeirdB64(buf);
 }
 
 function lenDelim(fieldId: number, payload: Buffer) {

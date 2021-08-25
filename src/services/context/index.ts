@@ -74,11 +74,11 @@ export class ContextService {
     this.apiKey = ctx.apiKey;
   }
 
-  protected async populateLiveChatContext() {
-    const token = this.continuation.top.token;
-    const ctx = await this.fetchLiveChatContext(token);
-    this.liveChatContext = ctx;
-  }
+  // protected async populateLiveChatContext() {
+  //   const token = this.continuation.top.token;
+  //   const ctx = await this.fetchLiveChatContext(token);
+  //   this.liveChatContext = ctx;
+  // }
 
   private async fetchContext(id: string): Promise<Context> {
     const res = await this.get("/watch?v=" + id);
