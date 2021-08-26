@@ -483,87 +483,107 @@ export class ChatService {
     });
 
     let res: YTChatResponse;
+    let retryRemaining = 3;
+    const retryInterval = 1000;
 
-    try {
-      res = await this.postJson<YTChatResponse>(queryUrl, {
-        body: JSON.stringify(body),
-        retry: 3,
-        retryInterval: 5000,
-      });
+    loop: while (true) {
+      try {
+        res = await this.postJson<YTChatResponse>(queryUrl, {
+          body: JSON.stringify(body),
+          retry: 0,
+        });
 
-      if (res.error) {
-        /** error.code ->
-         * 400: request contains an invalid argument
-         *   - when attempting to access livechat while it is already in replay mode
-         * 403: no permission
-         *   - video was made private by uploader
-         *   - something went wrong (server-side)
-         * 404: not found
-         *   - removed by uploader
-         * 500: internal error
-         *   - server-side failure
-         * 503: The service is currently unavailable
-         *   - temporary server-side failure
-         *
-         * @see https://developers.google.com/youtube/v3/live/docs/liveChatMessages/list
-         */
+        if (res.error) {
+          /** error.code ->
+           * 400: request contains an invalid argument
+           *   - when attempting to access livechat while it is already in replay mode
+           * 403: no permission
+           *   - video was made private by uploader
+           *   - something went wrong (server-side)
+           * 404: not found
+           *   - removed by uploader
+           * 500: internal error
+           *   - server-side failure
+           * 503: The service is currently unavailable
+           *   - temporary server-side failure
+           *
+           * @see https://developers.google.com/youtube/v3/live/docs/liveChatMessages/list
+           */
 
-        const { status, message } = res.error;
+          const { status, message } = res.error;
 
-        switch (status) {
-          case YTChatErrorStatus.Invalid: {
-            return {
-              error: {
-                status: FetchChatErrorStatus.Unavailable,
-                message:
-                  "requested live chat is already in reply mode: " + message,
-              },
-            };
+          /**
+           * Return Error object to let users handle errors.
+           */
+
+          switch (status) {
+            case YTChatErrorStatus.Invalid:
+            case YTChatErrorStatus.PermissionDenied:
+            case YTChatErrorStatus.NotFound: {
+              // TODO: Make sure that these errors are the only signals you get when the live stream is finished
+              debugLog(
+                `[action required] ${this.videoId}: ${status} - ${message}`
+              );
+              return {
+                actions: [],
+                continuation: undefined,
+                error: null,
+              };
+            }
+            case YTChatErrorStatus.Unavailable:
+            case YTChatErrorStatus.Internal: {
+              // it might be temporary issue so should retry immediately
+              throw new Error(`${status}: ${message}`);
+            }
+            default: {
+              debugLog(
+                `[action required] ${this.videoId}: Unrecognized error code`,
+                JSON.stringify(res)
+              );
+              return {
+                error: {
+                  status,
+                  message,
+                },
+              };
+            }
           }
-          case YTChatErrorStatus.PermissionDenied:
-          case YTChatErrorStatus.NotFound: {
-            return {
-              error: {
-                status: FetchChatErrorStatus.Unavailable,
-                message,
-              },
-            };
-          }
-          case YTChatErrorStatus.Unavailable:
-          case YTChatErrorStatus.Internal: {
-            // it's temporary so should retry
-            const err = new Error(message);
-            (err as any).type = "system";
-            throw err;
-          }
-          default:
+        }
+
+        break loop;
+      } catch (err) {
+        // logging
+        debugLog(
+          `Error(fetchChat) ${this.videoId}:`,
+          err.message,
+          err.code,
+          err.type
+        );
+        switch (err.type) {
+          case "invalid-json": {
+            // NOTE: rarely occurs
             debugLog(
-              "[action required] Unrecognized error code",
-              JSON.stringify(res)
+              `[action required] ${this.videoId}: invalid-json`,
+              err.response.text()
             );
-            return {
-              error: {
-                status,
-                message,
-              },
-            };
+          }
+          case "system": {
+            // ECONNRESET, ETIMEOUT, etc
+            // Currently unavailable
+          }
         }
-      }
-    } catch (err) {
-      debugLog("fetchError", err.message, err.code, err.type);
 
-      switch (err.type) {
-        case "invalid-json": {
-          // NOTE: rarely occurs
-          debugLog("[action required] invalid-json", err.response.text());
+        if (retryInterval > 0) {
+          retryRemaining -= 1;
+          debugLog(
+            `Retrying(fetchChat) remaining=${retryRemaining} interval=${retryInterval}`
+          );
+          await timeoutThen(retryInterval);
+          continue loop;
         }
-        case "system": {
-          // ECONNRESET, ETIMEOUT, etc
-          // Currently unavailable
-        }
-      }
 
-      throw err;
+        throw err;
+      }
     }
 
     const { continuationContents } = res;
