@@ -2,9 +2,8 @@ import { setupRecorder } from "nock-record";
 import fetch from "cross-fetch";
 import { Masterchat, timeoutThen } from "..";
 
-const record = setupRecorder({
-  mode: (process.env.NOCK_BACK_MODE as any) || "record",
-});
+const mode = (process.env.NOCK_BACK_MODE as any) || "lockdown";
+const record = setupRecorder({ mode });
 
 async function fetchUpcomingStreams() {
   const data = await fetch("https://holodex.net/api/v2/live?status=live").then(
@@ -90,7 +89,7 @@ describe("normal live chat", () => {
     }
 
     // console.log("waiting for", timeoutMs);
-    await timeoutThen(timeoutMs);
+    if (mode !== "lockdown") await timeoutThen(timeoutMs);
 
     const consecutiveChat = await mc.fetchChat({
       continuation: token,

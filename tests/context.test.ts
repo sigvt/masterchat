@@ -2,7 +2,7 @@ import { setupRecorder } from "nock-record";
 import { Masterchat } from "..";
 
 const record = setupRecorder({
-  mode: (process.env.NOCK_BACK_MODE as any) || "record",
+  mode: (process.env.NOCK_BACK_MODE as any) || "lockdown",
 });
 
 it("live chat", async () => {

@@ -11,7 +11,7 @@ const credentials = JSON.parse(
 const itif = enabled ? it : it.skip;
 
 const record = setupRecorder({
-  mode: (process.env.NOCK_BACK_MODE as any) || "record",
+  mode: (process.env.NOCK_BACK_MODE as any) || "lockdown",
 });
 
 describe("subscribers-only mode", () => {

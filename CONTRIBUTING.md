@@ -17,6 +17,26 @@ npm run dev
 DEBUG=masterchat ./lib/cli.js -c -t all <videoId>
 ```
 
+## Testing
+
+Test while recording response (run only once):
+
+```bash
+NOCK_BACK_MODE=record jest
+```
+
+Test using recorded response:
+
+```bash
+jest
+```
+
+Disable fixtures completely:
+
+```bash
+NOCK_BACK_MODE=wild jest
+```
+
 ## Release Flow (Maintainers only)
 
 ```
