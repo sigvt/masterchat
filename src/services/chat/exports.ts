@@ -129,10 +129,10 @@ export type Action =
   | AddBannerAction
   | RemoveBannerAction
   | AddViewerEngagementMessageAction
-  | ShowTooltipAction
   | ShowLiveChatActionPanelAction
   | CloseLiveChatActionPanelAction
   | UpdateLiveChatPollAction
+  | ShowTooltipAction
   | ModeChangeAction;
 
 export interface AddChatItemAction {

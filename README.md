@@ -21,11 +21,7 @@ npm i masterchat
 ```js
 import { Masterchat, convertRunsToString } from "masterchat";
 
-let mc;
-
-try {
-  mc = await Masterchat.init("<videoId>");
-} catch (err) {
+let mc = await Masterchat.init("<videoId>").catch((err) => {
   console.log(err.code);
   // "disabled" => Live chat is disabled
   // "membersOnly" => No permission (members-only)
@@ -35,9 +31,9 @@ try {
   // "denied" => Access denied
   // "invalid" => Invalid request
   // "unknown" => Unknown error
-}
+});
 
-for await (const res of mc.iterateChat({ tokenType: "top" })) {
+for await (const res of mc.iterateChat("top" /* or "all" */)) {
   if (res.error) {
     console.log(res.error);
     break;
@@ -66,9 +62,10 @@ const credentials = {
   SID: "<value>",
   SSID: "<value>",
 };
+
 const mc = await Masterchat.init("<videoId>", { credentials });
 
-for await (const { actions } of mc.iterateChat({ tokenType: "all" })) {
+for await (const { actions } of mc.iterateChat("all")) {
   for (const action of actions) {
     if (action.type !== "addChatItemAction") continue;
 
@@ -109,8 +106,9 @@ For a desktop app, see [Komet](https://github.com/holodata/komet).
 
 We welcome your contribution such as:
 
-- Use masterchat with your product and report bugs
-- Join discussions on the holodata Discord server
+- Use masterchat with your product and [report bugs](https://github.com/holodata/masterchat/issues/new)
+- Squash [TODOs](https://github.com/holodata/masterchat/search?l=TypeScript&q=TODO)
+- Join API discussions on the [holodata Discord server](https://holodata.org/discord)
 
 See [Contribution Guide](./CONTRIBUTING.md) for more information.
 

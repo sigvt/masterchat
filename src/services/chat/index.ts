@@ -180,7 +180,7 @@ function parseChatAction(action: YTAction): Action | UnknownAction {
                 break;
               default:
                 debugLog(
-                  "[action required] Unrecognized iconType:",
+                  `[action required] Unrecognized iconType:`,
                   iconType,
                   JSON.stringify(renderer)
                 );
@@ -602,7 +602,10 @@ export class ChatService {
       // {"contents": {"messageRenderer": {"text": {"runs": [{"text": "Sorry, live chat is currently unavailable"}]}}}} => ?
       // {"trackingParams": ...} => ?
       if ("contents" in obj) {
-        debugLog("continuationNotFound(with contents)", JSON.stringify(obj));
+        debugLog(
+          `continuationNotFound(with contents) ${this.videoId}:`,
+          JSON.stringify(obj)
+        );
         return {
           error: {
             status: FetchChatErrorStatus.LiveChatDisabled,
@@ -613,7 +616,7 @@ export class ChatService {
       }
       if ("trackingParams" in obj) {
         debugLog(
-          "continuationNotFound(with trackingParams)",
+          `continuationNotFound(with trackingParams) ${this.videoId}:`,
           JSON.stringify(obj)
         );
         return {
@@ -656,7 +659,10 @@ export class ChatService {
           )[0] as any;
 
           if (replayAction.actions.length > 1) {
-            debugLog("replayCount: " + replayAction.actions.length);
+            debugLog(
+              `[action required] ${this.videoId}: replayCount` +
+                replayAction.actions.length
+            );
           }
 
           return replayAction.actions[0];
@@ -704,7 +710,7 @@ export class ChatService {
       const { continuation } = chatResponse;
 
       if (!continuation) {
-        debugLog("live stream ended");
+        debugLog(`${this.videoId}: live stream ended`);
         break;
       }
 

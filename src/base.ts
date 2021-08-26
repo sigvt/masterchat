@@ -67,7 +67,7 @@ export class Base {
           await timeoutThen(retryInterval);
           remaining -= 1;
           debugLog(
-            `Retrying postJson remaining=${remaining} after=${retryInterval}`
+            `Retrying(postJson) remaining=${remaining} after=${retryInterval}`
           );
           continue;
         }
