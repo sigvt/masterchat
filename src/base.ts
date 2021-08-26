@@ -66,7 +66,9 @@ export class Base {
         if (remaining > 0) {
           await timeoutThen(retryInterval);
           remaining -= 1;
-          debugLog("postJson failed: retry remaining " + remaining);
+          debugLog(
+            `Retrying postJson remaining=${remaining} after=${retryInterval}`
+          );
           continue;
         }
 

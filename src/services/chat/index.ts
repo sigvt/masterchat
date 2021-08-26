@@ -587,7 +587,7 @@ export class ChatService {
           error: {
             status: FetchChatErrorStatus.LiveChatDisabled,
             message:
-              "continuation contents cannot be found. live chat is over, or turned into membership-only stream, or chat got disabled",
+              "continuation contents cannot be found. live chat might have turned into membership-only stream",
           },
         };
       }
@@ -600,7 +600,7 @@ export class ChatService {
           error: {
             status: FetchChatErrorStatus.LiveChatDisabled,
             message:
-              "continuation contents cannot be found. live chat is over, or turned into membership-only stream, or chat got disabled",
+              "continuation contents cannot be found. live chat might have turned into membership-only stream",
           },
         };
       }
@@ -656,11 +656,9 @@ export class ChatService {
   /**
    * Iterate chat until live stream ends
    */
-  async *iterateChat({
-    tokenType,
-  }: {
-    tokenType: keyof ReloadContinuationItems;
-  }): AsyncGenerator<SucceededChatResponse | FailedChatResponse> {
+  async *iterateChat(
+    tokenType: keyof ReloadContinuationItems
+  ): AsyncGenerator<SucceededChatResponse | FailedChatResponse> {
     let token = this.continuation[tokenType].token;
 
     // continuously fetch chat fragments

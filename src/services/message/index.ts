@@ -11,9 +11,7 @@ import { withContext } from "../../util";
  */
 export interface MessageService extends Base {}
 export class MessageService {
-  async sendMessage(
-    message: string
-  ): Promise<YTLiveChatTextMessageRenderer | undefined> {
+  async sendMessage(message: string): Promise<YTLiveChatTextMessageRenderer> {
     // const params = this.liveChatContext?.sendMessageParams;
     // if (!params) return undefined;
     const params = generateSendMessageParams(

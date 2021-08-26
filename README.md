@@ -4,7 +4,7 @@
 [![npm: total downloads](https://badgen.net/npm/dt/masterchat)](https://npmjs.org/package/masterchat)
 [![Open in Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/holodata/masterchat)
 
-A JavaScript library for YouTube Live Chat.
+Battle-tested YouTube Live Chat client for JavaScript.
 
 - [Documentation](https://holodata.github.io/masterchat/)
 
@@ -22,19 +22,19 @@ npm i masterchat
 import { Masterchat, convertRunsToString } from "masterchat";
 
 let mc;
+
 try {
   mc = await Masterchat.init("<videoId>");
 } catch (err) {
   console.log(err.code);
-  // "private" => Private video
-  // "unavailable" => Deleted video OR wrong video id
-  // "unarchived" => Live stream recording is not available
   // "disabled" => Live chat is disabled
-  // "abandoned" => Abandoned stream
   // "membersOnly" => No permission (members-only)
+  // "private" => No permission (private video)
+  // "unavailable" => Deleted OR wrong video id
+  // "unarchived" => Live stream recording is not available
   // "denied" => Access denied
   // "invalid" => Invalid request
-  // "unknown"; => Unknown error
+  // "unknown" => Unknown error
 }
 
 for await (const res of mc.iterateChat({ tokenType: "top" })) {
@@ -103,9 +103,14 @@ For a desktop app, see [Komet](https://github.com/holodata/komet).
 - [x] Release `masterchat-cli`
 - [x] Auth support
 - [x] Ability to send chat
-- [ ] Moderation functionality
+- [x] Moderation functionality
 
-## Contribution
+## Contribute
+
+We welcome your contribution such as:
+
+- Use masterchat with your product and report bugs
+- Join discussions on the holodata Discord server
 
 See [Contribution Guide](./CONTRIBUTING.md) for more information.
 
