@@ -16,7 +16,7 @@ export { convertRunsToString, normalizeVideoId, timeoutThen } from "./util";
 
 export interface MasterchatOptions {
   apiKey?: string;
-  credentials?: Credentials;
+  credentials?: Credentials | string;
 }
 
 // umbrella class
@@ -42,6 +42,13 @@ export class Masterchat {
   ) {
     this.videoId = videoId;
     this.apiKey = apiKey;
+
+    if (typeof credentials === "string") {
+      credentials = JSON.parse(
+        Buffer.from(credentials, "base64").toString()
+      ) as Credentials;
+    }
+
     this.credentials = credentials;
   }
 }

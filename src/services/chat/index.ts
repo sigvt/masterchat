@@ -619,7 +619,11 @@ export class ChatService {
 
     // this means no chat available between the time window
     if (!rawActions) {
-      return { actions: [], continuation: newContinuation, error: null };
+      return {
+        actions: [],
+        continuation: newContinuation,
+        error: null,
+      };
     }
 
     // unwrap replay actions into YTActions

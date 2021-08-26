@@ -66,6 +66,7 @@ export enum YTChatErrorStatus {
   Internal = "INTERNAL",
   Invalid = "INVALID_ARGUMENT",
   NotFound = "NOT_FOUND",
+  Unauthenticated = "UNAUTHENTICATED",
 }
 
 export interface YTChatErrorDetail {

@@ -58,7 +58,7 @@ for await (const res of mc.iterateChat({ tokenType: "top" })) {
 import { Masterchat, convertRunsToString } from "masterchat";
 import { isSpam } from "spamreaper";
 
-// YouTube session cookie
+// `credentials` is an object containing YouTube session cookie or a base64-encoded JSON string of them
 const credentials = {
   SAPISID: "<value>",
   APISID: "<value>",
