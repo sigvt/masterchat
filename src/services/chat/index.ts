@@ -599,7 +599,7 @@ export class ChatService {
       delete obj["responseContext"];
 
       // {} => Live stream ended
-      // {"contents": {"messageRenderer": {"text": {"runs": [{"text": "Sorry, live chat is currently unavailable"}]}}}} => ?
+      // {"contents": {"messageRenderer": {"text": {"runs": [{"text": "Sorry, live chat is currently unavailable"}]}}}} => Turned into members-only stream
       // {"trackingParams": ...} => ?
       if ("contents" in obj) {
         debugLog(

@@ -101,6 +101,7 @@ For a desktop app, see [Komet](https://github.com/holodata/komet).
 - [x] Auth support
 - [x] Ability to send chat
 - [x] Moderation functionality
+- [ ] Simplify action interface
 
 ## Contribute
 
@@ -108,7 +109,7 @@ We welcome your contribution such as:
 
 - Use masterchat with your product and [report bugs](https://github.com/holodata/masterchat/issues/new)
 - Squash [TODOs](https://github.com/holodata/masterchat/search?l=TypeScript&q=TODO)
-- Join API discussions on the [holodata Discord server](https://holodata.org/discord)
+- Join API discussions on [holodata Discord server](https://holodata.org/discord)
 
 See [Contribution Guide](./CONTRIBUTING.md) for more information.
 
