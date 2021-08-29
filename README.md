@@ -6,7 +6,7 @@
 
 Battle-tested YouTube Live Chat client for JavaScript.
 
-- [Documentation](https://holodata.github.io/masterchat/)
+- [Documentation](https://holodata.github.io/masterchat/classes/index.Masterchat.html)
 
 ## Install
 
