@@ -21,59 +21,96 @@ npm i masterchat
 ```js
 import { Masterchat, convertRunsToString } from "masterchat";
 
-let mc = await Masterchat.init("<videoId>").catch((err) => {
-  console.log(err.code);
-  // "disabled" => Live chat is disabled
-  // "membersOnly" => No permission (members-only)
-  // "private" => No permission (private video)
-  // "unavailable" => Deleted OR wrong video id
-  // "unarchived" => Live stream recording is not available
-  // "denied" => Access denied
-  // "invalid" => Invalid request
-  // "unknown" => Unknown error
-});
+async function main() {
+  const mc = await Masterchat.init("<videoId>").catch((err) => {
+    console.log(err.code);
+    // "disabled" => Live chat is disabled
+    // "membersOnly" => No permission (members-only)
+    // "private" => No permission (private video)
+    // "unavailable" => Deleted OR wrong video id
+    // "unarchived" => Live stream recording is not available
+    // "denied" => Access denied
+    // "invalid" => Invalid request
+    // "unknown" => Unknown error
+  });
 
-for await (const res of mc.iterateChat("top" /* or "all" */)) {
-  if (res.error) {
-    console.log(res.error);
-    break;
-  }
+  for await (const res of mc.iterateChat("top" /* or "all" */)) {
+    if (res.error) {
+      console.log(res.error);
+      break;
+    }
 
-  const { actions } = res;
-  const chats = actions.filter((action) => action.type === "addChatItemAction");
+    const { actions } = res;
+    const chats = actions.filter(
+      (action) => action.type === "addChatItemAction"
+    );
 
-  for (const chat of chats) {
-    console.log(chat.authorName, convertRunsToString(chat.rawMessage));
+    for (const chat of chats) {
+      console.log(chat.authorName, convertRunsToString(chat.rawMessage));
+    }
   }
 }
+
+main();
 ```
 
-### Auto-moderation bot
+### Download replay chat as JSONLines
+
+```js
+import { Masterchat, convertRunsToString } from "masterchat";
+import { appendFile } from "fs/promises";
+
+async function main() {
+  const mc = await Masterchat.init("<videoId>");
+
+  for await (const { actions } of mc.iterateChat("all", {
+    ignoreReplayTimeout: true,
+  })) {
+    const chats = actions.filter(
+      (action) => action.type === "addChatItemAction"
+    );
+
+    const jsonl = chats.map((chat) => JSON.stringify(chat)).join("\n");
+
+    await appendFile("./chats.jsonl", jsonl + "\n");
+  }
+}
+
+main();
+```
+
+### Auto-moderator
 
 ```js
 import { Masterchat, convertRunsToString } from "masterchat";
 import { isSpam } from "spamreaper";
 
-// `credentials` is an object containing YouTube session cookie or a base64-encoded JSON string of them
-const credentials = {
-  SAPISID: "<value>",
-  APISID: "<value>",
-  HSID: "<value>",
-  SID: "<value>",
-  SSID: "<value>",
-};
+async function main() {
+  // `credentials` is an object containing YouTube session cookie or a base64-encoded JSON string of them
+  const credentials = {
+    SAPISID: "<value>",
+    APISID: "<value>",
+    HSID: "<value>",
+    SID: "<value>",
+    SSID: "<value>",
+  };
 
-const mc = await Masterchat.init("<videoId>", { credentials });
+  const mc = await Masterchat.init("<videoId>", { credentials });
 
-for await (const { actions } of mc.iterateChat("all")) {
-  for (const action of actions) {
-    if (action.type !== "addChatItemAction") continue;
+  for await (const { actions } of mc.iterateChat("all", {
+    ignoreFirstResponse: true,
+  })) {
+    for (const action of actions) {
+      if (action.type !== "addChatItemAction") continue;
 
-    if (isSpam(convertRunsToString(action.rawMessage))) {
-      await mc.remove(action.contextMenuEndpointParams);
+      if (isSpam(convertRunsToString(action.rawMessage))) {
+        await mc.remove(action.contextMenuEndpointParams);
+      }
     }
   }
 }
+
+main();
 ```
 
 ## CLI

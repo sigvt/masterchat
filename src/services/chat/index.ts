@@ -687,9 +687,14 @@ export class ChatService {
    * Iterate chat until live stream ends
    */
   async *iterateChat(
-    tokenType: keyof ReloadContinuationItems
+    tokenType: keyof ReloadContinuationItems,
+    {
+      ignoreFirstResponse = false,
+      ignoreReplayTimeout = false,
+    }: { ignoreFirstResponse?: boolean; ignoreReplayTimeout?: boolean } = {}
   ): AsyncGenerator<SucceededChatResponse | FailedChatResponse> {
     let token = this.continuation[tokenType].token;
+    let treatedFirstResponse = false;
 
     // continuously fetch chat fragments
     while (true) {
@@ -704,7 +709,11 @@ export class ChatService {
       }
 
       // handle chats
-      yield chatResponse;
+      if (!(ignoreFirstResponse && !treatedFirstResponse)) {
+        yield chatResponse;
+      }
+
+      treatedFirstResponse = true;
 
       // refresh continuation token
       const { continuation } = chatResponse;
@@ -716,7 +725,7 @@ export class ChatService {
 
       token = continuation.token;
 
-      if (!this.isReplay) {
+      if (!(this.isReplay && ignoreReplayTimeout)) {
         await timeoutThen(continuation.timeoutMs);
       }
     }
