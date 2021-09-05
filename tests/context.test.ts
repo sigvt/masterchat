@@ -85,7 +85,7 @@ it("members-only stream", async () => {
     await Masterchat.init("M-sdpgv3gMQ");
     throw new Error("this should not occur");
   } catch (err) {
-    expect(err.code).toBe("membersOnly");
+    expect((err as any).code).toBe("membersOnly");
   } finally {
     completeRecording();
     assertScopesFinished();
@@ -100,7 +100,7 @@ it("pre stream but chat disabled", async () => {
     await Masterchat.init("l3T2COhIouU");
     throw new Error("this should not occur");
   } catch (err) {
-    expect(err.code).toBe("disabled");
+    expect((err as any).code).toBe("disabled");
   } finally {
     completeRecording();
     assertScopesFinished();
@@ -117,7 +117,7 @@ it("archived stream with chat replay being prepared", async () => {
     await Masterchat.init("32qr8wO1mV4");
     throw new Error("this should not occur");
   } catch (err) {
-    expect(err.code).toBe("disabled");
+    expect((err as any).code).toBe("disabled");
   } finally {
     completeRecording();
     assertScopesFinished();
@@ -132,7 +132,7 @@ it("unarchived stream", async () => {
     await Masterchat.init("xCKYp2lxywE");
     throw new Error("this should not occur");
   } catch (err) {
-    expect(err.code).toBe("unarchived");
+    expect((err as any).code).toBe("unarchived");
   } finally {
     completeRecording();
     assertScopesFinished();
@@ -147,7 +147,7 @@ it("invalid video id", async () => {
     await Masterchat.init("invalid_video_id");
     throw new Error("this should not occur");
   } catch (err) {
-    expect(err.code).toBe("unavailable");
+    expect((err as any).code).toBe("unavailable");
   } finally {
     completeRecording();
     assertScopesFinished();
@@ -160,7 +160,7 @@ it("private stream", async () => {
     await Masterchat.init("wchTnTjAiHg");
     throw new Error("this should not occur");
   } catch (err) {
-    expect(err.code).toBe("private");
+    expect((err as any).code).toBe("private");
   } finally {
     completeRecording();
     assertScopesFinished();
@@ -173,7 +173,7 @@ it("deleted stream", async () => {
     await Masterchat.init("XBmtJiYt8Tw");
     throw new Error("this should not occur");
   } catch (err) {
-    expect(err.code).toBe("unavailable");
+    expect((err as any).code).toBe("unavailable");
   } finally {
     completeRecording();
     assertScopesFinished();
