@@ -1,3 +1,4 @@
+import { FetchError } from "node-fetch";
 import { Base } from "../../base";
 import {
   YTAction,
@@ -553,23 +554,23 @@ export class ChatService {
         break loop;
       } catch (err) {
         // logging
-        debugLog(
-          `Error(fetchChat) ${this.videoId}:`,
-          err.message,
-          err.code,
-          err.type
-        );
-        switch (err.type) {
-          case "invalid-json": {
-            // NOTE: rarely occurs
-            debugLog(
-              `[action required] ${this.videoId}: invalid-json`,
-              err.response.text()
-            );
-          }
-          case "system": {
-            // ECONNRESET, ETIMEOUT, etc
-            // Currently unavailable
+        if (err instanceof FetchError) {
+          debugLog(
+            `Error(fetchChat) ${this.videoId}:`,
+            err.message,
+            err.code,
+            err.type
+          );
+
+          switch (err.type) {
+            case "invalid-json": {
+              // NOTE: rarely occurs
+              debugLog(`[action required] ${this.videoId}: invalid-json`);
+            }
+            case "system": {
+              // ECONNRESET, ETIMEOUT, etc
+              // Currently unavailable
+            }
           }
         }
 

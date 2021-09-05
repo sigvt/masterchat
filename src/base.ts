@@ -1,4 +1,5 @@
 import fetch from "cross-fetch";
+import { FetchError } from "node-fetch";
 import { buildAuthHeaders, Credentials } from "./auth";
 import { DEFAULT_HEADERS, DEFAULT_ORIGIN } from "./constants";
 import { ReloadContinuationItems } from "./services/chat/exports";
@@ -59,20 +60,22 @@ export class Base {
         const res = await this.post(input, init);
         return await res.json();
       } catch (err) {
-        if (err.name === "AbortError") throw err;
+        if (err instanceof Error) {
+          if (err.name === "AbortError") throw err;
 
-        errors.push(err);
+          errors.push(err);
 
-        if (remaining > 0) {
-          await timeoutThen(retryInterval);
-          remaining -= 1;
-          debugLog(
-            `Retrying(postJson) remaining=${remaining} after=${retryInterval}`
-          );
-          continue;
+          if (remaining > 0) {
+            await timeoutThen(retryInterval);
+            remaining -= 1;
+            debugLog(
+              `Retrying(postJson) remaining=${remaining} after=${retryInterval}`
+            );
+            continue;
+          }
+
+          (err as any).errors = errors;
         }
-
-        err.errors = errors;
         throw err;
       }
     }
