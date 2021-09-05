@@ -671,6 +671,11 @@ export interface YTPopoutLiveChatEndpointContainer {
 
 export enum YTWebPageType {
   Unknown = "WEB_PAGE_TYPE_UNKNOWN",
+  WebPageTypeBrowse = "WEB_PAGE_TYPE_BROWSE",
+  WebPageTypeChannel = "WEB_PAGE_TYPE_CHANNEL",
+  WebPageTypeSearch = "WEB_PAGE_TYPE_SEARCH",
+  WebPageTypeUnknown = "WEB_PAGE_TYPE_UNKNOWN",
+  WebPageTypeWatch = "WEB_PAGE_TYPE_WATCH",
 }
 
 export interface YTSimpleText {

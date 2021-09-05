@@ -44,7 +44,7 @@ export const SUPERCHAT_COLOR_MAP = {
  * Errors
  */
 
-export interface YTLiveError {
+export interface LiveError {
   message: string;
   status: FetchChatErrorStatus | YTChatErrorStatus;
 }
@@ -271,5 +271,5 @@ export interface SucceededChatResponse {
 }
 
 export interface FailedChatResponse {
-  error: YTLiveError;
+  error: LiveError;
 }

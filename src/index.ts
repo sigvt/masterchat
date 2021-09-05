@@ -8,10 +8,22 @@ import { MessageService } from "./services/message";
 import { normalizeVideoId } from "./util";
 
 export { Credentials } from "./auth";
+export { MasterchatError } from "./error";
 export * from "./services/chat/exports";
 export * from "./services/chatAction/exports";
 export * from "./services/context/exports";
 export * from "./services/message/exports";
+export {
+  YTChatError,
+  YTChatErrorStatus,
+  YTEmojiRun,
+  YTLiveChatTextMessageRenderer,
+  YTRun,
+  YTRunContainer,
+  YTTextRun,
+  YTThumbnail,
+} from "./types/chat";
+export { YTReloadContinuation } from "./types/context";
 export { convertRunsToString, normalizeVideoId, timeoutThen } from "./util";
 
 export interface MasterchatOptions {

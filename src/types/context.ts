@@ -1,9 +1,13 @@
 import {
+  UIActions,
+  YTClientMessages,
   YTIcon,
+  YTOverflowMenu,
   YTRun,
   YTRunContainer,
   YTSimpleText,
   YTThumbnailList,
+  YTWebPageType,
 } from "./chat";
 
 export interface YTPlayabilityStatus {
@@ -154,14 +158,6 @@ export interface YTPurpleWebCommandMetadata {
   rootVe: number;
 }
 
-export enum YTWebPageType {
-  WebPageTypeBrowse = "WEB_PAGE_TYPE_BROWSE",
-  WebPageTypeChannel = "WEB_PAGE_TYPE_CHANNEL",
-  WebPageTypeSearch = "WEB_PAGE_TYPE_SEARCH",
-  WebPageTypeUnknown = "WEB_PAGE_TYPE_UNKNOWN",
-  WebPageTypeWatch = "WEB_PAGE_TYPE_WATCH",
-}
-
 export interface YTAutoplayVideoWatchEndpoint {
   videoId: string;
   params: string;
@@ -189,14 +185,6 @@ export interface YTLiveChatRenderer {
   clientMessages: YTClientMessages;
   initialDisplayState: string;
   showHideButton: YTShowHideButton;
-}
-
-export interface YTClientMessages {
-  reconnectMessage: YTRunContainer;
-  unableToReconnectMessage: YTRunContainer;
-  fatalError: YTRunContainer;
-  reconnectedMessage: YTRunContainer;
-  genericError: YTRunContainer;
 }
 
 export interface YTReloadContinuation {
@@ -229,14 +217,6 @@ export interface YTCollapseButtonButtonRenderer {
   accessibility?: YTAccessibilityLabel;
   trackingParams: string;
   text?: YTRunContainer;
-}
-
-export interface YTOverflowMenu {
-  menuRenderer: {
-    items: YTPurpleItem[];
-    trackingParams: string;
-    accessibility: YTAccessibilityData;
-  };
 }
 
 export interface YTAccessibilityData {
@@ -1241,10 +1221,6 @@ export interface AcceptCommand {
 export interface FeedbackEndpoint {
   feedbackToken: string;
   uiActions: UIActions;
-}
-
-export interface UIActions {
-  hideEnclosingContainer: boolean;
 }
 
 export interface DismissStrategy {
