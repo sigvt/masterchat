@@ -1,5 +1,6 @@
 import { FetchError } from "node-fetch";
 import { Base } from "../../base";
+import { ENDPOINT_GLC, ENDPOINT_GLCR } from "../../constants";
 import {
   YTAction,
   YTAddLiveChatTickerItem,
@@ -32,9 +33,8 @@ import {
   UnknownAction,
 } from "./exports";
 
-/** References
- * @see https://developers.google.com/youtube/v3/live/docs/liveChatMessages
- */
+const E_GLCR = Buffer.from(ENDPOINT_GLCR, "hex").toString();
+const E_GLC = Buffer.from(ENDPOINT_GLC, "hex").toString();
 
 function parseColorCode(code: number): Color | undefined {
   if (code > 4294967295) {
@@ -475,9 +475,7 @@ export class ChatService {
   }: {
     continuation: string;
   }): Promise<SucceededChatResponse | FailedChatResponse> {
-    const queryUrl = this.isReplay
-      ? "/youtubei/v1/live_chat/get_live_chat_replay"
-      : "/youtubei/v1/live_chat/get_live_chat";
+    const queryUrl = this.isReplay ? E_GLCR : E_GLC;
 
     const body = withContext({
       continuation,

@@ -26,6 +26,8 @@ export {
 export { YTReloadContinuation } from "./types/context";
 export { convertRunsToString, normalizeVideoId, timeoutThen } from "./util";
 
+const DAK = Buffer.from(DEFAULT_API_KEY, "hex").toString();
+
 export interface MasterchatOptions {
   apiKey?: string;
   credentials?: Credentials | string;
@@ -50,7 +52,7 @@ export class Masterchat {
 
   private constructor(
     videoId: string,
-    { apiKey = DEFAULT_API_KEY, credentials }: MasterchatOptions = {}
+    { apiKey = DAK, credentials }: MasterchatOptions = {}
   ) {
     this.videoId = videoId;
     this.apiKey = apiKey;

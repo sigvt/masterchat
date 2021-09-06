@@ -138,7 +138,6 @@ For a desktop app, see [Komet](https://github.com/holodata/komet).
 - [x] Auth support
 - [x] Ability to send chat
 - [x] Moderation functionality
-- [ ] Simplify action interface
 
 ## Contribute
 

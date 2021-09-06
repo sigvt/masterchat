@@ -2,7 +2,7 @@
   "compilerOptions": {
     /* https://www.typescriptlang.org/docs/handbook/project-references.html */
 
-    "target": "es2019",
+    "target": "es2020",
     "module": "commonjs",
     "moduleResolution": "node",
     "declaration": true /* Generates corresponding '.d.ts' file. */,
