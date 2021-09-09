@@ -22,19 +22,19 @@ DEBUG=masterchat ./lib/cli.js -c -t all <videoId>
 Test while recording response (run only once):
 
 ```bash
-DEBUG=masterchat NOCK_BACK_MODE=record jest
+NOCK_BACK_MODE=record jest
 ```
 
 Test using recorded response:
 
 ```bash
-DEBUG=masterchat jest
+jest
 ```
 
 Disable fixtures completely:
 
 ```bash
-DEBUG=masterchat NOCK_BACK_MODE=wild jest
+NOCK_BACK_MODE=wild jest
 ```
 
 ## Release Flow (Maintainers only)

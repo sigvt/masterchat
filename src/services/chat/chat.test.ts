@@ -1,6 +1,7 @@
 import { setupRecorder } from "nock-record";
 import fetch from "cross-fetch";
-import { Masterchat, timeoutThen } from "..";
+import { Masterchat, timeoutThen } from "../..";
+import assert from "assert";
 
 const mode = (process.env.NOCK_BACK_MODE as any) || "lockdown";
 const record = setupRecorder({ mode });
@@ -30,7 +31,7 @@ describe("normal live chat", () => {
   });
 
   it("context match", async () => {
-    expect(mc.metadata.id).toBe(subject.id);
+    assert(mc.metadata);
     expect(mc.metadata.title).toBe(subject.title);
     expect(mc.metadata.channelId).toBe(subject.channel.id);
     expect(mc.metadata.channelName).toBe(subject.channel.name);
@@ -40,7 +41,9 @@ describe("normal live chat", () => {
     const { completeRecording } = await record("wildlife2");
 
     const chat = await mc.fetchChat({
-      continuation: mc.continuation.all.token,
+      videoId: mc.videoId,
+      channelId: mc.channelId,
+      topChat: false,
     });
 
     if (chat.error) {
@@ -91,9 +94,7 @@ describe("normal live chat", () => {
     // console.log("waiting for", timeoutMs);
     if (mode !== "lockdown") await timeoutThen(timeoutMs);
 
-    const consecutiveChat = await mc.fetchChat({
-      continuation: token,
-    });
+    const consecutiveChat = await mc.fetchChat(token);
     completeRecording();
     if (consecutiveChat.error) {
       throw new Error(consecutiveChat.error.message);

@@ -11,9 +11,10 @@ export { Credentials } from "./auth";
 export { MasterchatError } from "./error";
 export * from "./services/chat/types";
 export * from "./services/chatAction/types";
-export { fetchMetadata, fetchMetadataFromEmbed } from "./services/context";
+export { fetchMetadata } from "./services/context";
 export * from "./services/context/types";
 export * from "./services/message/types";
+export { normalizeVideoId, runsToString, timeoutThen } from "./utils";
 export {
   YTChatError,
   YTChatErrorStatus,
@@ -25,7 +26,6 @@ export {
   YTThumbnail,
 } from "./yt/chat";
 export { YTReloadContinuation } from "./yt/context";
-export { runsToString, normalizeVideoId, timeoutThen } from "./utils";
 
 export interface MasterchatOptions {
   credentials?: Credentials | string;

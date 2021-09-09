@@ -1,4 +1,3 @@
-import { FetchError } from "node-fetch";
 import { Base } from "../../base";
 import { EP_GLC, EP_GLCR } from "../../constants";
 import { rlc } from "../../protobuf/assembler";
@@ -13,14 +12,32 @@ import {
 } from "./types";
 import { getTimedContinuation, omitTrackingParams } from "./utils";
 
+export interface FetchChatOptions {
+  videoId: string;
+  channelId: string;
+  topChat?: boolean;
+}
+
+type FetchError = Error & {
+  type: string;
+  code?: string | undefined;
+  errno?: string | undefined;
+};
+
 export interface ChatService extends Base {}
 
 export class ChatService {
-  public async fetchChat({
-    continuation,
-  }: {
-    continuation: string;
-  }): Promise<SucceededChatResponse | FailedChatResponse> {
+  public async fetchChat(
+    options: FetchChatOptions | string
+  ): Promise<SucceededChatResponse | FailedChatResponse> {
+    const continuation =
+      typeof options === "string"
+        ? options
+        : rlc(
+            { videoId: options.videoId, channelId: options.channelId },
+            { top: options.topChat ?? false }
+          );
+
     const queryUrl = this.isReplay ? EP_GLCR : EP_GLC;
 
     const body = withContext({
@@ -94,15 +111,16 @@ export class ChatService {
         break loop;
       } catch (err) {
         // logging
-        if (err instanceof FetchError) {
+        if ("type" in (err as any)) {
+          const ferr = err as FetchError;
           debugLog(
             `fetchChat(${this.videoId}): FetchError`,
-            err.message,
-            err.code,
-            err.type
+            ferr.message,
+            ferr.code,
+            ferr.type
           );
 
-          switch (err.type) {
+          switch (ferr.type) {
             case "invalid-json": {
               // NOTE: rarely occurs
               debugLog(`[action required] ${this.videoId}: invalid-json`);
@@ -219,35 +237,33 @@ export class ChatService {
     ignoreFirstResponse?: boolean;
     ignoreReplayTimeout?: boolean;
   } = {}): AsyncGenerator<SucceededChatResponse | FailedChatResponse> {
-    // let token = this.continuation[tokenType].token;
     let token = rlc(
       { videoId: this.videoId, channelId: this.channelId },
-      { top: topChat }
+      { top: topChat ?? false }
     );
+
     debugLog("iterateChat(${this.videoId}): rcnt", token);
     let treatedFirstResponse = false;
 
     // continuously fetch chat fragments
     while (true) {
-      const chatResponse = await this.fetchChat({
-        continuation: token,
-      });
+      const res = await this.fetchChat(token);
 
       // handle errors
-      if (chatResponse.error) {
-        yield chatResponse;
+      if (res.error) {
+        yield res;
         continue;
       }
 
       // handle chats
       if (!(ignoreFirstResponse && !treatedFirstResponse)) {
-        yield chatResponse;
+        yield res;
       }
 
       treatedFirstResponse = true;
 
       // refresh continuation token
-      const { continuation } = chatResponse;
+      const { continuation } = res;
 
       if (!continuation) {
         debugLog(

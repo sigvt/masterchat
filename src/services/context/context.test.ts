@@ -1,5 +1,6 @@
+import assert from "assert";
 import { setupRecorder } from "nock-record";
-import { Masterchat } from "..";
+import { Masterchat } from "../..";
 
 const record = setupRecorder({
   mode: (process.env.NOCK_BACK_MODE as any) || "lockdown",
@@ -13,14 +14,9 @@ it("live chat", async () => {
   completeRecording();
   assertScopesFinished();
 
+  assert(mc.metadata);
+
   expect(mc.metadata.isLive).toBe(true);
-  expect(mc.continuation.all.token).toBe(
-    "0ofMyANhGlhDaWtxSndvWVZVTnRZbk00VkRaTlYzRlZTRkF4ZEVsUmRsTm5TM0puRWdzMlYwWlZNbmQ2VUV0bVFSb1Q2cWpkdVFFTkNnczJWMFpWTW5kNlVFdG1RU0FCMAGCAQIIAQ%3D%3D"
-  );
-  expect(mc.continuation.top.token).toBe(
-    "0ofMyANhGlhDaWtxSndvWVZVTnRZbk00VkRaTlYzRlZTRkF4ZEVsUmRsTm5TM0puRWdzMlYwWlZNbmQ2VUV0bVFSb1Q2cWpkdVFFTkNnczJWMFpWTW5kNlVFdG1RU0FCMAGCAQIIBA%3D%3D"
-  );
-  expect(mc.metadata.id).toBe("6WFU2wzPKfA");
   expect(mc.metadata.channelId).toBe("UCmbs8T6MWqUHP1tIQvSgKrg");
   expect(mc.metadata.title).toBe("【SUPERHOT】That's Hot");
   expect(mc.metadata.channelName).toBe("Ouro Kronii Ch. hololive-EN");
@@ -34,11 +30,8 @@ it("premiere", async () => {
   completeRecording();
   assertScopesFinished();
 
-  expect(mc.continuation.top.token).toBe(
-    "0ofMyANhGlhDaWtxSndvWVZVTnpaeTFaY1dSeFVTMUxSa1l3VEU1ck1qTkNXVFJCRWd0UFNrNWlObXhaWTJSZk1Cb1Q2cWpkdVFFTkNndFBTazVpTm14WlkyUmZNQ0FCMAGCAQIIBA%3D%3D"
-  );
+  assert(mc.metadata);
   expect(mc.metadata.isLive).toBe(true);
-  expect(mc.metadata.id).toBe("OJNb6lYcd_0");
   expect(mc.metadata.channelId).toBe("UCsg-YqdqQ-KFF0LNk23BY4A");
   expect(mc.metadata.title).toBe(
     "【全曲試聴動画】メジャー2ndシングル『Baddest』/ 樋口楓"
@@ -54,14 +47,8 @@ it("prechat", async () => {
   completeRecording();
   assertScopesFinished();
 
+  assert(mc.metadata);
   expect(mc.metadata.isLive).toBe(true);
-  expect(mc.continuation.all.token).toBe(
-    "0ofMyANhGlhDaWtxSndvWVZVTkdTMDlXWjFaaVIyMVlOalZTZUU4elJYUklNMmwzRWd0U01reDFUMUZHWDJSSmN4b1Q2cWpkdVFFTkNndFNNa3gxVDFGR1gyUkpjeUFCMAGCAQIIAQ%3D%3D"
-  );
-  expect(mc.continuation.top.token).toBe(
-    "0ofMyANhGlhDaWtxSndvWVZVTkdTMDlXWjFaaVIyMVlOalZTZUU4elJYUklNMmwzRWd0U01reDFUMUZHWDJSSmN4b1Q2cWpkdVFFTkNndFNNa3gxVDFGR1gyUkpjeUFCMAGCAQIIBA%3D%3D"
-  );
-  expect(mc.metadata.id).toBe("R2LuOQF_dIs");
   expect(mc.metadata.channelId).toBe("UCFKOVgVbGmX65RxO3EtH3iw");
   expect(mc.metadata.title).toBe(
     "【帰り道/The Night Way Home】一緒に…帰る？【雪花ラミィ/ホロライブ】"
@@ -71,10 +58,12 @@ it("prechat", async () => {
 
 it("abandoned stream", async () => {
   const { completeRecording, assertScopesFinished } = await record("abandoned");
-  const res = await Masterchat.init("N5XoLCMQrFY");
+  const mc = await Masterchat.init("N5XoLCMQrFY");
   completeRecording();
   assertScopesFinished();
-  expect(res.metadata.isLive).toBe(true);
+
+  assert(mc.metadata);
+  expect(mc.metadata.isLive).toBe(true);
 });
 
 it("members-only stream", async () => {
@@ -114,9 +103,10 @@ it("archived stream with chat replay being prepared", async () => {
     "no_chat_replay"
   );
   try {
-    await Masterchat.init("32qr8wO1mV4");
+    const mc = await Masterchat.init("32qr8wO1mV4");
     throw new Error("this should not occur");
   } catch (err) {
+    console.log(err);
     expect((err as any).code).toBe("disabled");
   } finally {
     completeRecording();

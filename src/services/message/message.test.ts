@@ -1,13 +1,13 @@
 import { setupRecorder } from "nock-record";
-import { Masterchat } from "..";
+import { Masterchat } from "../..";
 
 const id = process.env.MC_MSG_TEST_ID;
 const credentialsB64 = process.env.MC_MSG_TEST_CREDENTIALS;
-const enabled = id && credentialsB64;
+const credentials = credentialsB64
+  ? JSON.parse(Buffer.from(credentialsB64!, "base64").toString())
+  : undefined;
 
-const credentials = JSON.parse(
-  Buffer.from(credentialsB64!, "base64").toString()
-) as any;
+const enabled = id && credentialsB64;
 const itif = enabled ? it : it.skip;
 
 const record = setupRecorder({
@@ -15,13 +15,12 @@ const record = setupRecorder({
 });
 
 describe("subscribers-only mode", () => {
-  it("can init", async () => {
+  itif.skip("can init", async () => {
     const { completeRecording, assertScopesFinished } = await record(
       "subscribers_only"
     );
     const mc = await Masterchat.init("lqhYHycrsHk", { credentials });
     completeRecording();
-    // expect((mc as any).liveChatContext.sendMessageParams).toBeUndefined();
   });
 });
 
