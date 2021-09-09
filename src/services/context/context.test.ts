@@ -1,6 +1,5 @@
-import assert from "assert";
 import { setupRecorder } from "nock-record";
-import { Masterchat, MasterchatError } from "../..";
+import { Masterchat } from "../..";
 import {
   DisabledChatError,
   InvalidArgumentError,
