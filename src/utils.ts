@@ -1,6 +1,6 @@
 import debug from "debug";
-import { DEFAULT_CLIENT } from "./constants";
-import { YTEmoji, YTRun } from "./types/chat";
+import { DC } from "./constants";
+import { YTEmoji, YTRun } from "./yt/chat";
 
 export const debugLog = debug("masterchat");
 
@@ -14,7 +14,7 @@ export function normalizeVideoId(idOrUrl: string) {
   return idOrUrl.replace(/^https?:\/\/www\.youtube\.com\/watch\?v=/, "");
 }
 
-export function convertRunsToString(
+export function runsToString(
   runs: YTRun[],
   {
     emojiHandler = undefined,
@@ -27,14 +27,15 @@ export function convertRunsToString(
       }
 
       if ("emoji" in run) {
+        const { emoji } = run;
+
         if (emojiHandler) {
-          return emojiHandler(run.emoji);
+          return emojiHandler(emoji);
         }
 
-        const isCustomEmoji = run.emoji.isCustomEmoji;
-        const term = isCustomEmoji
-          ? ":" + run.emoji.searchTerms[run.emoji.searchTerms.length - 1] + ":"
-          : run.emoji.emojiId;
+        const term = emoji.isCustomEmoji
+          ? emoji.shortcuts[emoji.shortcuts.length - 1] + ":"
+          : emoji.emojiId;
 
         return term;
       }
@@ -63,9 +64,13 @@ export function withContext(input: any = {}) {
     ...input,
     context: {
       ...input?.context,
-      client: DEFAULT_CLIENT,
+      client: DC,
     },
   };
+}
+
+export function h(b: TemplateStringsArray) {
+  return Buffer.from(b.raw[0], "hex").toString();
 }
 
 /*

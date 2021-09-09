@@ -1,18 +1,19 @@
 import { Credentials } from "./auth";
 import { Base } from "./base";
-import { DEFAULT_API_KEY } from "./constants";
+import { DAK } from "./constants";
 import { ChatService } from "./services/chat";
 import { ChatActionService } from "./services/chatAction";
-import { ContextService } from "./services/context";
+import { ContextService, fetchMetadata } from "./services/context";
 import { MessageService } from "./services/message";
-import { normalizeVideoId } from "./util";
+import { normalizeVideoId } from "./utils";
 
 export { Credentials } from "./auth";
 export { MasterchatError } from "./error";
-export * from "./services/chat/exports";
-export * from "./services/chatAction/exports";
-export * from "./services/context/exports";
-export * from "./services/message/exports";
+export * from "./services/chat/types";
+export * from "./services/chatAction/types";
+export { fetchMetadata, fetchMetadataFromEmbed } from "./services/context";
+export * from "./services/context/types";
+export * from "./services/message/types";
 export {
   YTChatError,
   YTChatErrorStatus,
@@ -22,40 +23,41 @@ export {
   YTRunContainer,
   YTTextRun,
   YTThumbnail,
-} from "./types/chat";
-export { YTReloadContinuation } from "./types/context";
-export { convertRunsToString, normalizeVideoId, timeoutThen } from "./util";
-
-const DAK = Buffer.from(DEFAULT_API_KEY, "hex").toString();
+} from "./yt/chat";
+export { YTReloadContinuation } from "./yt/context";
+export { runsToString, normalizeVideoId, timeoutThen } from "./utils";
 
 export interface MasterchatOptions {
-  apiKey?: string;
   credentials?: Credentials | string;
 }
 
 // umbrella class
 export class Masterchat {
+  /**
+   * Useful when you don't know channelId
+   */
   static async init(videoIdOrUrl: string, options: MasterchatOptions = {}) {
     const videoId = normalizeVideoId(videoIdOrUrl);
-    const mc = new Masterchat(videoId, options);
-    await mc.populateMetadata();
-    // if (options.credentials) await mc.populateLiveChatContext();
+    const metadata = await fetchMetadata(videoId);
+    const mc = new Masterchat(videoId, metadata.channelId, options);
+    mc.metadata = metadata;
+    mc.isReplay = !metadata.isLive;
     return mc;
   }
 
-  public async setVideoId(videoIdOrUrl: string) {
-    const videoId = normalizeVideoId(videoIdOrUrl);
-    this.videoId = videoId;
-    await this.populateMetadata();
-    // if (this.credentials) await this.populateLiveChatContext();
-  }
-
-  private constructor(
+  /**
+   * Much faster than Masterchat.init
+   */
+  constructor(
     videoId: string,
-    { apiKey = DAK, credentials }: MasterchatOptions = {}
+    channelId: string,
+    { credentials }: MasterchatOptions = {}
   ) {
     this.videoId = videoId;
-    this.apiKey = apiKey;
+    this.channelId = channelId;
+    this.apiKey = DAK;
+    this.metadata = undefined;
+    this.isReplay = undefined;
 
     if (typeof credentials === "string") {
       credentials = JSON.parse(

@@ -42,7 +42,3 @@ DEBUG=masterchat NOCK_BACK_MODE=wild jest
 ```
 np
 ```
-
-## References
-
-- [LiveChatMessages  |  YouTube Live Streaming API  |  Google Developers](https://developers.google.com/youtube/v3/live/docs/liveChatMessages)

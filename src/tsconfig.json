@@ -7,6 +7,7 @@
     "moduleResolution": "node",
     "declaration": true /* Generates corresponding '.d.ts' file. */,
     "outDir": "../lib" /* Redirect output structure to the directory. */,
+    "sourceRoot": ".",
     "sourceMap": true,
     "strict": true,
     "esModuleInterop": true,

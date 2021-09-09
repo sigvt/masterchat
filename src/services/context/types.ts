@@ -1,12 +1,5 @@
-import { ReloadContinuationItems } from "../chat/exports";
-import { YTTimedContinuationData } from "../../types/chat";
-import { YTReloadContinuationData } from "../../types/context";
-
-export interface Context {
-  apiKey: string;
-  metadata: Metadata;
-  continuations: ReloadContinuationItems;
-}
+import { YTTimedContinuationData } from "../../yt/chat";
+import { YTReloadContinuationData } from "../../yt/context";
 
 export interface ClientInfo {
   clientName: string;
@@ -14,9 +7,8 @@ export interface ClientInfo {
 }
 
 export interface Metadata {
-  id: string;
-  title: string;
   channelId: string;
+  title: string;
   channelName: string;
   isLive: boolean;
 }

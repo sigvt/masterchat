@@ -4,7 +4,7 @@
 [![npm: total downloads](https://badgen.net/npm/dt/masterchat)](https://npmjs.org/package/masterchat)
 [![Open in Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/holodata/masterchat)
 
-Battle-tested YouTube Live Chat client for JavaScript.
+YouTube Live Chat client for JavaScript.
 
 - [Documentation](https://holodata.github.io/masterchat/classes/index.Masterchat.html)
 
@@ -34,7 +34,7 @@ async function main() {
     // "unknown" => Unknown error
   });
 
-  for await (const res of mc.iterateChat("top" /* or "all" */)) {
+  for await (const res of mc.iterateChat({ topChat: true })) {
     if (res.error) {
       console.log(res.error);
       break;
@@ -63,7 +63,7 @@ import { appendFile } from "fs/promises";
 async function main() {
   const mc = await Masterchat.init("<videoId>");
 
-  for await (const { actions } of mc.iterateChat("all", {
+  for await (const { actions } of mc.iterateChat({
     ignoreReplayTimeout: true,
   })) {
     const chats = actions.filter(
@@ -97,7 +97,7 @@ async function main() {
 
   const mc = await Masterchat.init("<videoId>", { credentials });
 
-  for await (const { actions } of mc.iterateChat("all", {
+  for await (const { actions } of mc.iterateChat({
     ignoreFirstResponse: true,
   })) {
     for (const action of actions) {
@@ -111,6 +111,28 @@ async function main() {
 }
 
 main();
+```
+
+### Faster instantiation
+
+To skip parsing watch page, use:
+
+```js
+const mc = new Masterchat("<videoId>", "<channelId>");
+```
+
+instead of:
+
+```js
+const mc = await Masterchat.init("<videoId>");
+```
+
+The former won't populate metadata. If you need metadata, call:
+
+```js
+import { fetchMetadata } from "masterchat";
+
+await fetchMetadata("<videoId>");
 ```
 
 ## CLI
@@ -141,11 +163,10 @@ For a desktop app, see [Komet](https://github.com/holodata/komet).
 
 ## Contribute
 
-We welcome your contribution such as:
+We welcome your contribution:
 
 - Use masterchat with your product and [report bugs](https://github.com/holodata/masterchat/issues/new)
 - Squash [TODOs](https://github.com/holodata/masterchat/search?l=TypeScript&q=TODO)
-- Join API discussions on [holodata Discord server](https://holodata.org/discord)
 
 See [Contribution Guide](./CONTRIBUTING.md) for more information.
 
