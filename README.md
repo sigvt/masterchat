@@ -121,7 +121,7 @@ main();
 To skip loading watch page, use:
 
 ```js
-const live = new Masterchat(videoId, channelId, { isReplay });
+const live = new Masterchat(videoId, channelId, { isLive });
 ```
 
 instead of:

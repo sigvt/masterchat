@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.9.0
+
 - Full protobuf support
 - Use `new Masterchat(videoId, channelId, {isLive})` for skipping metadata fetching. `Masterchat.init(videoId)` scrapes watch page in order to obtain channelId and livechat status
 - Renamed `masterchat/types/...` -> `masterchat/yt/...`
