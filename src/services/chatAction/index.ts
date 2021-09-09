@@ -79,9 +79,9 @@ import {
   YTAction,
   YTGetItemContextMenuResponse,
   YTLiveChatServiceEndpointContainer,
-} from "../../types/chat";
-import { withContext } from "../../util";
-import { ActionCatalog, ActionInfo } from "./exports";
+} from "../../yt/chat";
+import { withContext } from "../../utils";
+import { ActionCatalog, ActionInfo } from "./types";
 
 function findParams(obj: any): string | undefined {
   const keys = Object.keys(obj).filter(
@@ -110,6 +110,7 @@ function buildMeta(endpoint: YTLiveChatServiceEndpointContainer) {
 }
 
 export interface ChatActionService extends Base {}
+
 export class ChatActionService {
   // TODO: narrow down return type
   async report(contextMenuEndpointParams: string) {

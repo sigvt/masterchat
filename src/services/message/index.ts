@@ -1,22 +1,15 @@
 import { Base } from "../../base";
 import { smp } from "../../protobuf/assembler";
-import {
-  YTActionResponse,
-  YTLiveChatTextMessageRenderer,
-} from "../../types/chat";
-import { withContext } from "../../util";
+import { withContext } from "../../utils";
+import { YTActionResponse, YTLiveChatTextMessageRenderer } from "../../yt/chat";
 
-/**
- * returns undefined if unauthorized
- */
 export interface MessageService extends Base {}
+
 export class MessageService {
   async sendMessage(message: string): Promise<YTLiveChatTextMessageRenderer> {
-    // const params = this.liveChatContext?.sendMessageParams;
-    // if (!params) return undefined;
     const params = smp({
-      channelId: this.metadata.channelId,
       videoId: this.videoId,
+      channelId: this.channelId,
     });
 
     const body = withContext({

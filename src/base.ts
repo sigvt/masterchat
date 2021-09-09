@@ -1,10 +1,8 @@
 import fetch from "cross-fetch";
-import { FetchError } from "node-fetch";
 import { buildAuthHeaders, Credentials } from "./auth";
 import { DEFAULT_HEADERS, DEFAULT_ORIGIN } from "./constants";
-import { ReloadContinuationItems } from "./services/chat/exports";
-import { LiveChatContext, Metadata } from "./services/context/exports";
-import { debugLog, timeoutThen } from "./util";
+import { Metadata } from "./services/context/types";
+import { debugLog, timeoutThen } from "./utils";
 
 export type RequestInitWithRetryOption = RequestInit & {
   retry?: number;
@@ -13,38 +11,12 @@ export type RequestInitWithRetryOption = RequestInit & {
 
 export class Base {
   public videoId!: string;
-  protected apiKey!: string;
+  public channelId!: string;
+  public metadata?: Metadata;
+
   protected credentials?: Credentials;
-
-  public metadata!: Metadata;
-  public continuation!: ReloadContinuationItems;
-  protected isReplay!: boolean;
-  // protected liveChatContext!: LiveChatContext;
-
-  protected get(input: string, init?: RequestInit) {
-    if (!input.startsWith("http")) {
-      input = DEFAULT_ORIGIN + input;
-    }
-    const parsedUrl = new URL(input);
-
-    if (!parsedUrl.searchParams.has("key")) {
-      parsedUrl.searchParams.append("key", this.apiKey);
-    }
-
-    const authHeaders = buildAuthHeaders(this.credentials);
-    const headers = {
-      ...DEFAULT_HEADERS,
-      ...authHeaders,
-      ...init?.headers,
-    };
-
-    // debugLog("GET", parsedUrl.toString());
-
-    return fetch(parsedUrl.toString(), {
-      ...init,
-      headers,
-    });
-  }
+  protected apiKey!: string;
+  protected isReplay?: boolean;
 
   protected async postJson<T>(
     input: string,
@@ -104,6 +76,34 @@ export class Base {
     return fetch(parsedUrl.toString(), {
       ...init,
       method: "POST",
+      headers,
+    });
+  }
+
+  protected get(input: string, init?: RequestInit) {
+    if (!input.startsWith("http")) {
+      input = DEFAULT_ORIGIN + input;
+    }
+    const parsedUrl = new URL(input);
+
+    if (
+      !parsedUrl.searchParams.has("key") &&
+      !parsedUrl.pathname.includes("watch/v")
+    ) {
+      parsedUrl.searchParams.append("key", this.apiKey);
+    }
+
+    const authHeaders = buildAuthHeaders(this.credentials);
+    const headers = {
+      ...DEFAULT_HEADERS,
+      ...authHeaders,
+      ...init?.headers,
+    };
+
+    // debugLog("GET", parsedUrl.toString());
+
+    return fetch(parsedUrl.toString(), {
+      ...init,
       headers,
     });
   }
