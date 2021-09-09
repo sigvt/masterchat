@@ -6,7 +6,7 @@ export type VCPair = {
   channelId: string;
 };
 
-export function hd(tgt: VCPair): string {
+function hd(tgt: VCPair): string {
   return cc([
     ld(1, ld(5, [ld(1, tgt.channelId), ld(2, tgt.videoId)])),
     ld(3, ld(48687757, ld(1, tgt.videoId))),
@@ -16,15 +16,23 @@ export function hd(tgt: VCPair): string {
 
 export function rlc(
   origin: VCPair,
-  { top = false }: { top?: boolean } = {}
+  { top = false, replay = false }: { top?: boolean; replay?: boolean } = {}
 ): string {
   const chatType = top ? 4 : 1;
   const meta = hd(origin);
+  const op = replay
+    ? ld(156074452, [
+        ld(3, meta),
+        vt(5, 0), // seek
+        vt(8, 0),
+        vt(9, 4), // 3 auth???
+        ld(10, vt(4, 0)),
+        ld(14, vt(1, chatType)),
+        vt(15, 0),
+      ])
+    : ld(119693434, [ld(3, meta), vt(6, 1), ld(16, vt(1, chatType))]);
 
-  return b64e(
-    ld(119693434, [ld(3, meta), vt(6, 1), ld(16, vt(1, chatType))]),
-    B64Type.B1
-  );
+  return b64e(op, B64Type.B1);
 }
 
 export function tmc(
@@ -122,6 +130,12 @@ function ld(fid: bigint | number, payload: Buffer[] | Buffer | string): Buffer {
 function vt(fid: bigint | number, payload: bigint | number): Buffer {
   return cc([bitob(pbh(fid, 0)), bitob(payload)]);
 }
+
+// function f3(fid: bigint | number, payload: bigint): Buffer {
+//   while (payload >> 8n) {
+//     const b = payload & 8n;
+//   }
+// }
 
 function pbh(fid: bigint | number, type: number): bigint {
   return encv((BigInt(fid) << 3n) | BigInt(type));

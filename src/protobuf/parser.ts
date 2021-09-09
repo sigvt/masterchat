@@ -15,7 +15,7 @@ export function parse(input: Buffer, depth: number = 0): PBValue {
   let nextHeader;
 
   while ((nextHeader = pbr.eatVariant())) {
-    // logger(" rawHeader=", nextHeader.toString(2));
+    logger(" rawHeader=", nextHeader.toString(2));
     const [fid, type] = ProtoBufReader.splitHeader(nextHeader);
     logger(`┌(${fid}: ${type})`);
     switch (type) {
@@ -26,33 +26,40 @@ export function parse(input: Buffer, depth: number = 0): PBValue {
         tokens.push({ fid, type: PBType.V, v });
         break;
       }
-      case 1: {
-        const v = pbr.eatUInt64();
-        logger("└f64>", v);
-        if (v == null) throw new Error("Invalid sequence (f64)");
-        tokens.push({ fid, type: PBType.F64, v });
-        break;
-      }
       case 2: {
+        pbr.save();
         const len = pbr.eatVariant();
         logger(`└struct [length=${len}]>`);
         if (len == null) throw new Error("Invalid sequence (ld)");
-        const inner = pbr.eat(Number(len));
-        if (inner == null) {
-          logger("!!inner");
-          break;
+        if (len > pbr.remainingBytes()) {
+          logger("!overSized");
+          pbr.rewind();
+        } else {
+          const inner = pbr.eat(Number(len));
+          if (inner == null) {
+            logger("!empty");
+            pbr.rewind();
+          } else {
+            const v = parse(inner, depth + 1);
+            tokens.push({ fid, type: PBType.LD, v });
+            break;
+          }
         }
-        const v = parse(inner, depth + 1);
-        tokens.push({ fid, type: PBType.LD, v });
-        break;
       }
-      case 5: {
-        const v = pbr.eatUInt32();
-        logger("└f32>", v);
-        if (v == null) throw new Error("Invalid sequence (f32)");
-        tokens.push({ fid, type: PBType.F32, v });
-        break;
-      }
+      // case 5: {
+      //   const v = pbr.eatUInt32();
+      //   logger("└f32>", v);
+      //   if (v == null) throw new Error("Invalid sequence (f32)");
+      //   tokens.push({ fid, type: PBType.F32, v });
+      //   break;
+      // }
+      // case 1: {
+      //   const v = pbr.eatUInt64();
+      //   logger("└f64>", v);
+      //   if (v == null) throw new Error("Invalid sequence (f64)");
+      //   tokens.push({ fid, type: PBType.F64, v });
+      //   break;
+      // }
       default: {
         // throw new Error("Unknown type: " + type);
         const res = input.toString();

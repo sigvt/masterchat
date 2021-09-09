@@ -1,8 +1,7 @@
-# MasterChat
+# Masterchat
 
 [![npm](https://badgen.net/npm/v/masterchat)](https://npmjs.org/package/masterchat)
 [![npm: total downloads](https://badgen.net/npm/dt/masterchat)](https://npmjs.org/package/masterchat)
-[![Open in Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/holodata/masterchat)
 
 YouTube Live Chat client for JavaScript.
 
@@ -19,10 +18,22 @@ npm i masterchat
 ### Iterate live chats
 
 ```js
-import { Masterchat, convertRunsToString } from "masterchat";
+import { Masterchat, runsToString } from "masterchat";
 
 async function main() {
-  const mc = await Masterchat.init("<videoId>").catch((err) => {
+  try {
+    const live = await Masterchat.init("<videoId>");
+
+    for await (const { actions } of live.iterate()) {
+      const chats = actions.filter(
+        (action) => action.type === "addChatItemAction"
+      );
+
+      for (const chat of chats) {
+        console.log(chat.authorName, runsToString(chat.rawMessage));
+      }
+    }
+  } catch (err) {
     console.log(err.code);
     // "disabled" => Live chat is disabled
     // "membersOnly" => No permission (members-only)
@@ -32,22 +43,6 @@ async function main() {
     // "denied" => Access denied
     // "invalid" => Invalid request
     // "unknown" => Unknown error
-  });
-
-  for await (const res of mc.iterateChat({ topChat: true })) {
-    if (res.error) {
-      console.log(res.error);
-      break;
-    }
-
-    const { actions } = res;
-    const chats = actions.filter(
-      (action) => action.type === "addChatItemAction"
-    );
-
-    for (const chat of chats) {
-      console.log(chat.authorName, convertRunsToString(chat.rawMessage));
-    }
   }
 }
 
@@ -61,11 +56,9 @@ import { Masterchat, convertRunsToString } from "masterchat";
 import { appendFile } from "fs/promises";
 
 async function main() {
-  const mc = await Masterchat.init("<videoId>");
+  const replay = await Masterchat.init("<videoId>");
 
-  for await (const { actions } of mc.iterateChat({
-    ignoreReplayTimeout: true,
-  })) {
+  for await (const { actions } of replay.iterate()) {
     const chats = actions.filter(
       (action) => action.type === "addChatItemAction"
     );
@@ -82,7 +75,7 @@ main();
 ### Auto-moderator
 
 ```js
-import { Masterchat, convertRunsToString } from "masterchat";
+import { Masterchat, runsToString } from "masterchat";
 import { isSpam } from "spamreaper";
 
 async function main() {
@@ -95,16 +88,16 @@ async function main() {
     SSID: "<value>",
   };
 
-  const mc = await Masterchat.init("<videoId>", { credentials });
+  const live = await Masterchat.init("<videoId>", { credentials });
 
-  for await (const { actions } of mc.iterateChat({
+  for await (const { actions } of live.iterate({
     ignoreFirstResponse: true,
   })) {
     for (const action of actions) {
       if (action.type !== "addChatItemAction") continue;
 
-      if (isSpam(convertRunsToString(action.rawMessage))) {
-        await mc.remove(action.contextMenuEndpointParams);
+      if (isSpam(runsToString(action.rawMessage))) {
+        await live.remove(action.contextMenuEndpointParams);
       }
     }
   }
@@ -113,26 +106,35 @@ async function main() {
 main();
 ```
 
+## Advanced Tips
+
 ### Faster instantiation
 
-To skip parsing watch page, use:
+To skip loading watch page, use:
 
 ```js
-const mc = new Masterchat("<videoId>", "<channelId>");
+const live = new Masterchat(videoId, channelId, isReplay);
 ```
 
 instead of:
 
 ```js
-const mc = await Masterchat.init("<videoId>");
+const live = await Masterchat.init(videoId);
 ```
 
 The former won't populate metadata. If you need metadata, call:
 
 ```js
-import { fetchMetadata } from "masterchat";
+await live.populateMetadata(); // will query watch page
+console.log(live.metadata);
+```
 
-await fetchMetadata("<videoId>");
+### Fetch credentials
+
+```bash
+cd extra/credentials-fetcher
+npm i
+npm start
 ```
 
 ## CLI
@@ -162,8 +164,6 @@ For a desktop app, see [Komet](https://github.com/holodata/komet).
 - [x] Moderation functionality
 
 ## Contribute
-
-We welcome your contribution:
 
 - Use masterchat with your product and [report bugs](https://github.com/holodata/masterchat/issues/new)
 - Squash [TODOs](https://github.com/holodata/masterchat/search?l=TypeScript&q=TODO)

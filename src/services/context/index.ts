@@ -1,11 +1,17 @@
-import { Base } from "../../base";
-import { DEFAULT_HEADERS, DEFAULT_ORIGIN } from "../../constants";
-import { MasterchatError } from "../../error";
-import { YTInitialData, YTPlayabilityStatus } from "../../yt/context";
-import { runsToString } from "../../utils";
-import { Metadata } from "./types";
 import fetch from "cross-fetch";
 import { writeFileSync } from "fs";
+import { Base } from "../../base";
+import { DEFAULT_HEADERS, DEFAULT_ORIGIN } from "../../constants";
+import {
+  AccessDeniedError,
+  MasterchatError,
+  MembersOnlyError,
+  NoPermissionError,
+  NoStreamRecordingError,
+  UnavailableError,
+} from "../../error";
+import { runsToString } from "../../utils";
+import { YTInitialData, YTPlayabilityStatus } from "../../yt/context";
 
 // OK duration=">0" => Archived (replay chat may be available)
 // OK duration="0" => Live (chat may be available)
@@ -16,16 +22,16 @@ function assertPlayability(playabilityStatus: YTPlayabilityStatus | undefined) {
   }
   switch (playabilityStatus.status) {
     case "ERROR":
-      throw new MasterchatError("unavailable", playabilityStatus.reason!);
+      throw new UnavailableError(playabilityStatus.reason!);
     case "LOGIN_REQUIRED":
-      throw new MasterchatError("private", playabilityStatus.reason!);
+      throw new NoPermissionError(playabilityStatus.reason!);
     case "UNPLAYABLE": {
       if (
         "playerLegacyDesktopYpcOfferRenderer" in playabilityStatus.errorScreen!
       ) {
-        throw new MasterchatError("membersOnly", playabilityStatus.reason!);
+        throw new MembersOnlyError(playabilityStatus.reason!);
       }
-      throw new MasterchatError("unarchived", playabilityStatus.reason!);
+      throw new NoStreamRecordingError(playabilityStatus.reason!);
     }
     case "LIVE_STREAM_OFFLINE":
     case "OK":
@@ -66,7 +72,7 @@ export async function fetchMetadataFromEmbed(id: string) {
 
   // Check ban status
   if (res.status === 429) {
-    throw new MasterchatError("denied", "Rate limit exceeded: " + id);
+    throw new AccessDeniedError("Rate limit exceeded: " + id);
   }
 
   const html = await res.text();
@@ -105,45 +111,44 @@ export async function fetchMetadataFromEmbed(id: string) {
   };
 }
 
-export async function fetchMetadata(id: string): Promise<Metadata> {
-  const res = await fetch(DEFAULT_ORIGIN + "/watch?v=" + id, {
-    headers: DEFAULT_HEADERS,
-  });
-
-  // Check ban status
-  if (res.status === 429) {
-    throw new MasterchatError("denied", "Rate limit exceeded: " + id);
-  }
-
-  const watchHtml = await res.text();
-  const initialData = findInitialData(watchHtml)!;
-
-  const playabilityStatus = findPlayabilityStatus(watchHtml);
-  assertPlayability(playabilityStatus);
-
-  // TODO
-  // initialData.contents.twoColumnWatchNextResults.conversationBar.conversationBarRenderer.availabilityMessage.messageRenderer.text.runs[0].text === 'Chat is disabled for this live stream.'
-
-  const results =
-    initialData.contents?.twoColumnWatchNextResults?.results.results!;
-
-  const primaryInfo = results.contents[0].videoPrimaryInfoRenderer;
-  const videoOwner =
-    results.contents[1].videoSecondaryInfoRenderer.owner.videoOwnerRenderer;
-
-  const title = runsToString(primaryInfo.title.runs);
-  const channelId = videoOwner.navigationEndpoint.browseEndpoint.browseId;
-  const channelName = runsToString(videoOwner.title.runs);
-  const isLive = primaryInfo.viewCount!.videoViewCountRenderer.isLive ?? false;
-
-  return {
-    title,
-    channelId,
-    channelName,
-    isLive,
-  };
-}
-
 export interface ContextService extends Base {}
 
-export class ContextService {}
+export class ContextService {
+  public async populateMetadata(): Promise<void> {
+    const res = await fetch(DEFAULT_ORIGIN + "/watch?v=" + this.videoId, {
+      headers: DEFAULT_HEADERS,
+    });
+
+    // Check ban status
+    if (res.status === 429) {
+      throw new AccessDeniedError("Rate limit exceeded: " + this.videoId);
+    }
+
+    const watchHtml = await res.text();
+    const initialData = findInitialData(watchHtml)!;
+
+    const playabilityStatus = findPlayabilityStatus(watchHtml);
+    assertPlayability(playabilityStatus);
+
+    // TODO
+    // initialData.contents.twoColumnWatchNextResults.conversationBar.conversationBarRenderer.availabilityMessage.messageRenderer.text.runs[0].text === 'Chat is disabled for this live stream.'
+
+    const results =
+      initialData.contents?.twoColumnWatchNextResults?.results.results!;
+
+    const primaryInfo = results.contents[0].videoPrimaryInfoRenderer;
+    const videoOwner =
+      results.contents[1].videoSecondaryInfoRenderer.owner.videoOwnerRenderer;
+
+    const title = runsToString(primaryInfo.title.runs);
+    const channelId = videoOwner.navigationEndpoint.browseEndpoint.browseId;
+    const channelName = runsToString(videoOwner.title.runs);
+    const isLive =
+      primaryInfo.viewCount!.videoViewCountRenderer.isLive ?? false;
+
+    this.title = title;
+    this.channelId = channelId;
+    this.channelName = channelName;
+    this.isLive = isLive;
+  }
+}

@@ -1,10 +1,10 @@
 export type ErrorCode =
-  | "private" // Private video
   | "unavailable" // Deleted video OR wrong video id
-  | "unarchived" // Live stream recording is not available
   | "disabled" // Live chat is disabled
+  | "private" // No permission (private)
   | "membersOnly" // No permission (members-only)
-  | "denied" // Access denied
+  | "unarchived" // Live stream recording is not available
+  | "denied" // Access denied (429)
   | "invalid" // Invalid request
   | "unknown"; // Unknown error
 
@@ -16,5 +16,54 @@ export class MasterchatError extends Error {
     this.code = code;
 
     Object.setPrototypeOf(this, MasterchatError.prototype);
+  }
+}
+
+export class UnavailableError extends MasterchatError {
+  constructor(msg: string) {
+    super("unavailable", msg);
+    Object.setPrototypeOf(this, UnavailableError.prototype);
+  }
+}
+
+export class DisabledChatError extends MasterchatError {
+  constructor(msg: string) {
+    super("disabled", msg);
+    Object.setPrototypeOf(this, DisabledChatError.prototype);
+  }
+}
+
+export class NoPermissionError extends MasterchatError {
+  constructor(msg: string) {
+    super("private", msg);
+    Object.setPrototypeOf(this, NoPermissionError.prototype);
+  }
+}
+
+export class MembersOnlyError extends MasterchatError {
+  constructor(msg: string) {
+    super("membersOnly", msg);
+    Object.setPrototypeOf(this, MembersOnlyError.prototype);
+  }
+}
+
+export class NoStreamRecordingError extends MasterchatError {
+  constructor(msg: string) {
+    super("unarchived", msg);
+    Object.setPrototypeOf(this, NoStreamRecordingError.prototype);
+  }
+}
+
+export class AccessDeniedError extends MasterchatError {
+  constructor(msg: string) {
+    super("denied", msg);
+    Object.setPrototypeOf(this, AccessDeniedError.prototype);
+  }
+}
+
+export class InvalidArgumentError extends MasterchatError {
+  constructor(msg: string) {
+    super("invalid", msg);
+    Object.setPrototypeOf(this, InvalidArgumentError.prototype);
   }
 }

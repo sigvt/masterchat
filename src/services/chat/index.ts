@@ -1,56 +1,49 @@
+import { InvalidArgumentError, UnavailableError } from "../..";
 import { Base } from "../../base";
 import { EP_GLC, EP_GLCR } from "../../constants";
+import {
+  DisabledChatError,
+  MembersOnlyError,
+  NoPermissionError,
+} from "../../error";
 import { rlc } from "../../protobuf/assembler";
+import { runsToString, timeoutThen, withContext } from "../../utils";
 import { YTAction, YTChatErrorStatus, YTChatResponse } from "../../yt/chat";
-import { debugLog, timeoutThen, withContext } from "../../utils";
 import { parseChatAction } from "./parser";
 import {
   Action,
   FailedChatResponse,
-  FetchChatErrorStatus,
+  FetchChatOptions,
   SucceededChatResponse,
 } from "./types";
 import { getTimedContinuation, omitTrackingParams } from "./utils";
 
-export interface FetchChatOptions {
-  videoId: string;
-  channelId: string;
-  topChat?: boolean;
-}
-
-type FetchError = Error & {
-  type: string;
-  code?: string | undefined;
-  errno?: string | undefined;
-};
-
 export interface ChatService extends Base {}
 
 export class ChatService {
-  public async fetchChat(
-    options: FetchChatOptions | string
-  ): Promise<SucceededChatResponse | FailedChatResponse> {
+  public async fetch(
+    token: string | FetchChatOptions = {}
+  ): Promise<SucceededChatResponse> {
     const continuation =
-      typeof options === "string"
-        ? options
+      typeof token === "string"
+        ? token
         : rlc(
-            { videoId: options.videoId, channelId: options.channelId },
-            { top: options.topChat ?? false }
+            { videoId: this.videoId, channelId: this.channelId },
+            { top: token.topChat ?? false, replay: !this.isLive }
           );
-
-    const queryUrl = this.isReplay ? EP_GLCR : EP_GLC;
 
     const body = withContext({
       continuation,
     });
+    let endpoint = this.isLive ? EP_GLC : EP_GLCR;
+    let retryRemaining = 3;
+    const retryInterval = 3000;
 
     let res: YTChatResponse;
-    let retryRemaining = 3;
-    const retryInterval = 1000;
 
     loop: while (true) {
       try {
-        res = await this.postJson<YTChatResponse>(queryUrl, {
+        res = await this.postJson<YTChatResponse>(endpoint, {
           body: JSON.stringify(body),
           retry: 0,
         });
@@ -68,78 +61,76 @@ export class ChatService {
            *   - server-side failure
            * 503: The service is currently unavailable
            *   - temporary server-side failure
-           *
            * @see https://developers.google.com/youtube/v3/live/docs/liveChatMessages/list
            */
 
           const { status, message } = res.error;
 
-          debugLog(`fetchChat(${this.videoId}): ${status} (${message})`);
-
           switch (status) {
-            case YTChatErrorStatus.Invalid: // ?
-            case YTChatErrorStatus.PermissionDenied: // stream privated
-            case YTChatErrorStatus.NotFound: // stream deleted
-              debugLog(
-                `[action required] ${this.videoId}: ${status} - ${message}`
-              );
-              return {
-                actions: [],
-                continuation: undefined,
-                error: null,
-              };
+            // stream went privated or deleted
+            // TODO: should we break loop normally as if the stream ended or throw errors to tell users?
+            case YTChatErrorStatus.PermissionDenied:
+              retryRemaining = 0;
+              throw new NoPermissionError(message);
+            case YTChatErrorStatus.NotFound:
+              retryRemaining = 0;
+              throw new UnavailableError(message);
 
+            // already replay chat OR malformed continuation
+            case YTChatErrorStatus.Invalid:
+              retryRemaining = 0;
+
+              // retry with replay endpoint
+              if (this.isLive) {
+                this.log("fetch", "switched to replay endpoint");
+                endpoint = EP_GLCR;
+                this.isLive = false;
+                continue loop;
+              }
+
+              throw new InvalidArgumentError("malformed continuation");
+
+            // it might be temporary issue so should retry immediately
             case YTChatErrorStatus.Unavailable:
             case YTChatErrorStatus.Internal:
-              // it might be temporary issue so should retry immediately
-              throw new Error(`${status}: ${message}`);
+              throw res.error;
 
             default:
-              debugLog(
-                `[action required] fetchChat(${this.videoId}): Unrecognized error code`,
+              this.log(
+                `<!>fetch`,
+                `Unrecognized error code`,
                 JSON.stringify(res)
               );
-              return {
-                error: {
-                  status,
-                  message,
-                },
-              };
+              throw res.error;
           }
         }
 
         break loop;
       } catch (err) {
-        // logging
-        if ("type" in (err as any)) {
-          const ferr = err as FetchError;
-          debugLog(
-            `fetchChat(${this.videoId}): FetchError`,
-            ferr.message,
-            ferr.code,
-            ferr.type
-          );
-
-          switch (ferr.type) {
-            case "invalid-json": {
-              // NOTE: rarely occurs
-              debugLog(`[action required] ${this.videoId}: invalid-json`);
-            }
-            case "system": {
-              // ECONNRESET, ETIMEOUT, etc
-              // Currently unavailable
-            }
-          }
-        }
-
-        if (retryInterval > 0) {
+        if (retryRemaining > 0) {
           retryRemaining -= 1;
-          debugLog(
-            `fetchChat(${this.videoId}): Retrying remaining=${retryRemaining} interval=${retryInterval}`
+          this.log(
+            `fetch`,
+            `Retrying remaining=${retryRemaining} interval=${retryInterval} source=${
+              (err as any).name
+            }`
           );
           await timeoutThen(retryInterval);
           continue loop;
         }
+
+        /**
+         * type:
+         * "invalid-json"
+         * "system" => ECONNRESET, ETIMEOUT, etc (Currently unavailable)
+         */
+        this.log(
+          `fetch`,
+          `Unrecoverable Error:`,
+          `${(err as any).message} (${(err as any).code}) [${
+            (err as any).type
+          }]`
+        );
 
         throw err;
       }
@@ -157,36 +148,28 @@ export class ChatService {
       const obj = Object.assign({}, res) as any;
       delete obj["responseContext"];
 
-      // {} => Live stream ended
-      // {"contents": {"messageRenderer": {"text": {"runs": [{"text": "Sorry, live chat is currently unavailable"}]}}}} => Turned into members-only stream
-      // "Chat is disabled for this live stream." => Replay chat or pre-chat disabled
-      // {"trackingParams": ...} => ?
       if ("contents" in obj) {
-        debugLog(
-          `fetchChat(${this.videoId}): continuationNotFound(with contents)`,
+        const reason = runsToString(obj.contents.messageRenderer.text.runs);
+        if (/disabled/.test(reason)) {
+          // {contents: "Chat is disabled for this live stream."} => pre-chat unavailable
+          throw new DisabledChatError(reason);
+        } else if (/currently unavailable/.test(reason)) {
+          // {contents: "Sorry, live chat is currently unavailable"} =>
+          // - Turned into members-only stream
+          // - No stream recordings
+          throw new MembersOnlyError(reason);
+        }
+        this.log(`fetch`, `continuationNotFound(with contents)`, reason);
+      } else if ("trackingParams" in obj) {
+        // {trackingParams} => ?
+        this.log(
+          `fetch`,
+          `<!>continuationNotFound(with trackingParams)`,
           JSON.stringify(obj)
         );
-        return {
-          error: {
-            status: FetchChatErrorStatus.LiveChatDisabled,
-            message: "live chat might have turned into membership-only stream",
-          },
-        };
-      }
-      if ("trackingParams" in obj) {
-        debugLog(
-          `fetchChat(${this.videoId}): continuationNotFound(with trackingParams)`,
-          JSON.stringify(obj)
-        );
-        return {
-          error: {
-            status: FetchChatErrorStatus.LiveChatDisabled,
-            message: "continuation contents cannot be found",
-          },
-        };
       }
 
-      // Live stream ended
+      // {} => Live stream ended
       return {
         actions: [],
         continuation: undefined,
@@ -208,7 +191,7 @@ export class ChatService {
     }
 
     // unwrap replay actions into YTActions
-    if (this.isReplay) {
+    if (!this.isLive) {
       rawActions = this.unwrapReplayActions(rawActions);
     }
 
@@ -228,7 +211,7 @@ export class ChatService {
   /**
    * Iterate chat until live stream ends
    */
-  public async *iterateChat({
+  public async *iterate({
     topChat = false,
     ignoreFirstResponse = false,
     ignoreReplayTimeout = false,
@@ -237,23 +220,17 @@ export class ChatService {
     ignoreFirstResponse?: boolean;
     ignoreReplayTimeout?: boolean;
   } = {}): AsyncGenerator<SucceededChatResponse | FailedChatResponse> {
-    let token = rlc(
+    let token: string = rlc(
       { videoId: this.videoId, channelId: this.channelId },
       { top: topChat ?? false }
     );
 
-    debugLog("iterateChat(${this.videoId}): rcnt", token);
+    this.log("iterate", `rcnt=${token}`);
     let treatedFirstResponse = false;
 
     // continuously fetch chat fragments
     while (true) {
-      const res = await this.fetchChat(token);
-
-      // handle errors
-      if (res.error) {
-        yield res;
-        continue;
-      }
+      const res = await this.fetch(token);
 
       // handle chats
       if (!(ignoreFirstResponse && !treatedFirstResponse)) {
@@ -266,15 +243,13 @@ export class ChatService {
       const { continuation } = res;
 
       if (!continuation) {
-        debugLog(
-          `iterateChat(${this.videoId}): will break loop as continuation not found`
-        );
+        this.log("iterate", "will break loop as continuation not found");
         break;
       }
 
       token = continuation.token;
 
-      if (!(this.isReplay && ignoreReplayTimeout)) {
+      if (!(!this.isLive && ignoreReplayTimeout)) {
         await timeoutThen(continuation.timeoutMs);
       }
     }
@@ -289,10 +264,7 @@ export class ChatService {
         )[0] as any;
 
         if (replayAction.actions.length > 1) {
-          debugLog(
-            `[action required] ${this.videoId}: replayCount` +
-              replayAction.actions.length
-          );
+          this.log("<!>unwrapReplayActions", replayAction.actions.length);
         }
 
         return replayAction.actions[0];

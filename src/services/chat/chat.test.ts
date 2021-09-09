@@ -1,7 +1,6 @@
 import { setupRecorder } from "nock-record";
 import fetch from "cross-fetch";
 import { Masterchat, timeoutThen } from "../..";
-import assert from "assert";
 
 const mode = (process.env.NOCK_BACK_MODE as any) || "lockdown";
 const record = setupRecorder({ mode });
@@ -31,24 +30,17 @@ describe("normal live chat", () => {
   });
 
   it("context match", async () => {
-    assert(mc.metadata);
-    expect(mc.metadata.title).toBe(subject.title);
-    expect(mc.metadata.channelId).toBe(subject.channel.id);
-    expect(mc.metadata.channelName).toBe(subject.channel.name);
+    expect(mc.title).toBe(subject.title);
+    expect(mc.channelId).toBe(subject.channel.id);
+    expect(mc.channelName).toBe(subject.channel.name);
   });
 
   it("can fetch live chat", async () => {
     const { completeRecording } = await record("wildlife2");
 
-    const chat = await mc.fetchChat({
-      videoId: mc.videoId,
-      channelId: mc.channelId,
+    const chat = await mc.fetch({
       topChat: false,
     });
-
-    if (chat.error) {
-      throw new Error(chat.error.message);
-    }
     expect(chat.error).toBeNull();
     expect(chat?.continuation?.token).toEqual(expect.any(String));
     expect(chat?.actions).toEqual(
@@ -94,11 +86,8 @@ describe("normal live chat", () => {
     // console.log("waiting for", timeoutMs);
     if (mode !== "lockdown") await timeoutThen(timeoutMs);
 
-    const consecutiveChat = await mc.fetchChat(token);
+    const consecutiveChat = await mc.fetch(token);
     completeRecording();
-    if (consecutiveChat.error) {
-      throw new Error(consecutiveChat.error.message);
-    }
 
     expect(consecutiveChat.error).toBeNull();
     expect(consecutiveChat?.continuation?.token).toEqual(expect.any(String));

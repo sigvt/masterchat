@@ -17,6 +17,10 @@ import {
   YTTooltipRenderer,
 } from "../../yt/chat";
 
+export interface FetchChatOptions {
+  topChat?: boolean;
+}
+
 export const SUPERCHAT_SIGNIFICANCE_MAP = {
   blue: 1,
   lightblue: 2,

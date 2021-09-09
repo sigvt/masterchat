@@ -6,13 +6,6 @@ export interface ClientInfo {
   clientVersion: string;
 }
 
-export interface Metadata {
-  channelId: string;
-  title: string;
-  channelName: string;
-  isLive: boolean;
-}
-
 export type ContinuationData =
   | YTReloadContinuationData
   | YTTimedContinuationData;

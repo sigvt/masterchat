@@ -1,6 +1,7 @@
 export class ProtoBufReader {
   buf: Buffer;
   c: number;
+  s: number = 0;
 
   static splitHeader(n: bigint): [bigint, number] {
     return [n >> 3n, Number(n & 0x7n)];
@@ -43,6 +44,22 @@ export class ProtoBufReader {
     while (this.buf[this.c] & 0x80) this.c += 1;
     const rawBuf = this.buf.slice(start, (this.c += 1));
     return ProtoBufReader.parseVariant(rawBuf);
+  }
+
+  save() {
+    this.s = this.c;
+  }
+
+  rewind(b?: number) {
+    if (b !== undefined) {
+      this.c -= b;
+    } else {
+      this.c = this.s;
+    }
+  }
+
+  remainingBytes() {
+    return this.buf.length - this.c;
   }
 
   isEnded(): boolean {

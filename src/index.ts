@@ -3,15 +3,14 @@ import { Base } from "./base";
 import { DAK } from "./constants";
 import { ChatService } from "./services/chat";
 import { ChatActionService } from "./services/chatAction";
-import { ContextService, fetchMetadata } from "./services/context";
+import { ContextService } from "./services/context";
 import { MessageService } from "./services/message";
 import { normalizeVideoId } from "./utils";
 
 export { Credentials } from "./auth";
-export { MasterchatError } from "./error";
+export * from "./error";
 export * from "./services/chat/types";
 export * from "./services/chatAction/types";
-export { fetchMetadata } from "./services/context";
 export * from "./services/context/types";
 export * from "./services/message/types";
 export { normalizeVideoId, runsToString, timeoutThen } from "./utils";
@@ -29,6 +28,7 @@ export { YTReloadContinuation } from "./yt/context";
 
 export interface MasterchatOptions {
   credentials?: Credentials | string;
+  isLive?: boolean;
 }
 
 // umbrella class
@@ -38,10 +38,10 @@ export class Masterchat {
    */
   static async init(videoIdOrUrl: string, options: MasterchatOptions = {}) {
     const videoId = normalizeVideoId(videoIdOrUrl);
-    const metadata = await fetchMetadata(videoId);
-    const mc = new Masterchat(videoId, metadata.channelId, options);
-    mc.metadata = metadata;
-    mc.isReplay = !metadata.isLive;
+    const mc = new Masterchat(videoId, "", {
+      ...options,
+    });
+    await mc.populateMetadata();
     return mc;
   }
 
@@ -51,13 +51,12 @@ export class Masterchat {
   constructor(
     videoId: string,
     channelId: string,
-    { credentials }: MasterchatOptions = {}
+    { credentials, isLive = true }: MasterchatOptions = {}
   ) {
     this.videoId = videoId;
     this.channelId = channelId;
+    this.isLive = isLive;
     this.apiKey = DAK;
-    this.metadata = undefined;
-    this.isReplay = undefined;
 
     if (typeof credentials === "string") {
       credentials = JSON.parse(

@@ -1,7 +1,6 @@
 import fetch from "cross-fetch";
 import { buildAuthHeaders, Credentials } from "./auth";
 import { DEFAULT_HEADERS, DEFAULT_ORIGIN } from "./constants";
-import { Metadata } from "./services/context/types";
 import { debugLog, timeoutThen } from "./utils";
 
 export type RequestInitWithRetryOption = RequestInit & {
@@ -12,11 +11,12 @@ export type RequestInitWithRetryOption = RequestInit & {
 export class Base {
   public videoId!: string;
   public channelId!: string;
-  public metadata?: Metadata;
+  public channelName?: string;
+  public isLive?: boolean;
+  public title?: string;
 
   protected credentials?: Credentials;
   protected apiKey!: string;
-  protected isReplay?: boolean;
 
   protected async postJson<T>(
     input: string,
@@ -30,6 +30,9 @@ export class Base {
     while (true) {
       try {
         const res = await this.post(input, init);
+        if (res.status !== 200) {
+          debugLog(`postJson(${this.videoId}):`, `status=${res.status}`);
+        }
         return await res.json();
       } catch (err) {
         if (err instanceof Error) {
@@ -106,5 +109,9 @@ export class Base {
       ...init,
       headers,
     });
+  }
+
+  protected log(label: string, ...obj: any) {
+    debugLog(`${label}(${this.videoId}):`, ...obj);
   }
 }
