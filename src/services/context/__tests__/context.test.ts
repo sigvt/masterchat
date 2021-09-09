@@ -1,5 +1,5 @@
 import { setupRecorder } from "nock-record";
-import { Masterchat } from "../..";
+import { Masterchat } from "../../..";
 import {
   DisabledChatError,
   InvalidArgumentError,
@@ -7,7 +7,7 @@ import {
   NoPermissionError,
   NoStreamRecordingError,
   UnavailableError,
-} from "../../error";
+} from "../../../error";
 
 const record = setupRecorder({
   mode: (process.env.NOCK_BACK_MODE as any) || "lockdown",

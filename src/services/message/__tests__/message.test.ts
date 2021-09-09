@@ -1,5 +1,5 @@
 import { setupRecorder } from "nock-record";
-import { Masterchat } from "../..";
+import { Masterchat } from "../../..";
 
 const id = process.env.MC_MSG_TEST_ID;
 const credentialsB64 = process.env.MC_MSG_TEST_CREDENTIALS;
