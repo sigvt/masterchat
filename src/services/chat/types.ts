@@ -1,21 +1,21 @@
 import {
   YTChatErrorStatus,
-  YTRun,
-  YTLiveChatPaidStickerRenderer,
+  YTCloseLiveChatActionPanelAction,
+  YTLiveChatActionPanelRenderer,
+  YTLiveChatBannerRenderer,
   YTLiveChatMembershipItemRenderer,
+  YTLiveChatPaidStickerRenderer,
   YTLiveChatPlaceholderItemRenderer,
-  YTReplaceChatItemAction,
+  YTLiveChatPollRenderer,
   YTLiveChatTickerPaidMessageItemRenderer,
   YTLiveChatTickerPaidStickerItemRenderer,
   YTLiveChatTickerSponsorItemRenderer,
-  YTLiveChatBannerRenderer,
-  YTRemoveBannerForLiveChatCommand,
-  YTTooltipRenderer,
   YTLiveChatViewerEngagementMessageRenderer,
-  YTLiveChatActionPanelRenderer,
-  YTCloseLiveChatActionPanelAction,
-  YTLiveChatPollRenderer,
-} from "../../types/chat";
+  YTRemoveBannerForLiveChatCommand,
+  YTReplaceChatItemAction,
+  YTRun,
+  YTTooltipRenderer,
+} from "../../yt/chat";
 
 export const SUPERCHAT_SIGNIFICANCE_MAP = {
   blue: 1,
@@ -100,11 +100,6 @@ export interface SuperChat {
 export interface ReloadContinuation {
   token: string;
 }
-
-export type ReloadContinuationItems = {
-  top: ReloadContinuation;
-  all: ReloadContinuation;
-};
 
 export interface TimedContinuation extends ReloadContinuation {
   timeoutMs: number;
