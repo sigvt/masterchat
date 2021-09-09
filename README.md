@@ -3,7 +3,7 @@
 [![npm](https://badgen.net/npm/v/masterchat)](https://npmjs.org/package/masterchat)
 [![npm: total downloads](https://badgen.net/npm/dt/masterchat)](https://npmjs.org/package/masterchat)
 
-YouTube Live Chat client for JavaScript.
+JavaScript library for YouTube Live Chat.
 
 - [Documentation](https://holodata.github.io/masterchat/classes/index.Masterchat.html)
 
@@ -13,7 +13,7 @@ YouTube Live Chat client for JavaScript.
 npm i masterchat
 ```
 
-## Examples
+## Usage
 
 ### Iterate live chats
 
@@ -53,19 +53,27 @@ main();
 
 ```js
 import { Masterchat, convertRunsToString } from "masterchat";
-import { appendFile } from "fs/promises";
+import { appendFile, writeFile, readFile } from "fs/promises";
 
 async function main() {
   const replay = await Masterchat.init("<videoId>");
 
-  for await (const { actions } of replay.iterate()) {
+  const lastContinuation = await readFile("./checkpoint").catch(
+    () => undefined
+  );
+
+  for await (const { actions, continuation } of replay.iterate({
+    continuation: lastContinuation,
+  })) {
     const chats = actions.filter(
       (action) => action.type === "addChatItemAction"
     );
 
     const jsonl = chats.map((chat) => JSON.stringify(chat)).join("\n");
-
     await appendFile("./chats.jsonl", jsonl + "\n");
+
+    // save checkpoint
+    await writeFile("./checkpoint", continuation.token);
   }
 }
 
@@ -106,14 +114,14 @@ async function main() {
 main();
 ```
 
-## Advanced Tips
+## Advanced Usage
 
 ### Faster instantiation
 
 To skip loading watch page, use:
 
 ```js
-const live = new Masterchat(videoId, channelId, isReplay);
+const live = new Masterchat(videoId, channelId, { isReplay });
 ```
 
 instead of:
@@ -125,8 +133,9 @@ const live = await Masterchat.init(videoId);
 The former won't populate metadata. If you need metadata, call:
 
 ```js
-await live.populateMetadata(); // will query watch page
-console.log(live.metadata);
+await live.populateMetadata(); // will scrape metadata from watch page
+console.log(live.title);
+console.log(live.channelName);
 ```
 
 ### Fetch credentials

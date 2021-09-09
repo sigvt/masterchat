@@ -215,15 +215,19 @@ export class ChatService {
     topChat = false,
     ignoreFirstResponse = false,
     ignoreReplayTimeout = false,
+    continuation,
   }: {
     topChat?: boolean;
     ignoreFirstResponse?: boolean;
     ignoreReplayTimeout?: boolean;
+    continuation?: string;
   } = {}): AsyncGenerator<SucceededChatResponse | FailedChatResponse> {
-    let token: string = rlc(
-      { videoId: this.videoId, channelId: this.channelId },
-      { top: topChat ?? false }
-    );
+    let token: string =
+      continuation ??
+      rlc(
+        { videoId: this.videoId, channelId: this.channelId },
+        { top: topChat ?? false }
+      );
 
     this.log("iterate", `rcnt=${token}`);
     let treatedFirstResponse = false;
