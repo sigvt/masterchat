@@ -68,7 +68,6 @@ export class Masterchat {
   }
 }
 
-// merge service classes
 export interface Masterchat
   extends Base,
     ContextService,

@@ -9,7 +9,7 @@
     "build:esm": "tsc -b src/tsconfig.esm.json",
     "clean": "shx rm -rf lib",
     "dev": "tsc -p src/tsconfig.json -w",
-    "docs": "shx rm -rf docs && typedoc --out ./docs --excludeExternals --excludePrivate --exclude '**/__tests__/*' src && shx touch docs/.nojekyll",
+    "docs": "shx rm -rf docs && typedoc --out ./docs --excludeExternals --excludePrivate --excludeProtected --exclude '**/__tests__/*' src && shx touch docs/.nojekyll",
     "format": "pretty-quick --staged",
     "prepare": "husky install",
     "prepublishOnly": "npm run clean && npm run build",
