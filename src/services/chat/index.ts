@@ -221,7 +221,7 @@ export class ChatService {
     ignoreFirstResponse?: boolean;
     ignoreReplayTimeout?: boolean;
     continuation?: string;
-  } = {}): AsyncGenerator<SucceededChatResponse | FailedChatResponse> {
+  } = {}): AsyncGenerator<SucceededChatResponse> {
     let token: string =
       continuation ??
       rlc(
@@ -235,6 +235,7 @@ export class ChatService {
     // continuously fetch chat fragments
     while (true) {
       const res = await this.fetch(token);
+      const startMs = Date.now();
 
       // handle chats
       if (!(ignoreFirstResponse && !treatedFirstResponse)) {
@@ -254,7 +255,8 @@ export class ChatService {
       token = continuation.token;
 
       if (!(!this.isLive && ignoreReplayTimeout)) {
-        await timeoutThen(continuation.timeoutMs);
+        const driftMs = Date.now() - startMs;
+        await timeoutThen(Math.max(continuation.timeoutMs - driftMs, 0));
       }
     }
   }

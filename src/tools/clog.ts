@@ -1,6 +1,6 @@
 #!/usr/bin/env/node
 
-import { Masterchat, runsToString } from "..";
+import { Masterchat, normalizeVideoId, runsToString } from "..";
 import { fetchMetadataFromEmbed } from "../services/context";
 
 function log(...obj: any) {
@@ -22,10 +22,6 @@ async function main({
   });
 
   for await (const res of mc.iterate()) {
-    if (res.error) {
-      log("ERROR", res.error);
-      break;
-    }
     const { actions, continuation } = res;
     log("token", continuation?.token);
     log("timeoutMs", continuation?.timeoutMs);
@@ -52,8 +48,17 @@ async function main({
           break;
         }
         case "addChatItemAction": {
-          //   log(`<${action.authorName}>`, runsToString(action.rawMessage));
-          //   break;
+          log(`-${action.authorName}>`, runsToString(action.rawMessage));
+          break;
+        }
+        case "addSuperChatItemAction": {
+          log(
+            `$${action.authorName}>`,
+            runsToString(action.rawMessage ?? []),
+            action.superchat.amount,
+            action.superchat.currency
+          );
+          break;
         }
       }
     }
@@ -67,4 +72,4 @@ if (!videoId) {
 
 const credentials = process.env.MC_MSG_TEST_CREDENTIALS;
 
-main({ videoId });
+main({ videoId: normalizeVideoId(videoId) });
