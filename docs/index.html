@@ -57,12 +57,11 @@
 		<div class="col-8 col-content">
 			<div class="tsd-panel tsd-typography">
 				<a href="#masterchat" id="masterchat" style="color: inherit; text-decoration: none;">
-					<h1>MasterChat</h1>
+					<h1>Masterchat</h1>
 				</a>
 				<p><a href="https://npmjs.org/package/masterchat"><img src="https://badgen.net/npm/v/masterchat" alt="npm"></a>
-					<a href="https://npmjs.org/package/masterchat"><img src="https://badgen.net/npm/dt/masterchat" alt="npm: total downloads"></a>
-				<a href="https://open.vscode.dev/holodata/masterchat"><img src="https://open.vscode.dev/badges/open-in-vscode.svg" alt="Open in Visual Studio Code"></a></p>
-				<p>Battle-tested YouTube Live Chat client for JavaScript.</p>
+				<a href="https://npmjs.org/package/masterchat"><img src="https://badgen.net/npm/dt/masterchat" alt="npm: total downloads"></a></p>
+				<p>JavaScript library for YouTube Live Chat.</p>
 				<ul>
 					<li><a href="https://holodata.github.io/masterchat/classes/index.Masterchat.html">Documentation</a></li>
 				</ul>
@@ -71,16 +70,28 @@
 				</a>
 				<pre><code><span style="color: #001080">npm</span><span style="color: #000000"> </span><span style="color: #001080">i</span><span style="color: #000000"> </span><span style="color: #001080">masterchat</span>
 </code></pre>
-				<a href="#examples" id="examples" style="color: inherit; text-decoration: none;">
-					<h2>Examples</h2>
+				<a href="#usage" id="usage" style="color: inherit; text-decoration: none;">
+					<h2>Usage</h2>
 				</a>
 				<a href="#iterate-live-chats" id="iterate-live-chats" style="color: inherit; text-decoration: none;">
 					<h3>Iterate live chats</h3>
 				</a>
-				<pre><code class="language-js"><span style="color: #AF00DB">import</span><span style="color: #000000"> { </span><span style="color: #001080">Masterchat</span><span style="color: #000000">, </span><span style="color: #001080">convertRunsToString</span><span style="color: #000000"> } </span><span style="color: #AF00DB">from</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;masterchat&quot;</span><span style="color: #000000">;</span>
+				<pre><code class="language-js"><span style="color: #AF00DB">import</span><span style="color: #000000"> { </span><span style="color: #001080">Masterchat</span><span style="color: #000000">, </span><span style="color: #001080">runsToString</span><span style="color: #000000"> } </span><span style="color: #AF00DB">from</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;masterchat&quot;</span><span style="color: #000000">;</span>
 
 <span style="color: #0000FF">async</span><span style="color: #000000"> </span><span style="color: #0000FF">function</span><span style="color: #000000"> </span><span style="color: #795E26">main</span><span style="color: #000000">() {</span>
-<span style="color: #000000">  </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">mc</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">Masterchat</span><span style="color: #000000">.</span><span style="color: #795E26">init</span><span style="color: #000000">(</span><span style="color: #A31515">&quot;&lt;videoId&gt;&quot;</span><span style="color: #000000">).</span><span style="color: #795E26">catch</span><span style="color: #000000">((</span><span style="color: #001080">err</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {</span>
+<span style="color: #000000">  </span><span style="color: #AF00DB">try</span><span style="color: #000000"> {</span>
+<span style="color: #000000">    </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">live</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">Masterchat</span><span style="color: #000000">.</span><span style="color: #795E26">init</span><span style="color: #000000">(</span><span style="color: #A31515">&quot;&lt;videoId&gt;&quot;</span><span style="color: #000000">);</span>
+
+<span style="color: #000000">    </span><span style="color: #AF00DB">for</span><span style="color: #000000"> </span><span style="color: #AF00DB">await</span><span style="color: #000000"> (</span><span style="color: #0000FF">const</span><span style="color: #000000"> { </span><span style="color: #0070C1">actions</span><span style="color: #000000"> } </span><span style="color: #0000FF">of</span><span style="color: #000000"> </span><span style="color: #001080">live</span><span style="color: #000000">.</span><span style="color: #795E26">iterate</span><span style="color: #000000">()) {</span>
+<span style="color: #000000">      </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">chats</span><span style="color: #000000"> = </span><span style="color: #001080">actions</span><span style="color: #000000">.</span><span style="color: #795E26">filter</span><span style="color: #000000">(</span>
+<span style="color: #000000">        (</span><span style="color: #001080">action</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> </span><span style="color: #001080">action</span><span style="color: #000000">.</span><span style="color: #001080">type</span><span style="color: #000000"> === </span><span style="color: #A31515">&quot;addChatItemAction&quot;</span>
+<span style="color: #000000">      );</span>
+
+<span style="color: #000000">      </span><span style="color: #AF00DB">for</span><span style="color: #000000"> (</span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">chat</span><span style="color: #000000"> </span><span style="color: #0000FF">of</span><span style="color: #000000"> </span><span style="color: #001080">chats</span><span style="color: #000000">) {</span>
+<span style="color: #000000">        </span><span style="color: #001080">console</span><span style="color: #000000">.</span><span style="color: #795E26">log</span><span style="color: #000000">(</span><span style="color: #001080">chat</span><span style="color: #000000">.</span><span style="color: #001080">authorName</span><span style="color: #000000">, </span><span style="color: #795E26">runsToString</span><span style="color: #000000">(</span><span style="color: #001080">chat</span><span style="color: #000000">.</span><span style="color: #001080">rawMessage</span><span style="color: #000000">));</span>
+<span style="color: #000000">      }</span>
+<span style="color: #000000">    }</span>
+<span style="color: #000000">  } </span><span style="color: #AF00DB">catch</span><span style="color: #000000"> (</span><span style="color: #001080">err</span><span style="color: #000000">) {</span>
 <span style="color: #000000">    </span><span style="color: #001080">console</span><span style="color: #000000">.</span><span style="color: #795E26">log</span><span style="color: #000000">(</span><span style="color: #001080">err</span><span style="color: #000000">.</span><span style="color: #001080">code</span><span style="color: #000000">);</span>
 <span style="color: #000000">    </span><span style="color: #008000">// &quot;disabled&quot; =&gt; Live chat is disabled</span>
 <span style="color: #000000">    </span><span style="color: #008000">// &quot;membersOnly&quot; =&gt; No permission (members-only)</span>
@@ -90,22 +101,6 @@
 <span style="color: #000000">    </span><span style="color: #008000">// &quot;denied&quot; =&gt; Access denied</span>
 <span style="color: #000000">    </span><span style="color: #008000">// &quot;invalid&quot; =&gt; Invalid request</span>
 <span style="color: #000000">    </span><span style="color: #008000">// &quot;unknown&quot; =&gt; Unknown error</span>
-<span style="color: #000000">  });</span>
-
-<span style="color: #000000">  </span><span style="color: #AF00DB">for</span><span style="color: #000000"> </span><span style="color: #AF00DB">await</span><span style="color: #000000"> (</span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">res</span><span style="color: #000000"> </span><span style="color: #0000FF">of</span><span style="color: #000000"> </span><span style="color: #001080">mc</span><span style="color: #000000">.</span><span style="color: #795E26">iterateChat</span><span style="color: #000000">(</span><span style="color: #A31515">&quot;top&quot;</span><span style="color: #000000"> </span><span style="color: #008000">/* or &quot;all&quot; */</span><span style="color: #000000">)) {</span>
-<span style="color: #000000">    </span><span style="color: #AF00DB">if</span><span style="color: #000000"> (</span><span style="color: #001080">res</span><span style="color: #000000">.</span><span style="color: #001080">error</span><span style="color: #000000">) {</span>
-<span style="color: #000000">      </span><span style="color: #001080">console</span><span style="color: #000000">.</span><span style="color: #795E26">log</span><span style="color: #000000">(</span><span style="color: #001080">res</span><span style="color: #000000">.</span><span style="color: #001080">error</span><span style="color: #000000">);</span>
-<span style="color: #000000">      </span><span style="color: #AF00DB">break</span><span style="color: #000000">;</span>
-<span style="color: #000000">    }</span>
-
-<span style="color: #000000">    </span><span style="color: #0000FF">const</span><span style="color: #000000"> { </span><span style="color: #0070C1">actions</span><span style="color: #000000"> } = </span><span style="color: #001080">res</span><span style="color: #000000">;</span>
-<span style="color: #000000">    </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">chats</span><span style="color: #000000"> = </span><span style="color: #001080">actions</span><span style="color: #000000">.</span><span style="color: #795E26">filter</span><span style="color: #000000">(</span>
-<span style="color: #000000">      (</span><span style="color: #001080">action</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> </span><span style="color: #001080">action</span><span style="color: #000000">.</span><span style="color: #001080">type</span><span style="color: #000000"> === </span><span style="color: #A31515">&quot;addChatItemAction&quot;</span>
-<span style="color: #000000">    );</span>
-
-<span style="color: #000000">    </span><span style="color: #AF00DB">for</span><span style="color: #000000"> (</span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">chat</span><span style="color: #000000"> </span><span style="color: #0000FF">of</span><span style="color: #000000"> </span><span style="color: #001080">chats</span><span style="color: #000000">) {</span>
-<span style="color: #000000">      </span><span style="color: #001080">console</span><span style="color: #000000">.</span><span style="color: #795E26">log</span><span style="color: #000000">(</span><span style="color: #001080">chat</span><span style="color: #000000">.</span><span style="color: #001080">authorName</span><span style="color: #000000">, </span><span style="color: #795E26">convertRunsToString</span><span style="color: #000000">(</span><span style="color: #001080">chat</span><span style="color: #000000">.</span><span style="color: #001080">rawMessage</span><span style="color: #000000">));</span>
-<span style="color: #000000">    }</span>
 <span style="color: #000000">  }</span>
 <span style="color: #000000">}</span>
 
@@ -115,21 +110,27 @@
 					<h3>Download replay chat as JSONLines</h3>
 				</a>
 				<pre><code class="language-js"><span style="color: #AF00DB">import</span><span style="color: #000000"> { </span><span style="color: #001080">Masterchat</span><span style="color: #000000">, </span><span style="color: #001080">convertRunsToString</span><span style="color: #000000"> } </span><span style="color: #AF00DB">from</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;masterchat&quot;</span><span style="color: #000000">;</span>
-<span style="color: #AF00DB">import</span><span style="color: #000000"> { </span><span style="color: #001080">appendFile</span><span style="color: #000000"> } </span><span style="color: #AF00DB">from</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;fs/promises&quot;</span><span style="color: #000000">;</span>
+<span style="color: #AF00DB">import</span><span style="color: #000000"> { </span><span style="color: #001080">appendFile</span><span style="color: #000000">, </span><span style="color: #001080">writeFile</span><span style="color: #000000">, </span><span style="color: #001080">readFile</span><span style="color: #000000"> } </span><span style="color: #AF00DB">from</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;fs/promises&quot;</span><span style="color: #000000">;</span>
 
 <span style="color: #0000FF">async</span><span style="color: #000000"> </span><span style="color: #0000FF">function</span><span style="color: #000000"> </span><span style="color: #795E26">main</span><span style="color: #000000">() {</span>
-<span style="color: #000000">  </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">mc</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">Masterchat</span><span style="color: #000000">.</span><span style="color: #795E26">init</span><span style="color: #000000">(</span><span style="color: #A31515">&quot;&lt;videoId&gt;&quot;</span><span style="color: #000000">);</span>
+<span style="color: #000000">  </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">replay</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">Masterchat</span><span style="color: #000000">.</span><span style="color: #795E26">init</span><span style="color: #000000">(</span><span style="color: #A31515">&quot;&lt;videoId&gt;&quot;</span><span style="color: #000000">);</span>
 
-<span style="color: #000000">  </span><span style="color: #AF00DB">for</span><span style="color: #000000"> </span><span style="color: #AF00DB">await</span><span style="color: #000000"> (</span><span style="color: #0000FF">const</span><span style="color: #000000"> { </span><span style="color: #0070C1">actions</span><span style="color: #000000"> } </span><span style="color: #0000FF">of</span><span style="color: #000000"> </span><span style="color: #001080">mc</span><span style="color: #000000">.</span><span style="color: #795E26">iterateChat</span><span style="color: #000000">(</span><span style="color: #A31515">&quot;all&quot;</span><span style="color: #000000">, {</span>
-<span style="color: #000000">    </span><span style="color: #001080">ignoreReplayTimeout:</span><span style="color: #000000"> </span><span style="color: #0000FF">true</span><span style="color: #000000">,</span>
+<span style="color: #000000">  </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">lastContinuation</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #795E26">readFile</span><span style="color: #000000">(</span><span style="color: #A31515">&quot;./checkpoint&quot;</span><span style="color: #000000">).</span><span style="color: #795E26">catch</span><span style="color: #000000">(</span>
+<span style="color: #000000">    () </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> </span><span style="color: #0000FF">undefined</span>
+<span style="color: #000000">  );</span>
+
+<span style="color: #000000">  </span><span style="color: #AF00DB">for</span><span style="color: #000000"> </span><span style="color: #AF00DB">await</span><span style="color: #000000"> (</span><span style="color: #0000FF">const</span><span style="color: #000000"> { </span><span style="color: #0070C1">actions</span><span style="color: #000000">, </span><span style="color: #0070C1">continuation</span><span style="color: #000000"> } </span><span style="color: #0000FF">of</span><span style="color: #000000"> </span><span style="color: #001080">replay</span><span style="color: #000000">.</span><span style="color: #795E26">iterate</span><span style="color: #000000">({</span>
+<span style="color: #000000">    </span><span style="color: #001080">continuation:</span><span style="color: #000000"> </span><span style="color: #001080">lastContinuation</span><span style="color: #000000">,</span>
 <span style="color: #000000">  })) {</span>
 <span style="color: #000000">    </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">chats</span><span style="color: #000000"> = </span><span style="color: #001080">actions</span><span style="color: #000000">.</span><span style="color: #795E26">filter</span><span style="color: #000000">(</span>
 <span style="color: #000000">      (</span><span style="color: #001080">action</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> </span><span style="color: #001080">action</span><span style="color: #000000">.</span><span style="color: #001080">type</span><span style="color: #000000"> === </span><span style="color: #A31515">&quot;addChatItemAction&quot;</span>
 <span style="color: #000000">    );</span>
 
 <span style="color: #000000">    </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">jsonl</span><span style="color: #000000"> = </span><span style="color: #001080">chats</span><span style="color: #000000">.</span><span style="color: #795E26">map</span><span style="color: #000000">((</span><span style="color: #001080">chat</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> </span><span style="color: #267F99">JSON</span><span style="color: #000000">.</span><span style="color: #795E26">stringify</span><span style="color: #000000">(</span><span style="color: #001080">chat</span><span style="color: #000000">)).</span><span style="color: #795E26">join</span><span style="color: #000000">(</span><span style="color: #A31515">&quot;</span><span style="color: #EE0000">\n</span><span style="color: #A31515">&quot;</span><span style="color: #000000">);</span>
-
 <span style="color: #000000">    </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #795E26">appendFile</span><span style="color: #000000">(</span><span style="color: #A31515">&quot;./chats.jsonl&quot;</span><span style="color: #000000">, </span><span style="color: #001080">jsonl</span><span style="color: #000000"> + </span><span style="color: #A31515">&quot;</span><span style="color: #EE0000">\n</span><span style="color: #A31515">&quot;</span><span style="color: #000000">);</span>
+
+<span style="color: #000000">    </span><span style="color: #008000">// save checkpoint</span>
+<span style="color: #000000">    </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #795E26">writeFile</span><span style="color: #000000">(</span><span style="color: #A31515">&quot;./checkpoint&quot;</span><span style="color: #000000">, </span><span style="color: #001080">continuation</span><span style="color: #000000">.</span><span style="color: #001080">token</span><span style="color: #000000">);</span>
 <span style="color: #000000">  }</span>
 <span style="color: #000000">}</span>
 
@@ -138,7 +139,7 @@
 				<a href="#auto-moderator" id="auto-moderator" style="color: inherit; text-decoration: none;">
 					<h3>Auto-moderator</h3>
 				</a>
-				<pre><code class="language-js"><span style="color: #AF00DB">import</span><span style="color: #000000"> { </span><span style="color: #001080">Masterchat</span><span style="color: #000000">, </span><span style="color: #001080">convertRunsToString</span><span style="color: #000000"> } </span><span style="color: #AF00DB">from</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;masterchat&quot;</span><span style="color: #000000">;</span>
+				<pre><code class="language-js"><span style="color: #AF00DB">import</span><span style="color: #000000"> { </span><span style="color: #001080">Masterchat</span><span style="color: #000000">, </span><span style="color: #001080">runsToString</span><span style="color: #000000"> } </span><span style="color: #AF00DB">from</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;masterchat&quot;</span><span style="color: #000000">;</span>
 <span style="color: #AF00DB">import</span><span style="color: #000000"> { </span><span style="color: #001080">isSpam</span><span style="color: #000000"> } </span><span style="color: #AF00DB">from</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;spamreaper&quot;</span><span style="color: #000000">;</span>
 
 <span style="color: #0000FF">async</span><span style="color: #000000"> </span><span style="color: #0000FF">function</span><span style="color: #000000"> </span><span style="color: #795E26">main</span><span style="color: #000000">() {</span>
@@ -151,22 +152,46 @@
 <span style="color: #000000">    </span><span style="color: #001080">SSID:</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;&lt;value&gt;&quot;</span><span style="color: #000000">,</span>
 <span style="color: #000000">  };</span>
 
-<span style="color: #000000">  </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">mc</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">Masterchat</span><span style="color: #000000">.</span><span style="color: #795E26">init</span><span style="color: #000000">(</span><span style="color: #A31515">&quot;&lt;videoId&gt;&quot;</span><span style="color: #000000">, { </span><span style="color: #001080">credentials</span><span style="color: #000000"> });</span>
+<span style="color: #000000">  </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">live</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">Masterchat</span><span style="color: #000000">.</span><span style="color: #795E26">init</span><span style="color: #000000">(</span><span style="color: #A31515">&quot;&lt;videoId&gt;&quot;</span><span style="color: #000000">, { </span><span style="color: #001080">credentials</span><span style="color: #000000"> });</span>
 
-<span style="color: #000000">  </span><span style="color: #AF00DB">for</span><span style="color: #000000"> </span><span style="color: #AF00DB">await</span><span style="color: #000000"> (</span><span style="color: #0000FF">const</span><span style="color: #000000"> { </span><span style="color: #0070C1">actions</span><span style="color: #000000"> } </span><span style="color: #0000FF">of</span><span style="color: #000000"> </span><span style="color: #001080">mc</span><span style="color: #000000">.</span><span style="color: #795E26">iterateChat</span><span style="color: #000000">(</span><span style="color: #A31515">&quot;all&quot;</span><span style="color: #000000">, {</span>
+<span style="color: #000000">  </span><span style="color: #AF00DB">for</span><span style="color: #000000"> </span><span style="color: #AF00DB">await</span><span style="color: #000000"> (</span><span style="color: #0000FF">const</span><span style="color: #000000"> { </span><span style="color: #0070C1">actions</span><span style="color: #000000"> } </span><span style="color: #0000FF">of</span><span style="color: #000000"> </span><span style="color: #001080">live</span><span style="color: #000000">.</span><span style="color: #795E26">iterate</span><span style="color: #000000">({</span>
 <span style="color: #000000">    </span><span style="color: #001080">ignoreFirstResponse:</span><span style="color: #000000"> </span><span style="color: #0000FF">true</span><span style="color: #000000">,</span>
 <span style="color: #000000">  })) {</span>
 <span style="color: #000000">    </span><span style="color: #AF00DB">for</span><span style="color: #000000"> (</span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">action</span><span style="color: #000000"> </span><span style="color: #0000FF">of</span><span style="color: #000000"> </span><span style="color: #001080">actions</span><span style="color: #000000">) {</span>
 <span style="color: #000000">      </span><span style="color: #AF00DB">if</span><span style="color: #000000"> (</span><span style="color: #001080">action</span><span style="color: #000000">.</span><span style="color: #001080">type</span><span style="color: #000000"> !== </span><span style="color: #A31515">&quot;addChatItemAction&quot;</span><span style="color: #000000">) </span><span style="color: #AF00DB">continue</span><span style="color: #000000">;</span>
 
-<span style="color: #000000">      </span><span style="color: #AF00DB">if</span><span style="color: #000000"> (</span><span style="color: #795E26">isSpam</span><span style="color: #000000">(</span><span style="color: #795E26">convertRunsToString</span><span style="color: #000000">(</span><span style="color: #001080">action</span><span style="color: #000000">.</span><span style="color: #001080">rawMessage</span><span style="color: #000000">))) {</span>
-<span style="color: #000000">        </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">mc</span><span style="color: #000000">.</span><span style="color: #795E26">remove</span><span style="color: #000000">(</span><span style="color: #001080">action</span><span style="color: #000000">.</span><span style="color: #001080">contextMenuEndpointParams</span><span style="color: #000000">);</span>
+<span style="color: #000000">      </span><span style="color: #AF00DB">if</span><span style="color: #000000"> (</span><span style="color: #795E26">isSpam</span><span style="color: #000000">(</span><span style="color: #795E26">runsToString</span><span style="color: #000000">(</span><span style="color: #001080">action</span><span style="color: #000000">.</span><span style="color: #001080">rawMessage</span><span style="color: #000000">))) {</span>
+<span style="color: #000000">        </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">live</span><span style="color: #000000">.</span><span style="color: #795E26">remove</span><span style="color: #000000">(</span><span style="color: #001080">action</span><span style="color: #000000">.</span><span style="color: #001080">contextMenuEndpointParams</span><span style="color: #000000">);</span>
 <span style="color: #000000">      }</span>
 <span style="color: #000000">    }</span>
 <span style="color: #000000">  }</span>
 <span style="color: #000000">}</span>
 
 <span style="color: #795E26">main</span><span style="color: #000000">();</span>
+</code></pre>
+				<a href="#advanced-usage" id="advanced-usage" style="color: inherit; text-decoration: none;">
+					<h2>Advanced Usage</h2>
+				</a>
+				<a href="#faster-instantiation" id="faster-instantiation" style="color: inherit; text-decoration: none;">
+					<h3>Faster instantiation</h3>
+				</a>
+				<p>To skip loading watch page, use:</p>
+				<pre><code class="language-js"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">live</span><span style="color: #000000"> = </span><span style="color: #0000FF">new</span><span style="color: #000000"> </span><span style="color: #795E26">Masterchat</span><span style="color: #000000">(</span><span style="color: #001080">videoId</span><span style="color: #000000">, </span><span style="color: #001080">channelId</span><span style="color: #000000">, { </span><span style="color: #001080">isReplay</span><span style="color: #000000"> });</span>
+</code></pre>
+				<p>instead of:</p>
+				<pre><code class="language-js"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">live</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">Masterchat</span><span style="color: #000000">.</span><span style="color: #795E26">init</span><span style="color: #000000">(</span><span style="color: #001080">videoId</span><span style="color: #000000">);</span>
+</code></pre>
+				<p>The former won&#39;t populate metadata. If you need metadata, call:</p>
+				<pre><code class="language-js"><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">live</span><span style="color: #000000">.</span><span style="color: #795E26">populateMetadata</span><span style="color: #000000">(); </span><span style="color: #008000">// will scrape metadata from watch page</span>
+<span style="color: #001080">console</span><span style="color: #000000">.</span><span style="color: #795E26">log</span><span style="color: #000000">(</span><span style="color: #001080">live</span><span style="color: #000000">.</span><span style="color: #001080">title</span><span style="color: #000000">);</span>
+<span style="color: #001080">console</span><span style="color: #000000">.</span><span style="color: #795E26">log</span><span style="color: #000000">(</span><span style="color: #001080">live</span><span style="color: #000000">.</span><span style="color: #001080">channelName</span><span style="color: #000000">);</span>
+</code></pre>
+				<a href="#fetch-credentials" id="fetch-credentials" style="color: inherit; text-decoration: none;">
+					<h3>Fetch credentials</h3>
+				</a>
+				<pre><code class="language-bash"><span style="color: #795E26">cd</span><span style="color: #000000"> extra/credentials-fetcher</span>
+<span style="color: #000000">npm i</span>
+<span style="color: #000000">npm start</span>
 </code></pre>
 				<a href="#cli" id="cli" style="color: inherit; text-decoration: none;">
 					<h2>CLI</h2>
@@ -193,16 +218,13 @@
 					<li><input checked="" disabled="" type="checkbox"> Auth support</li>
 					<li><input checked="" disabled="" type="checkbox"> Ability to send chat</li>
 					<li><input checked="" disabled="" type="checkbox"> Moderation functionality</li>
-					<li><input disabled="" type="checkbox"> Simplify action interface</li>
 				</ul>
 				<a href="#contribute" id="contribute" style="color: inherit; text-decoration: none;">
 					<h2>Contribute</h2>
 				</a>
-				<p>We welcome your contribution such as:</p>
 				<ul>
 					<li>Use masterchat with your product and <a href="https://github.com/holodata/masterchat/issues/new">report bugs</a></li>
 					<li>Squash <a href="https://github.com/holodata/masterchat/search?l=TypeScript&amp;q=TODO">TODOs</a></li>
-					<li>Join API discussions on <a href="https://holodata.org/discord">holodata Discord server</a></li>
 				</ul>
 				<p>See <a href="./CONTRIBUTING.md">Contribution Guide</a> for more information.</p>
 				<a href="#community" id="community" style="color: inherit; text-decoration: none;">
@@ -227,46 +249,70 @@
 						<a href="modules/constants.html">constants</a>
 					</li>
 					<li class=" tsd-kind-module">
+						<a href="modules/currency.html">currency</a>
+					</li>
+					<li class=" tsd-kind-module">
 						<a href="modules/error.html">error</a>
 					</li>
 					<li class=" tsd-kind-module">
 						<a href="modules/index.html">index</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/protobuf.html">protobuf</a>
+						<a href="modules/protobuf_assembler.html">protobuf/assembler</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/protobuf_b64.html">protobuf/b64</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/protobuf_parser.html">protobuf/parser</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/protobuf_reader.html">protobuf/reader</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/protobuf_token.html">protobuf/token</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/protobuf_util.html">protobuf/util</a>
 					</li>
 					<li class=" tsd-kind-module">
 						<a href="modules/services_chat.html">services/chat</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/services_chat_exports.html">services/chat/exports</a>
+						<a href="modules/services_chat_parser.html">services/chat/parser</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/services_chat_types.html">services/chat/types</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/services_chat_utils.html">services/chat/utils</a>
 					</li>
 					<li class=" tsd-kind-module">
 						<a href="modules/services_chatAction.html">services/chat<wbr>Action</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/services_chatAction_exports.html">services/chat<wbr>Action/exports</a>
+						<a href="modules/services_chatAction_types.html">services/chat<wbr>Action/types</a>
 					</li>
 					<li class=" tsd-kind-module">
 						<a href="modules/services_context.html">services/context</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/services_context_exports.html">services/context/exports</a>
+						<a href="modules/services_context_types.html">services/context/types</a>
 					</li>
 					<li class=" tsd-kind-module">
 						<a href="modules/services_message.html">services/message</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/services_message_exports.html">services/message/exports</a>
+						<a href="modules/services_message_types.html">services/message/types</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/types_chat.html">types/chat</a>
+						<a href="modules/utils.html">utils</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/types_context.html">types/context</a>
+						<a href="modules/yt_chat.html">yt/chat</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/util.html">util</a>
+						<a href="modules/yt_context.html">yt/context</a>
 					</li>
 				</ul>
 			</nav>

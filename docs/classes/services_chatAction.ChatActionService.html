@@ -98,10 +98,11 @@
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-protected"><a href="services_chatAction.ChatActionService.html#apiKey" class="tsd-kind-icon">api<wbr>Key</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="services_chatAction.ChatActionService.html#continuation" class="tsd-kind-icon">continuation</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="services_chatAction.ChatActionService.html#channelId" class="tsd-kind-icon">channel<wbr>Id</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="services_chatAction.ChatActionService.html#channelName" class="tsd-kind-icon">channel<wbr>Name</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-protected"><a href="services_chatAction.ChatActionService.html#credentials" class="tsd-kind-icon">credentials</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-protected"><a href="services_chatAction.ChatActionService.html#isReplay" class="tsd-kind-icon">is<wbr>Replay</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="services_chatAction.ChatActionService.html#metadata" class="tsd-kind-icon">metadata</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="services_chatAction.ChatActionService.html#isLive" class="tsd-kind-icon">is<wbr>Live</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="services_chatAction.ChatActionService.html#title" class="tsd-kind-icon">title</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="services_chatAction.ChatActionService.html#videoId" class="tsd-kind-icon">video<wbr>Id</a></li>
 							</ul>
 						</section>
@@ -112,6 +113,7 @@
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="services_chatAction.ChatActionService.html#block" class="tsd-kind-icon">block</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected"><a href="services_chatAction.ChatActionService.html#get" class="tsd-kind-icon">get</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="services_chatAction.ChatActionService.html#hide" class="tsd-kind-icon">hide</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected"><a href="services_chatAction.ChatActionService.html#log" class="tsd-kind-icon">log</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="services_chatAction.ChatActionService.html#pin" class="tsd-kind-icon">pin</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected"><a href="services_chatAction.ChatActionService.html#post" class="tsd-kind-icon">post</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-inherited tsd-is-protected"><a href="services_chatAction.ChatActionService.html#postJson" class="tsd-kind-icon">post<wbr>Json</a></li>
@@ -154,18 +156,29 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="base.Base.html">Base</a>.<a href="base.Base.html#apiKey">apiKey</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/holodata/masterchat/blob/05dfc5b/src/base.ts#L16">base.ts:16</a></li>
+							<li>Defined in <a href="https://github.com/holodata/masterchat/blob/6298f4a/src/base.ts#L19">base.ts:19</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
-					<a name="continuation" class="tsd-anchor"></a>
-					<h3>continuation</h3>
-					<div class="tsd-signature tsd-kind-icon">continuation<span class="tsd-signature-symbol">:</span> <a href="../modules/services_chat_exports.html#ReloadContinuationItems" class="tsd-signature-type" data-tsd-kind="Type alias">ReloadContinuationItems</a></div>
+					<a name="channelId" class="tsd-anchor"></a>
+					<h3>channel<wbr>Id</h3>
+					<div class="tsd-signature tsd-kind-icon">channel<wbr>Id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
-						<p>Inherited from <a href="base.Base.html">Base</a>.<a href="base.Base.html#continuation">continuation</a></p>
+						<p>Inherited from <a href="base.Base.html">Base</a>.<a href="base.Base.html#channelId">channelId</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/holodata/masterchat/blob/05dfc5b/src/base.ts#L20">base.ts:20</a></li>
+							<li>Defined in <a href="https://github.com/holodata/masterchat/blob/6298f4a/src/base.ts#L13">base.ts:13</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+					<a name="channelName" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> channel<wbr>Name</h3>
+					<div class="tsd-signature tsd-kind-icon">channel<wbr>Name<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from <a href="base.Base.html">Base</a>.<a href="base.Base.html#channelName">channelName</a></p>
+						<ul>
+							<li>Defined in <a href="https://github.com/holodata/masterchat/blob/6298f4a/src/base.ts#L14">base.ts:14</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -176,29 +189,29 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="base.Base.html">Base</a>.<a href="base.Base.html#credentials">credentials</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/holodata/masterchat/blob/05dfc5b/src/base.ts#L17">base.ts:17</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
-					<a name="isReplay" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagProtected">Protected</span> is<wbr>Replay</h3>
-					<div class="tsd-signature tsd-kind-icon">is<wbr>Replay<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
-					<aside class="tsd-sources">
-						<p>Inherited from <a href="base.Base.html">Base</a>.<a href="base.Base.html#isReplay">isReplay</a></p>
-						<ul>
-							<li>Defined in <a href="https://github.com/holodata/masterchat/blob/05dfc5b/src/base.ts#L21">base.ts:21</a></li>
+							<li>Defined in <a href="https://github.com/holodata/masterchat/blob/6298f4a/src/base.ts#L18">base.ts:18</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
-					<a name="metadata" class="tsd-anchor"></a>
-					<h3>metadata</h3>
-					<div class="tsd-signature tsd-kind-icon">metadata<span class="tsd-signature-symbol">:</span> <a href="../interfaces/services_context_exports.Metadata.html" class="tsd-signature-type" data-tsd-kind="Interface">Metadata</a></div>
+					<a name="isLive" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> is<wbr>Live</h3>
+					<div class="tsd-signature tsd-kind-icon">is<wbr>Live<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
-						<p>Inherited from <a href="base.Base.html">Base</a>.<a href="base.Base.html#metadata">metadata</a></p>
+						<p>Inherited from <a href="base.Base.html">Base</a>.<a href="base.Base.html#isLive">isLive</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/holodata/masterchat/blob/05dfc5b/src/base.ts#L19">base.ts:19</a></li>
+							<li>Defined in <a href="https://github.com/holodata/masterchat/blob/6298f4a/src/base.ts#L15">base.ts:15</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+					<a name="title" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> title</h3>
+					<div class="tsd-signature tsd-kind-icon">title<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from <a href="base.Base.html">Base</a>.<a href="base.Base.html#title">title</a></p>
+						<ul>
+							<li>Defined in <a href="https://github.com/holodata/masterchat/blob/6298f4a/src/base.ts#L16">base.ts:16</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -209,7 +222,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="base.Base.html">Base</a>.<a href="base.Base.html#videoId">videoId</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/holodata/masterchat/blob/05dfc5b/src/base.ts#L15">base.ts:15</a></li>
+							<li>Defined in <a href="https://github.com/holodata/masterchat/blob/6298f4a/src/base.ts#L12">base.ts:12</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -220,13 +233,13 @@
 					<a name="addModerator" class="tsd-anchor"></a>
 					<h3>add<wbr>Moderator</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">add<wbr>Moderator<span class="tsd-signature-symbol">(</span>contextMenuEndpointParams<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/types_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">add<wbr>Moderator<span class="tsd-signature-symbol">(</span>contextMenuEndpointParams<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/yt_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/holodata/masterchat/blob/05dfc5b/src/services/chatAction/index.ts#L187">services/chatAction/index.ts:187</a></li>
+									<li>Defined in <a href="https://github.com/holodata/masterchat/blob/6298f4a/src/services/chatAction/index.ts#L188">services/chatAction/index.ts:188</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -235,7 +248,7 @@
 									<h5>contextMenuEndpointParams: <span class="tsd-signature-type">string</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/types_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/yt_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -243,13 +256,13 @@
 					<a name="block" class="tsd-anchor"></a>
 					<h3>block</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">block<span class="tsd-signature-symbol">(</span>contextMenuEndpointParams<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/types_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">block<span class="tsd-signature-symbol">(</span>contextMenuEndpointParams<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/yt_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/holodata/masterchat/blob/05dfc5b/src/services/chatAction/index.ts#L123">services/chatAction/index.ts:123</a></li>
+									<li>Defined in <a href="https://github.com/holodata/masterchat/blob/6298f4a/src/services/chatAction/index.ts#L124">services/chatAction/index.ts:124</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -258,7 +271,7 @@
 									<h5>contextMenuEndpointParams: <span class="tsd-signature-type">string</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/types_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/yt_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -273,7 +286,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="base.Base.html">Base</a>.<a href="base.Base.html#get">get</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/holodata/masterchat/blob/05dfc5b/src/base.ts#L24">base.ts:24</a></li>
+									<li>Defined in <a href="https://github.com/holodata/masterchat/blob/6298f4a/src/base.ts#L86">base.ts:86</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -293,13 +306,13 @@
 					<a name="hide" class="tsd-anchor"></a>
 					<h3>hide</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">hide<span class="tsd-signature-symbol">(</span>contextMenuEndpointParams<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/types_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">hide<span class="tsd-signature-symbol">(</span>contextMenuEndpointParams<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/yt_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/holodata/masterchat/blob/05dfc5b/src/services/chatAction/index.ts#L171">services/chatAction/index.ts:171</a></li>
+									<li>Defined in <a href="https://github.com/holodata/masterchat/blob/6298f4a/src/services/chatAction/index.ts#L172">services/chatAction/index.ts:172</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -308,7 +321,34 @@
 									<h5>contextMenuEndpointParams: <span class="tsd-signature-type">string</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/types_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/yt_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
+					<a name="log" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagProtected">Protected</span> log</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
+						<li class="tsd-signature tsd-kind-icon">log<span class="tsd-signature-symbol">(</span>label<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, <span class="tsd-signature-symbol">...</span>obj<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="base.Base.html">Base</a>.<a href="base.Base.html#log">log</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/holodata/masterchat/blob/6298f4a/src/base.ts#L114">base.ts:114</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>label: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagRest">Rest</span> <span class="tsd-signature-symbol">...</span>obj: <span class="tsd-signature-type">any</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -316,13 +356,13 @@
 					<a name="pin" class="tsd-anchor"></a>
 					<h3>pin</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">pin<span class="tsd-signature-symbol">(</span>contextMenuEndpointParams<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/types_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">pin<span class="tsd-signature-symbol">(</span>contextMenuEndpointParams<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/yt_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/holodata/masterchat/blob/05dfc5b/src/services/chatAction/index.ts#L139">services/chatAction/index.ts:139</a></li>
+									<li>Defined in <a href="https://github.com/holodata/masterchat/blob/6298f4a/src/services/chatAction/index.ts#L140">services/chatAction/index.ts:140</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -331,7 +371,7 @@
 									<h5>contextMenuEndpointParams: <span class="tsd-signature-type">string</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/types_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/yt_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -346,7 +386,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="base.Base.html">Base</a>.<a href="base.Base.html#post">post</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/holodata/masterchat/blob/05dfc5b/src/base.ts#L84">base.ts:84</a></li>
+									<li>Defined in <a href="https://github.com/holodata/masterchat/blob/6298f4a/src/base.ts#L59">base.ts:59</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -373,7 +413,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="base.Base.html">Base</a>.<a href="base.Base.html#postJson">postJson</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/holodata/masterchat/blob/05dfc5b/src/base.ts#L49">base.ts:49</a></li>
+									<li>Defined in <a href="https://github.com/holodata/masterchat/blob/6298f4a/src/base.ts#L21">base.ts:21</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
@@ -399,13 +439,13 @@
 					<a name="remove" class="tsd-anchor"></a>
 					<h3>remove</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">remove<span class="tsd-signature-symbol">(</span>contextMenuEndpointParams<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/types_chat.YTMarkChatItemAsDeletedAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTMarkChatItemAsDeletedAction</a><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">remove<span class="tsd-signature-symbol">(</span>contextMenuEndpointParams<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/yt_chat.YTMarkChatItemAsDeletedAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTMarkChatItemAsDeletedAction</a><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/holodata/masterchat/blob/05dfc5b/src/services/chatAction/index.ts#L154">services/chatAction/index.ts:154</a></li>
+									<li>Defined in <a href="https://github.com/holodata/masterchat/blob/6298f4a/src/services/chatAction/index.ts#L155">services/chatAction/index.ts:155</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -414,7 +454,7 @@
 									<h5>contextMenuEndpointParams: <span class="tsd-signature-type">string</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/types_chat.YTMarkChatItemAsDeletedAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTMarkChatItemAsDeletedAction</a><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/yt_chat.YTMarkChatItemAsDeletedAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTMarkChatItemAsDeletedAction</a><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -422,13 +462,13 @@
 					<a name="removeModerator" class="tsd-anchor"></a>
 					<h3>remove<wbr>Moderator</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">remove<wbr>Moderator<span class="tsd-signature-symbol">(</span>contextMenuEndpointParams<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/types_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">remove<wbr>Moderator<span class="tsd-signature-symbol">(</span>contextMenuEndpointParams<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/yt_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/holodata/masterchat/blob/05dfc5b/src/services/chatAction/index.ts#L195">services/chatAction/index.ts:195</a></li>
+									<li>Defined in <a href="https://github.com/holodata/masterchat/blob/6298f4a/src/services/chatAction/index.ts#L196">services/chatAction/index.ts:196</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -437,7 +477,7 @@
 									<h5>contextMenuEndpointParams: <span class="tsd-signature-type">string</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/types_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/yt_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -445,13 +485,13 @@
 					<a name="report" class="tsd-anchor"></a>
 					<h3>report</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">report<span class="tsd-signature-symbol">(</span>contextMenuEndpointParams<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/types_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">report<span class="tsd-signature-symbol">(</span>contextMenuEndpointParams<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/yt_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/holodata/masterchat/blob/05dfc5b/src/services/chatAction/index.ts#L115">services/chatAction/index.ts:115</a></li>
+									<li>Defined in <a href="https://github.com/holodata/masterchat/blob/6298f4a/src/services/chatAction/index.ts#L116">services/chatAction/index.ts:116</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -460,7 +500,7 @@
 									<h5>contextMenuEndpointParams: <span class="tsd-signature-type">string</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/types_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/yt_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -468,13 +508,13 @@
 					<a name="timeout" class="tsd-anchor"></a>
 					<h3>timeout</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">timeout<span class="tsd-signature-symbol">(</span>contextMenuEndpointParams<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/types_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">timeout<span class="tsd-signature-symbol">(</span>contextMenuEndpointParams<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/yt_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/holodata/masterchat/blob/05dfc5b/src/services/chatAction/index.ts#L163">services/chatAction/index.ts:163</a></li>
+									<li>Defined in <a href="https://github.com/holodata/masterchat/blob/6298f4a/src/services/chatAction/index.ts#L164">services/chatAction/index.ts:164</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -483,7 +523,7 @@
 									<h5>contextMenuEndpointParams: <span class="tsd-signature-type">string</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/types_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/yt_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -491,13 +531,13 @@
 					<a name="unblock" class="tsd-anchor"></a>
 					<h3>unblock</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">unblock<span class="tsd-signature-symbol">(</span>contextMenuEndpointParams<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/types_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">unblock<span class="tsd-signature-symbol">(</span>contextMenuEndpointParams<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/yt_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/holodata/masterchat/blob/05dfc5b/src/services/chatAction/index.ts#L131">services/chatAction/index.ts:131</a></li>
+									<li>Defined in <a href="https://github.com/holodata/masterchat/blob/6298f4a/src/services/chatAction/index.ts#L132">services/chatAction/index.ts:132</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -506,7 +546,7 @@
 									<h5>contextMenuEndpointParams: <span class="tsd-signature-type">string</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/types_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/yt_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -514,13 +554,13 @@
 					<a name="unhide" class="tsd-anchor"></a>
 					<h3>unhide</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">unhide<span class="tsd-signature-symbol">(</span>contextMenuEndpointParams<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/types_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">unhide<span class="tsd-signature-symbol">(</span>contextMenuEndpointParams<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/yt_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/holodata/masterchat/blob/05dfc5b/src/services/chatAction/index.ts#L179">services/chatAction/index.ts:179</a></li>
+									<li>Defined in <a href="https://github.com/holodata/masterchat/blob/6298f4a/src/services/chatAction/index.ts#L180">services/chatAction/index.ts:180</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -529,7 +569,7 @@
 									<h5>contextMenuEndpointParams: <span class="tsd-signature-type">string</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/types_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/yt_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -537,13 +577,13 @@
 					<a name="unpin" class="tsd-anchor"></a>
 					<h3>unpin</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">unpin<span class="tsd-signature-symbol">(</span>contextMenuEndpointParams<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/types_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">unpin<span class="tsd-signature-symbol">(</span>contextMenuEndpointParams<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/yt_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/holodata/masterchat/blob/05dfc5b/src/services/chatAction/index.ts#L147">services/chatAction/index.ts:147</a></li>
+									<li>Defined in <a href="https://github.com/holodata/masterchat/blob/6298f4a/src/services/chatAction/index.ts#L148">services/chatAction/index.ts:148</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -552,7 +592,7 @@
 									<h5>contextMenuEndpointParams: <span class="tsd-signature-type">string</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/types_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/yt_chat.YTAction.html" class="tsd-signature-type" data-tsd-kind="Interface">YTAction</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -574,46 +614,70 @@
 						<a href="../modules/constants.html">constants</a>
 					</li>
 					<li class=" tsd-kind-module">
+						<a href="../modules/currency.html">currency</a>
+					</li>
+					<li class=" tsd-kind-module">
 						<a href="../modules/error.html">error</a>
 					</li>
 					<li class=" tsd-kind-module">
 						<a href="../modules/index.html">index</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="../modules/protobuf.html">protobuf</a>
+						<a href="../modules/protobuf_assembler.html">protobuf/assembler</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/protobuf_b64.html">protobuf/b64</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/protobuf_parser.html">protobuf/parser</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/protobuf_reader.html">protobuf/reader</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/protobuf_token.html">protobuf/token</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/protobuf_util.html">protobuf/util</a>
 					</li>
 					<li class=" tsd-kind-module">
 						<a href="../modules/services_chat.html">services/chat</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="../modules/services_chat_exports.html">services/chat/exports</a>
+						<a href="../modules/services_chat_parser.html">services/chat/parser</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/services_chat_types.html">services/chat/types</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/services_chat_utils.html">services/chat/utils</a>
 					</li>
 					<li class="current tsd-kind-module">
 						<a href="../modules/services_chatAction.html">services/chat<wbr>Action</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="../modules/services_chatAction_exports.html">services/chat<wbr>Action/exports</a>
+						<a href="../modules/services_chatAction_types.html">services/chat<wbr>Action/types</a>
 					</li>
 					<li class=" tsd-kind-module">
 						<a href="../modules/services_context.html">services/context</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="../modules/services_context_exports.html">services/context/exports</a>
+						<a href="../modules/services_context_types.html">services/context/types</a>
 					</li>
 					<li class=" tsd-kind-module">
 						<a href="../modules/services_message.html">services/message</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="../modules/services_message_exports.html">services/message/exports</a>
+						<a href="../modules/services_message_types.html">services/message/types</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="../modules/types_chat.html">types/chat</a>
+						<a href="../modules/utils.html">utils</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="../modules/types_context.html">types/context</a>
+						<a href="../modules/yt_chat.html">yt/chat</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="../modules/util.html">util</a>
+						<a href="../modules/yt_context.html">yt/context</a>
 					</li>
 				</ul>
 			</nav>
@@ -631,16 +695,19 @@
 								<a href="services_chatAction.ChatActionService.html#apiKey" class="tsd-kind-icon">api<wbr>Key</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
-								<a href="services_chatAction.ChatActionService.html#continuation" class="tsd-kind-icon">continuation</a>
+								<a href="services_chatAction.ChatActionService.html#channelId" class="tsd-kind-icon">channel<wbr>Id</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+								<a href="services_chatAction.ChatActionService.html#channelName" class="tsd-kind-icon">channel<wbr>Name</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
 								<a href="services_chatAction.ChatActionService.html#credentials" class="tsd-kind-icon">credentials</a>
 							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
-								<a href="services_chatAction.ChatActionService.html#isReplay" class="tsd-kind-icon">is<wbr>Replay</a>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+								<a href="services_chatAction.ChatActionService.html#isLive" class="tsd-kind-icon">is<wbr>Live</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
-								<a href="services_chatAction.ChatActionService.html#metadata" class="tsd-kind-icon">metadata</a>
+								<a href="services_chatAction.ChatActionService.html#title" class="tsd-kind-icon">title</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
 								<a href="services_chatAction.ChatActionService.html#videoId" class="tsd-kind-icon">video<wbr>Id</a>
@@ -656,6 +723,9 @@
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="services_chatAction.ChatActionService.html#hide" class="tsd-kind-icon">hide</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
+								<a href="services_chatAction.ChatActionService.html#log" class="tsd-kind-icon">log</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="services_chatAction.ChatActionService.html#pin" class="tsd-kind-icon">pin</a>
