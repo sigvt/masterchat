@@ -183,10 +183,12 @@ it("pre stream but chat got disabled", async () => {
   completeRecording();
 });
 
-it.skip("archived stream with chat replay being prepared", async () => {
+it("archived stream with chat replay being prepared", async () => {
+  const videoId = "HiAGXND3oq0";
+  const channelId = "UCwL7dgTxKo8Y4RFIKWaf8gA";
   const { completeRecording } = await record("no_chat_replay");
 
-  const mc = await Masterchat.init("32qr8wO1mV4");
+  const mc = await Masterchat.init(videoId);
   expect(mc.isLive).toBe(false);
   await expect(mc.fetch()).rejects.toBeInstanceOf(DisabledChatError);
 
