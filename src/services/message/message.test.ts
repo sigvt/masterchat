@@ -14,15 +14,15 @@ const record = setupRecorder({
   mode: (process.env.NOCK_BACK_MODE as any) || "lockdown",
 });
 
-describe("subscribers-only mode", () => {
-  itif.skip("can init", async () => {
-    const { completeRecording, assertScopesFinished } = await record(
-      "subscribers_only"
-    );
-    const mc = await Masterchat.init("lqhYHycrsHk", { credentials });
-    completeRecording();
-  });
-});
+// describe("subscribers-only mode", () => {
+//   itif("can init", async () => {
+//     const { completeRecording, assertScopesFinished } = await record(
+//       "subscribers_only"
+//     );
+//     const mc = await Masterchat.init("lqhYHycrsHk", { credentials });
+//     completeRecording();
+//   });
+// });
 
 describe("normal message handling", () => {
   let mc: Masterchat;
