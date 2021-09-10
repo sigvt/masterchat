@@ -1,5 +1,5 @@
 import { setupRecorder } from "nock-record";
-import { Masterchat } from "../../..";
+import { AddChatItemAction, Masterchat } from "../../..";
 import {
   DisabledChatError,
   InvalidArgumentError,
@@ -35,8 +35,8 @@ it("live chat", async () => {
   expect(mc.channelName).toBe("Rushia Ch. 潤羽るしあ");
 
   const chats = await new Masterchat(videoId, channelId).fetch();
-
-  expect(chats.continuation).toBeTruthy();
+  expect(chats.continuation!.token).toBeTruthy();
+  expect(chats.continuation!.timeoutMs).toBeTruthy();
   expect(chats.actions).toEqual(actionsMatcher);
 
   completeRecording();
@@ -48,11 +48,11 @@ it("emojis in video title", async () => {
   const { completeRecording } = await record("emojis_in_title");
 
   const mc = await Masterchat.init(videoId);
-  completeRecording();
-
   expect(mc.title).toBe(
     "🔴Irish Pub Music ♫♫ JOIN THE SESSION | Traditional Irish Music Session"
   );
+
+  completeRecording();
 });
 
 it("prechat", async () => {
@@ -66,8 +66,8 @@ it("prechat", async () => {
   expect(mc.channelId).toBe(channelId);
 
   const chats = await new Masterchat(videoId, channelId).fetch();
-
-  expect(chats.continuation).toBeTruthy();
+  expect(chats.continuation!.token).toBeTruthy();
+  expect(chats.continuation!.timeoutMs).toBeTruthy();
   expect(chats.actions).toEqual(actionsMatcher);
 
   completeRecording();
@@ -86,10 +86,11 @@ it("premiere prechat", async () => {
   expect(mc.title).toBe("Everlasting Soul／角巻わため【original】");
 
   const chats = await new Masterchat(videoId, channelId).fetch();
-  completeRecording();
-
-  expect(chats.continuation).toBeTruthy();
+  expect(chats.continuation!.token).toBeTruthy();
+  expect(chats.continuation!.timeoutMs).toBeTruthy();
   expect(chats.actions).toEqual(actionsMatcher);
+
+  completeRecording();
 });
 
 it("replay chat", async () => {
@@ -107,16 +108,50 @@ it("replay chat", async () => {
   );
 
   const chats = await mc.fetch();
-
-  expect(chats.continuation).toBeTruthy();
+  expect(chats.continuation!.token).toBeTruthy();
+  expect(chats.continuation!.timeoutMs).toBeUndefined();
   expect(chats.actions).toEqual(actionsMatcher);
 
   const chats2 = await new Masterchat(videoId, channelId, {
     isLive: false,
   }).fetch();
-
   expect(chats2.continuation).toBeTruthy();
   expect(chats2.actions).toEqual(actionsMatcher);
+
+  completeRecording();
+});
+
+it("replay chat with malformed token (with fallback)", async () => {
+  const videoId = "mLVSjBoLX5o";
+  const channelId = "UCDqI2jOz0weumE8s7paEk6g";
+
+  const { completeRecording } = await record("replay_malformed");
+
+  const mc = await Masterchat.init(videoId);
+  expect(mc.isLive).toBe(false);
+
+  const chats = await new Masterchat(videoId, channelId).fetch();
+  expect(chats.continuation!.token).toBeTruthy();
+  expect(chats.continuation!.timeoutMs).toBeUndefined();
+  expect(chats.actions).toEqual(actionsMatcher);
+
+  completeRecording();
+});
+
+it("replay chat with malformed token (no fallback)", async () => {
+  const videoId = "mLVSjBoLX5o";
+  const channelId = "UCDqI2jOz0weumE8s7paEk6g";
+
+  const { completeRecording } = await record("replay_no_fallback");
+
+  const mc = await Masterchat.init(videoId);
+  expect(mc.isLive).toBe(false);
+
+  await expect(
+    new Masterchat(videoId, channelId, {
+      isLive: true,
+    }).fetch({ fallbackToReplayChat: false })
+  ).rejects.toBeInstanceOf(DisabledChatError);
 
   completeRecording();
 });
@@ -130,8 +165,8 @@ it("abandoned stream", async () => {
   expect(mc.isLive).toBe(true);
 
   const chats = await new Masterchat(videoId, channelId).fetch();
-
-  expect(chats.continuation).toBeTruthy();
+  expect(chats.continuation!.token).toBeTruthy();
+  expect(chats.continuation!.timeoutMs).toBeTruthy();
   expect(chats.actions).toEqual(actionsMatcher);
 
   completeRecording();
@@ -146,6 +181,7 @@ it("members-only stream", async () => {
   await expect(Masterchat.init(videoId)).rejects.toBeInstanceOf(
     MembersOnlyError
   );
+
   await expect(
     new Masterchat(videoId, channelId).fetch()
   ).rejects.toBeInstanceOf(MembersOnlyError);
@@ -162,23 +198,29 @@ it("members-only archive with no replay chat available", async () => {
   await expect(Masterchat.init(videoId)).rejects.toBeInstanceOf(
     MembersOnlyError
   );
-  await expect(
-    new Masterchat(videoId, channelId).fetch()
-  ).rejects.toBeInstanceOf(DisabledChatError);
+
+  // why tho
+  const chats = await new Masterchat(videoId, channelId).fetch();
+  expect(chats.continuation!.token).toBeTruthy();
+  expect(chats.continuation!.timeoutMs).toBeUndefined();
+  expect(chats.actions).toEqual(actionsMatcher);
 
   completeRecording();
 });
 
-it("pre stream but chat got disabled", async () => {
+it("pre-chat disabled", async () => {
+  const videoId = "uCFuXlerAkE";
+  const channelId = "UCsUj0dszADCGbF3gNrQEuSQ";
   const { completeRecording } = await record("prechat_disabled");
 
-  const mc = await Masterchat.init("aWx7zLf6CSo");
+  const mc = await Masterchat.init(videoId);
   expect(mc.isLive).toBe(true);
-  expect(mc.channelId).toBe("UCO_aKKYxn4tvrqPjcTzZ6EQ");
-  expect(mc.channelName).toBe("Ceres Fauna Ch. hololive-EN");
-  expect(mc.title).toBe("【SPORE】 The Not Pickle Strikes Back #holoCouncil");
+  expect(mc.channelId).toBe(channelId);
 
   await expect(mc.fetch()).rejects.toBeInstanceOf(DisabledChatError);
+  await expect(
+    new Masterchat(videoId, channelId).fetch()
+  ).rejects.toBeInstanceOf(DisabledChatError);
 
   completeRecording();
 });
@@ -195,15 +237,15 @@ it("archived stream with chat replay being prepared", async () => {
   completeRecording();
 });
 
-it.todo("archived stream with chat replay explicitly disabled");
-
 it("unarchived stream", async () => {
   const videoId = "xCKYp2lxywE";
   const channelId = "UCtjQoCilYbnxUXquXcVU3uA";
   const { completeRecording } = await record("unarchived");
+
   await expect(Masterchat.init(videoId)).rejects.toBeInstanceOf(
     NoStreamRecordingError
   );
+
   await expect(
     new Masterchat(videoId, channelId).fetch()
   ).rejects.toBeInstanceOf(DisabledChatError);
@@ -219,6 +261,7 @@ it("private stream", async () => {
   await expect(Masterchat.init(videoId)).rejects.toBeInstanceOf(
     NoPermissionError
   );
+
   await expect(
     new Masterchat(videoId, channelId).fetch()
   ).rejects.toBeInstanceOf(NoPermissionError);
@@ -234,6 +277,7 @@ it("deleted stream", async () => {
   await expect(Masterchat.init(videoId)).rejects.toBeInstanceOf(
     UnavailableError
   );
+
   await expect(
     new Masterchat(videoId, channelId).fetch()
   ).rejects.toBeInstanceOf(UnavailableError);
@@ -247,6 +291,7 @@ it("invalid video and channel", async () => {
   await expect(Masterchat.init("invalid_video_id")).rejects.toBeInstanceOf(
     UnavailableError
   );
+
   await expect(
     new Masterchat("invalid_video_id", "UCtjQoCilYbnxUXquXcVU3uA").fetch()
   ).rejects.toBeInstanceOf(InvalidArgumentError);

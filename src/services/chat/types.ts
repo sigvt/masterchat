@@ -19,6 +19,14 @@ import {
 
 export interface FetchChatOptions {
   topChat?: boolean;
+  fallbackToReplayChat?: boolean;
+}
+
+export interface IterateChatOptions extends FetchChatOptions {
+  fallbackToReplayChat?: boolean;
+  ignoreFirstResponse?: boolean;
+  ignoreReplayTimeout?: boolean;
+  continuation?: string;
 }
 
 export const SUPERCHAT_SIGNIFICANCE_MAP = {
@@ -43,20 +51,6 @@ export const SUPERCHAT_COLOR_MAP = {
   "4290910299": "magenta",
   "4291821568": "red",
 } as const;
-
-/**
- * Errors
- */
-
-export interface LiveError {
-  message: string;
-  status: FetchChatErrorStatus | YTChatErrorStatus;
-}
-
-export enum FetchChatErrorStatus {
-  LiveChatDisabled = "LIVE_CHAT_DISABLED",
-  Unavailable = "UNAVAILABLE",
-}
 
 /**
  * Components
@@ -263,12 +257,8 @@ export interface UnknownAction {
  * Response
  */
 
-export interface SucceededChatResponse {
+export interface ChatResponse {
   actions: Action[];
   continuation: TimedContinuation | undefined;
   error: null;
-}
-
-export interface FailedChatResponse {
-  error: LiveError;
 }

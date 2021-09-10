@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### chat
+
+- `fetch` will attempt to switch an API endpoint to the replay chat if failed to fetch chats from the live chat API. Pass `{fallbackToReplayChat: false}` to `iterate` or `fetch` to disable this behavior.
+- Supporeted `fetch` overloading
+  - `fetch(options?: FetchChatOptions)`
+  - `fetch(token: string, options?: FetchChatOptions)`
+- Renamed `SucceededChatResponse` -> `ChatResponse`
+
 ## v0.9.0
 
 - Full protobuf support

@@ -9,10 +9,10 @@ export type RequestInitWithRetryOption = RequestInit & {
 };
 
 export class Base {
+  public isLive!: boolean;
   public videoId!: string;
   public channelId!: string;
   public channelName?: string;
-  public isLive?: boolean;
   public title?: string;
 
   protected credentials?: Credentials;
