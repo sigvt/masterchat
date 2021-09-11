@@ -22,9 +22,9 @@ import { Masterchat, runsToString } from "masterchat";
 
 async function main() {
   try {
-    const live = await Masterchat.init("<videoId>");
+    const client = await Masterchat.init("<videoId>");
 
-    for await (const { actions } of live.iterate()) {
+    for await (const { actions } of client.iterate()) {
       const chats = actions.filter(
         (action) => action.type === "addChatItemAction"
       );
@@ -56,13 +56,13 @@ import { Masterchat, convertRunsToString } from "masterchat";
 import { appendFile, writeFile, readFile } from "fs/promises";
 
 async function main() {
-  const replay = await Masterchat.init("<videoId>");
+  const client = await Masterchat.init("<videoId>");
 
   const lastContinuation = await readFile("./checkpoint").catch(
     () => undefined
   );
 
-  for await (const { actions, continuation } of replay.iterate({
+  for await (const { actions, continuation } of client.iterate({
     continuation: lastContinuation,
   })) {
     const chats = actions.filter(
@@ -96,16 +96,16 @@ async function main() {
     SSID: "<value>",
   };
 
-  const live = await Masterchat.init("<videoId>", { credentials });
+  const client = await Masterchat.init("<videoId>", { credentials });
 
-  for await (const { actions } of live.iterate({
+  for await (const { actions } of client.iterate({
     ignoreFirstResponse: true,
   })) {
     for (const action of actions) {
       if (action.type !== "addChatItemAction") continue;
 
       if (isSpam(runsToString(action.rawMessage))) {
-        await live.remove(action.contextMenuEndpointParams);
+        await client.remove(action.id);
       }
     }
   }

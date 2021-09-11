@@ -21,7 +21,7 @@ export class MessageService {
       params,
     });
 
-    const res = await this.postJson<YTActionResponse>(
+    const res = await this.postWithRetry<YTActionResponse>(
       "/youtubei/v1/live_chat/send_message",
       {
         body: JSON.stringify(body),

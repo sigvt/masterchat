@@ -32,16 +32,33 @@ export interface MasterchatOptions {
 
   sessionId?: string;
 
+  /** set live stream type
+   *
+   * ```
+   * if undefined,
+   *   live -> OK
+   *   archive -> first request fails, then try fetching replay chat -> OK
+   *
+   * if set true:
+   *   live -> OK
+   *   archive -> throw DisabledChatError
+   *
+   * if set false:
+   *   live -> throw DisabledChatError
+   *   archive -> OK
+   * ```
+   */
   isLive?: boolean;
 }
 
 // umbrella class
 export class Masterchat {
   /**
-   * Useful when you don't know channelId
+   * Useful when you don't know channelId or isLive status
    */
   static async init(videoIdOrUrl: string, options: MasterchatOptions = {}) {
     const videoId = normalizeVideoId(videoIdOrUrl);
+    // set channelId "" as populateMetadata will fill out it anyways
     const mc = new Masterchat(videoId, "", {
       ...options,
     });

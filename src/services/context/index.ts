@@ -38,51 +38,49 @@ function assertPlayability(playabilityStatus: YTPlayabilityStatus | undefined) {
   }
 }
 
-function findEmbedCfg(data: string) {
+export function findCfg(data: string) {
   const match = /ytcfg\.set\(({.+?})\);/.exec(data);
   if (!match) return;
-
-  const epr = JSON.parse(
-    JSON.parse(match[1])?.PLAYER_VARS?.embedded_player_response
-  );
-  return epr;
+  return JSON.parse(match[1]);
 }
 
-function findPlayabilityStatus(data: string): YTPlayabilityStatus | undefined {
+export function findEPR(data: string) {
+  return findCfg(data)?.PLAYER_VARS?.embedded_player_response;
+}
+
+export function findPlayabilityStatus(
+  data: string
+): YTPlayabilityStatus | undefined {
   const match = /var ytInitialPlayerResponse = (.+?);var meta/.exec(data);
   if (match) {
     return JSON.parse(match[1]).playabilityStatus;
   }
 }
 
-function findInitialData(data: string): YTInitialData | undefined {
+export function findInitialData(data: string): YTInitialData | undefined {
   const match =
     /(?:var ytInitialData|window\["ytInitialData"\]) = (.+?);<\/script>/.exec(
       data
     );
-  if (match) {
-    return JSON.parse(match[1]);
-  }
+  if (!match) return;
+  return JSON.parse(match[1]);
 }
 
 export async function fetchMetadataFromEmbed(id: string) {
-  const res = await fetch(`https://www.youtube-nocookie.com/embed/${id}`, {
+  const res = await fetch(`https://www.youtube.com/embed/${id}`, {
     headers: DEFAULT_HEADERS,
   });
 
-  // Check ban status
-  if (res.status === 429) {
+  if (res.status === 429)
     throw new AccessDeniedError("Rate limit exceeded: " + id);
-  }
 
   const html = await res.text();
-  const cfg = findEmbedCfg(html);
-  writeFileSync(`epr.json`, JSON.stringify(cfg));
+  const epr = findEPR(html);
 
-  const ps = cfg.previewPlayabilityStatus;
+  const ps = epr.previewPlayabilityStatus;
   assertPlayability(ps);
 
-  const ep = cfg.embedPreview;
+  const ep = epr.embedPreview;
 
   const prevRdr = ep.thumbnailPreviewRenderer;
   const vdRdr = prevRdr.videoDetails.embeddedPlayerOverlayVideoDetailsRenderer;
@@ -115,9 +113,7 @@ export interface ContextService extends Base {}
 
 export class ContextService {
   public async populateMetadata(): Promise<void> {
-    const res = await fetch(DEFAULT_ORIGIN + "/watch?v=" + this.videoId, {
-      headers: DEFAULT_HEADERS,
-    });
+    const res = await this.get("/watch?v=" + this.videoId);
 
     // Check ban status
     if (res.status === 429) {

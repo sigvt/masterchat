@@ -18,14 +18,15 @@ import {
 } from "../../yt/chat";
 
 export interface FetchChatOptions {
+  /** fetch top chat instead of all chat */
   topChat?: boolean;
-  fallbackToReplayChat?: boolean;
 }
 
 export interface IterateChatOptions extends FetchChatOptions {
-  fallbackToReplayChat?: boolean;
+  /** ignore first response fetched by reload token */
   ignoreFirstResponse?: boolean;
-  ignoreReplayTimeout?: boolean;
+
+  /** pass previously fetched token to resume chat fetching */
   continuation?: string;
 }
 

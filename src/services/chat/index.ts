@@ -6,7 +6,7 @@ import {
   MembersOnlyError,
   NoPermissionError,
 } from "../../error";
-import { rlc } from "../../protobuf/assembler";
+import { lrc, rtc } from "../../protobuf/assembler";
 import { runsToString, timeoutThen, withContext } from "../../utils";
 import { YTAction, YTChatErrorStatus, YTChatResponse } from "../../yt/chat";
 import { parseChatAction } from "./parser";
@@ -34,36 +34,39 @@ export class ChatService {
       (typeof tokenOrOptions === "string" ? maybeOptions : tokenOrOptions) ??
       {};
 
-    const fallbackToReplayChat = options.fallbackToReplayChat ?? true;
     const topChat = options.topChat ?? false;
+    const target = { videoId: this.videoId, channelId: this.channelId };
+    let retryRemaining = 3;
+    const retryInterval = 3000;
+    let requestUrl: string = "";
+    let requestBody;
+    let response: YTChatResponse;
 
-    const cvPair = { videoId: this.videoId, channelId: this.channelId };
-    let endpoint: string = "";
-    let body;
-    function apply(isLive: boolean) {
-      endpoint = isLive ? EP_GLC : EP_GLCR;
+    function applyNewLiveStatus(isLive: boolean) {
+      requestUrl = isLive ? EP_GLC : EP_GLCR;
+
       const continuation =
         typeof tokenOrOptions === "string"
           ? tokenOrOptions
-          : rlc(cvPair, { top: topChat, replay: !isLive });
-      body = withContext({
+          : isLive
+          ? lrc(target, { top: topChat })
+          : rtc(target, { top: topChat });
+
+      requestBody = withContext({
         continuation,
       });
     }
-    apply(this.isLive);
-    let retryRemaining = 3;
-    const retryInterval = 3000;
 
-    let res: YTChatResponse;
+    applyNewLiveStatus(this.isLive ?? true);
 
     loop: while (true) {
       try {
-        res = await this.postJson<YTChatResponse>(endpoint, {
-          body: JSON.stringify(body),
+        response = await this.postWithRetry<YTChatResponse>(requestUrl, {
+          body: JSON.stringify(requestBody),
           retry: 0,
         });
 
-        if (res.error) {
+        if (response.error) {
           /** error.code ->
            * 400: request contains an invalid argument
            *   - when attempting to access livechat while it is already in replay mode
@@ -79,7 +82,7 @@ export class ChatService {
            * @see https://developers.google.com/youtube/v3/live/docs/liveChatMessages/list
            */
 
-          const { status, message } = res.error;
+          const { status, message } = response.error;
 
           switch (status) {
             // stream went privated or deleted
@@ -99,15 +102,15 @@ export class ChatService {
             // it might be temporary issue so should retry immediately
             case YTChatErrorStatus.Unavailable:
             case YTChatErrorStatus.Internal:
-              throw res.error;
+              throw response.error;
 
             default:
               this.log(
                 `<!>fetch`,
                 `Unrecognized error code`,
-                JSON.stringify(res)
+                JSON.stringify(response)
               );
-              throw res.error;
+              throw response.error;
           }
         }
       } catch (err) {
@@ -139,7 +142,7 @@ export class ChatService {
         throw err;
       }
 
-      const { continuationContents } = res;
+      const { continuationContents } = response;
 
       if (!continuationContents) {
         /** there's several possibilities lied here:
@@ -148,7 +151,7 @@ export class ChatService {
          * 3. given video is neither a live stream nor an archived stream
          * 4. chat got disabled
          */
-        const obj = Object.assign({}, res) as any;
+        const obj = Object.assign({}, response) as any;
         delete obj["responseContext"];
 
         if ("contents" in obj) {
@@ -157,10 +160,10 @@ export class ChatService {
             // {contents: "Chat is disabled for this live stream."} => pre-chat unavailable
             // or accessing replay chat with live chat token
 
-            // retry with replay endpoint
-            if (this.isLive && fallbackToReplayChat) {
+            // retry with replay endpoint if isLive is unknown
+            if (this.isLive === undefined) {
               this.log("fetch", "switched to replay endpoint");
-              apply((this.isLive = false));
+              applyNewLiveStatus((this.isLive = false));
               continue loop;
             }
 
@@ -203,7 +206,7 @@ export class ChatService {
       }
 
       // unwrap replay actions into YTActions
-      if (!this.isLive) {
+      if (!(this.isLive ?? true)) {
         rawActions = this.unwrapReplayActions(rawActions);
       }
 
@@ -226,14 +229,12 @@ export class ChatService {
    */
   public async *iterate({
     topChat = false,
-    fallbackToReplayChat = true,
     ignoreFirstResponse = false,
-    ignoreReplayTimeout = false,
     continuation,
   }: IterateChatOptions = {}): AsyncGenerator<ChatResponse> {
     let token: string =
       continuation ??
-      rlc(
+      lrc(
         { videoId: this.videoId, channelId: this.channelId },
         { top: topChat ?? false }
       );
@@ -242,7 +243,7 @@ export class ChatService {
 
     // continuously fetch chat fragments
     while (true) {
-      const res = await this.fetch(token, { fallbackToReplayChat });
+      const res = await this.fetch(token);
       const startMs = Date.now();
 
       // handle chats
@@ -262,7 +263,7 @@ export class ChatService {
 
       token = continuation.token;
 
-      if (!(!this.isLive && ignoreReplayTimeout)) {
+      if (this.isLive) {
         const driftMs = Date.now() - startMs;
         await timeoutThen(Math.max(continuation.timeoutMs - driftMs, 0));
       }

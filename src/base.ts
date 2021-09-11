@@ -9,7 +9,7 @@ export type RequestInitWithRetryOption = RequestInit & {
 };
 
 export class Base {
-  public isLive!: boolean;
+  public isLive?: boolean;
   public videoId!: string;
   public channelId!: string;
   public channelName?: string;
@@ -18,7 +18,7 @@ export class Base {
   protected sessionId?: string;
   protected apiKey!: string;
 
-  protected async postJson<T>(
+  protected async postWithRetry<T>(
     input: string,
     init?: RequestInitWithRetryOption
   ): Promise<T> {

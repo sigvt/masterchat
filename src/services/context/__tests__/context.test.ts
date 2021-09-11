@@ -21,40 +21,6 @@ const actionsMatcher = expect.arrayContaining([
   }),
 ]);
 
-it("live chat", async () => {
-  const videoId = "Wkg5N25sbU0";
-  const channelId = "UCl_gCybOJRIgOXw6Qb4qJzQ";
-  const { completeRecording } = await record("livechat");
-
-  const mc = await Masterchat.init(videoId);
-  expect(mc.isLive).toBe(true);
-  expect(mc.channelId).toBe(channelId);
-  expect(mc.title).toBe(
-    "【バイオハザード ヴィレッジ】バイオ８！完全初見プレイ！！ヘルプミー【潤羽るしあ/ホロライブ】"
-  );
-  expect(mc.channelName).toBe("Rushia Ch. 潤羽るしあ");
-
-  const chats = await new Masterchat(videoId, channelId).fetch();
-  expect(chats.continuation!.token).toBeTruthy();
-  expect(chats.continuation!.timeoutMs).toBeTruthy();
-  expect(chats.actions).toEqual(actionsMatcher);
-
-  completeRecording();
-});
-
-it("emojis in video title", async () => {
-  const videoId = "qz8dg-38NZY";
-
-  const { completeRecording } = await record("emojis_in_title");
-
-  const mc = await Masterchat.init(videoId);
-  expect(mc.title).toBe(
-    "🔴Irish Pub Music ♫♫ JOIN THE SESSION | Traditional Irish Music Session"
-  );
-
-  completeRecording();
-});
-
 it("prechat", async () => {
   const videoId = "Y8PUxGDEo2M";
   const channelId = "UChgTyjG-pdNvxxhdsXfHQ5Q";
@@ -93,6 +59,57 @@ it("premiere prechat", async () => {
   completeRecording();
 });
 
+it("emojis in video title", async () => {
+  const videoId = "qz8dg-38NZY";
+
+  const { completeRecording } = await record("emojis_in_title");
+
+  const mc = await Masterchat.init(videoId);
+  expect(mc.title).toBe(
+    "🔴Irish Pub Music ♫♫ JOIN THE SESSION | Traditional Irish Music Session"
+  );
+
+  completeRecording();
+});
+
+it("live chat", async () => {
+  const videoId = "Wkg5N25sbU0";
+  const channelId = "UCl_gCybOJRIgOXw6Qb4qJzQ";
+  const { completeRecording } = await record("livechat");
+
+  const mc = await Masterchat.init(videoId);
+  expect(mc.isLive).toBe(true);
+  expect(mc.channelId).toBe(channelId);
+  expect(mc.title).toBe(
+    "【バイオハザード ヴィレッジ】バイオ８！完全初見プレイ！！ヘルプミー【潤羽るしあ/ホロライブ】"
+  );
+  expect(mc.channelName).toBe("Rushia Ch. 潤羽るしあ");
+
+  const chats = await new Masterchat(videoId, channelId).fetch();
+  expect(chats.continuation!.token).toBeTruthy();
+  expect(chats.continuation!.timeoutMs).toBeTruthy();
+  expect(chats.actions).toEqual(actionsMatcher);
+
+  completeRecording();
+});
+
+it("live chat with isLive set false should fail", async () => {
+  const videoId = "--5dh3oS8bk";
+  const channelId = "UCsUj0dszADCGbF3gNrQEuSQ";
+  const { completeRecording } = await record("livechat_isLive_false");
+
+  const mc = await Masterchat.init(videoId);
+  expect(mc.isLive).toBe(true);
+
+  await expect(
+    new Masterchat(videoId, channelId, {
+      isLive: false,
+    }).fetch()
+  ).rejects.toBeInstanceOf(DisabledChatError);
+
+  completeRecording();
+});
+
 it("replay chat", async () => {
   const videoId = "mLVSjBoLX5o";
   const channelId = "UCDqI2jOz0weumE8s7paEk6g";
@@ -112,16 +129,14 @@ it("replay chat", async () => {
   expect(chats.continuation!.timeoutMs).toBeUndefined();
   expect(chats.actions).toEqual(actionsMatcher);
 
-  const chats2 = await new Masterchat(videoId, channelId, {
-    isLive: false,
-  }).fetch();
+  const chats2 = await new Masterchat(videoId, channelId).fetch();
   expect(chats2.continuation).toBeTruthy();
   expect(chats2.actions).toEqual(actionsMatcher);
 
   completeRecording();
 });
 
-it("replay chat with malformed token (with fallback)", async () => {
+it("replay chat with isLive set false should success", async () => {
   const videoId = "mLVSjBoLX5o";
   const channelId = "UCDqI2jOz0weumE8s7paEk6g";
 
@@ -130,7 +145,9 @@ it("replay chat with malformed token (with fallback)", async () => {
   const mc = await Masterchat.init(videoId);
   expect(mc.isLive).toBe(false);
 
-  const chats = await new Masterchat(videoId, channelId).fetch();
+  const chats = await new Masterchat(videoId, channelId, {
+    isLive: false,
+  }).fetch();
   expect(chats.continuation!.token).toBeTruthy();
   expect(chats.continuation!.timeoutMs).toBeUndefined();
   expect(chats.actions).toEqual(actionsMatcher);
@@ -138,7 +155,7 @@ it("replay chat with malformed token (with fallback)", async () => {
   completeRecording();
 });
 
-it("replay chat with malformed token (no fallback)", async () => {
+it("replay chat with isLive set true should fail", async () => {
   const videoId = "mLVSjBoLX5o";
   const channelId = "UCDqI2jOz0weumE8s7paEk6g";
 
@@ -150,7 +167,7 @@ it("replay chat with malformed token (no fallback)", async () => {
   await expect(
     new Masterchat(videoId, channelId, {
       isLive: true,
-    }).fetch({ fallbackToReplayChat: false })
+    }).fetch()
   ).rejects.toBeInstanceOf(DisabledChatError);
 
   completeRecording();
