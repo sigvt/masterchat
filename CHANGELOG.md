@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- New auth params allows commenting on other streamers' chat
+
+### chatActions
+
+- `.remove` will use homebrew protobuf params
+
 ### chat
 
 - `fetch` will attempt to switch an API endpoint to the replay chat if failed to fetch chats from the live chat API. Pass `{fallbackToReplayChat: false}` to `iterate` or `fetch` to disable this behavior.

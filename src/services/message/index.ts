@@ -1,16 +1,14 @@
 import { Base } from "../../base";
 import { smp } from "../../protobuf/assembler";
-import { withContext } from "../../utils";
+import { debugLog, withContext } from "../../utils";
 import { YTActionResponse, YTLiveChatTextMessageRenderer } from "../../yt/chat";
 
 export interface MessageService extends Base {}
 
 export class MessageService {
   async sendMessage(message: string): Promise<YTLiveChatTextMessageRenderer> {
-    const params = smp({
-      videoId: this.videoId,
-      channelId: this.channelId,
-    });
+    const params = smp(this.cvPair());
+    debugLog(params);
 
     const body = withContext({
       richMessage: {
@@ -29,7 +27,10 @@ export class MessageService {
         body: JSON.stringify(body),
       }
     );
-    const item = res.actions[0].addChatItemAction?.item;
+
+    debugLog(res);
+
+    const item = res.actions?.[0].addChatItemAction?.item;
     if (!(item && "liveChatTextMessageRenderer" in item)) {
       throw new Error(`Invalid response: ` + item);
     }

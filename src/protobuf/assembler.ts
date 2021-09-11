@@ -1,55 +1,35 @@
 import { b64d, b64e, B64Type } from "./b64";
 import { bitob, cc } from "./util";
 
-export type VCPair = {
-  videoId: string;
+export type CVPair = {
   channelId: string;
+  videoId: string;
 };
 
-function hd(tgt: VCPair): string {
-  return cc([
-    ld(1, ld(5, [ld(1, tgt.channelId), ld(2, tgt.videoId)])),
-    ld(3, ld(48687757, ld(1, tgt.videoId))),
-    vt(4, 1),
-  ]).toString("base64");
-}
-
-export function rlc(
-  origin: VCPair,
-  { top = false, replay = false }: { top?: boolean; replay?: boolean } = {}
+export function lrc(
+  origin: CVPair,
+  { top = false }: { top?: boolean } = {}
 ): string {
   const chatType = top ? 4 : 1;
-  const meta = hd(origin);
-  const op = replay
-    ? ld(156074452, [
-        ld(3, meta),
-        vt(5, 0), // seek
-        vt(8, 0),
-        vt(9, 4), // 3 auth???
-        ld(10, vt(4, 0)),
-        ld(14, vt(1, chatType)),
-        vt(15, 0),
-      ])
-    : ld(119693434, [ld(3, meta), vt(6, 1), ld(16, vt(1, chatType))]);
-
-  return b64e(op, B64Type.B1);
+  return b64e(
+    ld(119693434, [ld(3, hdt(origin)), vt(6, 1), ld(16, vt(1, chatType))]),
+    B64Type.B1
+  );
 }
 
-export function tmc(
-  origin: VCPair,
+export function ltc(
+  origin: CVPair,
   {
     top = false,
     since = new Date(),
   }: { top?: boolean; isOwner?: boolean; since?: Date } = {}
 ): string {
   const chatType = top ? 4 : 1;
-  const meta = hd(origin);
   const t1 = Date.now() * 1000;
   const t2 = since.getTime() * 1000;
-
   return b64e(
     ld(119693434, [
-      ld(3, meta),
+      ld(3, hdt(origin)),
       vt(5, t2),
       vt(6, 0),
       vt(8, 1),
@@ -64,17 +44,86 @@ export function tmc(
   );
 }
 
+export function rtc(
+  origin: CVPair,
+  { top = false, seek = 0 }: { top?: boolean; seek?: number } = {}
+): string {
+  const chatType = top ? 4 : 1;
+  return b64e(
+    ld(156074452, [
+      ld(3, hdt(origin)),
+      vt(5, seek),
+      vt(8, 0),
+      vt(9, 4), // 3
+      ld(10, vt(4, 0)),
+      ld(14, vt(1, chatType)),
+      vt(15, 0),
+    ]),
+    B64Type.B1
+  );
+}
+
+export function hdp(
+  channelId: string,
+  origin: CVPair,
+  undo: boolean = false
+): string {
+  const op = undo ? 4 : 5;
+  return b64e(
+    cc([
+      ld(1, cvt(origin)),
+      ld(op, ld(1, truc(channelId))),
+      vt(10, 2),
+      vt(11, 1),
+    ]),
+    B64Type.B2
+  );
+}
+
+export function rmp(chatId: string, origin: CVPair, retract: boolean = true) {
+  return b64e(
+    cc([
+      ld(1, cvt(origin)),
+      ld(2, ld(1, cht(chatId))),
+      vt(10, retract ? 1 : 2),
+      vt(11, 1),
+    ]),
+    B64Type.B2
+  );
+}
+
+export function pnp(chatId: string, origin: CVPair, undo: boolean = false) {
+  // TODO: undo
+  return b64e(
+    ld(1, [
+      ld(1, cvt(origin)),
+      ld(2, cht(chatId)),
+      vt(3, 1),
+      vt(10, 2),
+      vt(11, 1),
+    ]),
+    B64Type.B2
+  );
+}
+
+export function smp(to: CVPair): string {
+  return b64e(cc([ld(1, cvt(to)), vt(2, 2), vt(3, 4)]), B64Type.B2);
+}
+
+export function mdp(tgt: string, origin: CVPair, undo: boolean = false) {
+  // TODO: undo
+  b64e(cc([ld(1, cvt(origin)), ld(2, ld(1, truc(tgt)))]), B64Type.B2);
+}
+
 export function cmp(
   chatId: string,
   authorChannelId: string,
-  origin: VCPair
+  origin: CVPair
 ): string {
-  const cid = b64d(chatId, B64Type.B1);
-
   return b64e(
     cc([
-      ld(1, cid),
-      ld(3, ld(5, [ld(1, origin.channelId), ld(2, origin.videoId)])),
+      ld(1, cht(chatId)),
+      ld(3, cvt(origin)),
       vt(4, 2),
       vt(5, 4),
       ld(6, ld(1, authorChannelId)),
@@ -83,33 +132,32 @@ export function cmp(
   );
 }
 
-export function hdp(
-  channelId: string,
-  origin: VCPair,
-  undo: boolean = false
-): string {
-  const op = undo ? 4 : 5;
+/**
+ * Utils
+ */
 
-  return b64e(
-    cc([
-      ld(1, ld(5, [ld(1, origin.channelId), ld(2, origin.videoId)])),
-      ld(op, ld(1, channelId.replace(/^UC/, ""))),
-      vt(10, 2),
-      vt(11, 1),
-    ]),
-    B64Type.B2
-  );
+function cvt(p: CVPair) {
+  return ld(5, [ld(1, p.channelId), ld(2, p.videoId)]);
 }
 
-export function smp(to: VCPair, mn1: number = 1, mn2: number = 4): string {
-  return b64e(
-    cc([
-      ld(1, ld(5, [ld(1, to.channelId), ld(2, to.videoId)])),
-      vt(2, mn1),
-      vt(3, mn2),
-    ]),
-    B64Type.B2
-  );
+function cht(chatId: string) {
+  return b64d(chatId, B64Type.B1);
+  // const i = parse(b64d(chatId, B64Type.B1)) as PBToken[];
+  // const j = i[0].v as PBToken[];
+  // const k = j.map((pbv) => pbv.v) as [string, string];
+  // return [ld(1, k[0]), ld(2, k[1])];
+}
+
+function hdt(tgt: CVPair): string {
+  return cc([
+    ld(1, cvt(tgt)),
+    ld(3, ld(48687757, ld(1, tgt.videoId))),
+    vt(4, 1),
+  ]).toString("base64");
+}
+
+function truc(i: string) {
+  return i.replace(/^UC/, "");
 }
 
 /**

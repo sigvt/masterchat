@@ -77,11 +77,13 @@
 import { Base } from "../../base";
 import {
   YTAction,
+  YTActionResponse,
   YTGetItemContextMenuResponse,
   YTLiveChatServiceEndpointContainer,
 } from "../../yt/chat";
 import { withContext } from "../../utils";
 import { ActionCatalog, ActionInfo } from "./types";
+import { rmp } from "../../protobuf/assembler";
 
 function findParams(obj: any): string | undefined {
   const keys = Object.keys(obj).filter(
@@ -112,29 +114,12 @@ function buildMeta(endpoint: YTLiveChatServiceEndpointContainer) {
 export interface ChatActionService extends Base {}
 
 export class ChatActionService {
-  // TODO: narrow down return type
-  async report(contextMenuEndpointParams: string) {
-    const catalog = await this.getActionCatalog(contextMenuEndpointParams);
-    const actionInfo = catalog?.report;
-    if (!actionInfo) return;
-    return await this.sendAction(actionInfo);
-  }
-
-  // TODO: narrow down return type
-  async block(contextMenuEndpointParams: string) {
-    const catalog = await this.getActionCatalog(contextMenuEndpointParams);
-    const actionInfo = catalog?.block;
-    if (!actionInfo) return;
-    return await this.sendAction(actionInfo);
-  }
-
-  // TODO: narrow down return type
-  async unblock(contextMenuEndpointParams: string) {
-    const catalog = await this.getActionCatalog(contextMenuEndpointParams);
-    const actionInfo = catalog?.unblock;
-    if (!actionInfo) return;
-    return await this.sendAction(actionInfo);
-  }
+  // async report(contextMenuEndpointParams: string) {
+  //   const catalog = await this.getActionCatalog(contextMenuEndpointParams);
+  //   const actionInfo = catalog?.report;
+  //   if (!actionInfo) return;
+  //   return await this.sendAction(actionInfo);
+  // }
 
   // TODO: narrow down return type
   async pin(contextMenuEndpointParams: string) {
@@ -152,18 +137,45 @@ export class ChatActionService {
     return await this.sendAction(actionInfo);
   }
 
-  async remove(contextMenuEndpointParams: string) {
-    const catalog = await this.getActionCatalog(contextMenuEndpointParams);
-    const actionInfo = catalog?.remove;
-    if (!actionInfo) return;
-    const res = await this.sendAction(actionInfo);
-    return res[0].markChatItemAsDeletedAction;
+  async remove(chatId: string) {
+    const params = rmp(chatId, this.cvPair());
+    const res = await this.postWithRetry<YTActionResponse>(
+      "/youtubei/v1/live_chat/moderate",
+      {
+        body: JSON.stringify(
+          withContext({
+            params,
+          })
+        ),
+      }
+    );
+    if (!res.success) {
+      // {"error":{"code":501,"message":"Operation is not implemented, or supported, or enabled.","errors":[{"message":"Operation is not implemented, or supported, or enabled.","domain":"global","reason":"notImplemented"}],"status":"UNIMPLEMENTED"}}
+      throw new Error(`Failed to perform action: ` + JSON.stringify(res));
+    }
+    return res.actions[0].markChatItemAsDeletedAction!;
   }
 
   // TODO: narrow down return type
   async timeout(contextMenuEndpointParams: string) {
     const catalog = await this.getActionCatalog(contextMenuEndpointParams);
     const actionInfo = catalog?.timeout;
+    if (!actionInfo) return;
+    return await this.sendAction(actionInfo);
+  }
+
+  // TODO: narrow down return type
+  async block(contextMenuEndpointParams: string) {
+    const catalog = await this.getActionCatalog(contextMenuEndpointParams);
+    const actionInfo = catalog?.block;
+    if (!actionInfo) return;
+    return await this.sendAction(actionInfo);
+  }
+
+  // TODO: narrow down return type
+  async unblock(contextMenuEndpointParams: string) {
+    const catalog = await this.getActionCatalog(contextMenuEndpointParams);
+    const actionInfo = catalog?.unblock;
     if (!actionInfo) return;
     return await this.sendAction(actionInfo);
   }
@@ -232,7 +244,7 @@ export class ChatActionService {
     });
     const endpoint =
       "/youtubei/v1/live_chat/get_item_context_menu?" + query.toString();
-    const response = await this.postJson<YTGetItemContextMenuResponse>(
+    const response = await this.postWithRetry<YTGetItemContextMenuResponse>(
       endpoint,
       {
         body: JSON.stringify(withContext()),
