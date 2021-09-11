@@ -15,7 +15,6 @@ export class Base {
   public channelName?: string;
   public title?: string;
   protected credentials?: Credentials;
-  protected sessionId?: string;
   protected apiKey!: string;
 
   protected async postWithRetry<T>(
@@ -69,7 +68,7 @@ export class Base {
       method: "POST",
       headers: {
         ...DEFAULT_HEADERS,
-        ...buildAuthHeaders(this.credentials, this.sessionId),
+        ...buildAuthHeaders(this.credentials),
         ...init?.headers,
         "Content-Type": "application/json",
       },

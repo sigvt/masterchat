@@ -30,8 +30,6 @@ export interface MasterchatOptions {
   /** you can grab Credentials using `extra/credential-fetcher` */
   credentials?: Credentials | string;
 
-  sessionId?: string;
-
   /** set live stream type
    *
    * ```
@@ -72,13 +70,12 @@ export class Masterchat {
   constructor(
     videoId: string,
     channelId: string,
-    { isLive, credentials, sessionId }: MasterchatOptions = {}
+    { isLive, credentials }: MasterchatOptions = {}
   ) {
     this.videoId = videoId;
     this.channelId = channelId;
     this.isLive = isLive;
     this.apiKey = DAK;
-    this.sessionId = sessionId;
 
     if (typeof credentials === "string") {
       credentials = JSON.parse(

@@ -10,10 +10,7 @@ export interface Credentials {
   SESSION_ID?: string;
 }
 
-export function buildAuthHeaders(
-  creds: Credentials | undefined,
-  sessionId?: string
-) {
+export function buildAuthHeaders(creds: Credentials | undefined) {
   if (!creds) return undefined;
 
   return {

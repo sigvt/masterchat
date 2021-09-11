@@ -11,6 +11,15 @@
 ### chat
 
 - `.fetch` will attempt to switch an API endpoint to the replay chat if failed to fetch chats from the live chat. Explicitly set `isLive` option `true` or `false` when instiantiating Masterchat to disable this behavior.
+  - if unset,
+    - live -> OK
+    - archive -> first request fails, then try fetching replay chat -> OK
+  - if set `true`:
+    - live -> OK
+    - archive -> throw DisabledChatError
+  - if set `false`:
+    - live -> throw DisabledChatError
+    - archive -> OK
 - Supported `.fetch` overloading
   - `.fetch(options?: FetchChatOptions)`
   - `.fetch(token: string, options?: FetchChatOptions)`
