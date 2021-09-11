@@ -1,5 +1,5 @@
 import sha1 from "sha1";
-import { DEFAULT_ORIGIN } from "./constants";
+import { DEFAULT_ORIGIN, SASH, XGAU, XGPID, XO } from "./constants";
 
 export interface Credentials {
   SAPISID: string;
@@ -9,13 +9,18 @@ export interface Credentials {
   SSID: string;
 }
 
-export function buildAuthHeaders(creds: Credentials | undefined) {
+export function buildAuthHeaders(
+  creds: Credentials | undefined,
+  sessionId?: string
+) {
   if (!creds) return undefined;
 
   return {
     Cookie: genCookieString(creds),
     Authorization: genAuthToken(creds.SAPISID, DEFAULT_ORIGIN),
-    "X-Origin": DEFAULT_ORIGIN,
+    [XO]: DEFAULT_ORIGIN,
+    [XGAU]: "0",
+    [XGPID]: sessionId,
   };
 }
 
@@ -26,10 +31,10 @@ function genCookieString(creds: Credentials) {
 }
 
 function genAuthToken(sid: string, origin: string): string {
-  return `SAPISIDHASH ${genSapisidHash(sid, origin)}`;
+  return `${SASH} ${genSash(sid, origin)}`;
 }
 
-function genSapisidHash(sid: string, origin: string): string {
+function genSash(sid: string, origin: string): string {
   const now = Math.floor(new Date().getTime() / 1e3);
   const payload = [now, sid, origin];
   const digest = sha1Digest(payload.join(" "));

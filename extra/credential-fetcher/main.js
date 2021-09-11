@@ -39,6 +39,14 @@ async function createWindow() {
   mainWindow.webContents.on("did-finish-load", async (e) => {
     const url = e.sender.getURL();
     if (url === "https://www.youtube.com/") {
+      const match = await mainWindow.webContents.executeJavaScript(
+        "/ytcfg\\.set\\(({.+?})\\);/.exec(document.head.innerHTML)",
+        true
+      );
+      const sessionId = match
+        ? JSON.parse(match[1])["DELEGATED_SESSION_ID"]
+        : undefined;
+
       const ses = e.sender.session;
       const cookies = await ses.cookies.get({});
       const creds = Object.fromEntries(
@@ -49,7 +57,12 @@ async function createWindow() {
           .map((cookie) => [cookie.name, cookie.value])
       );
       console.log("Login succeeded. Use credential token below:");
-      console.log(Buffer.from(JSON.stringify(creds)).toString("base64"));
+      console.log(
+        Buffer.from(
+          JSON.stringify({ ...creds, SESSION_ID: sessionId })
+        ).toString("base64")
+      );
+
       app.quit();
     }
   });

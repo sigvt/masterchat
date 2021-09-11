@@ -14,8 +14,8 @@ export class Base {
   public channelId!: string;
   public channelName?: string;
   public title?: string;
-
   protected credentials?: Credentials;
+  protected sessionId?: string;
   protected apiKey!: string;
 
   protected async postJson<T>(
@@ -30,9 +30,6 @@ export class Base {
     while (true) {
       try {
         const res = await this.post(input, init);
-        if (res.status !== 200) {
-          debugLog(`postJson(${this.videoId}):`, `status=${res.status}`);
-        }
         return await res.json();
       } catch (err) {
         if (err instanceof Error) {
@@ -56,7 +53,7 @@ export class Base {
     }
   }
 
-  protected post(input: string, init?: RequestInit) {
+  protected async post(input: string, init?: RequestInit) {
     if (!input.startsWith("http")) {
       input = DEFAULT_ORIGIN + input;
     }
@@ -66,52 +63,54 @@ export class Base {
       parsedUrl.searchParams.append("key", this.apiKey);
     }
 
-    const authHeaders = buildAuthHeaders(this.credentials);
-    const headers = {
-      ...DEFAULT_HEADERS,
-      ...authHeaders,
-      ...init?.headers,
-      "Content-Type": "application/json",
-    };
-
-    // debugLog("POST", parsedUrl.toString(), init?.body);
-
-    return fetch(parsedUrl.toString(), {
+    const requestUrl = parsedUrl.toString();
+    const requestInit = {
       ...init,
       method: "POST",
-      headers,
-    });
+      headers: {
+        ...DEFAULT_HEADERS,
+        ...buildAuthHeaders(this.credentials, this.sessionId),
+        ...init?.headers,
+        "Content-Type": "application/json",
+      },
+    };
+    const res = await fetch(requestUrl, requestInit);
+
+    if (res.status !== 200) {
+      debugLog(
+        `post(${this.videoId}):`,
+        `${requestUrl} status=${res.status} ${JSON.stringify(requestInit)}`
+      );
+    }
+
+    return res;
   }
 
   protected get(input: string, init?: RequestInit) {
     if (!input.startsWith("http")) {
       input = DEFAULT_ORIGIN + input;
     }
-    const parsedUrl = new URL(input);
 
-    if (
-      !parsedUrl.searchParams.has("key") &&
-      !parsedUrl.pathname.includes("watch/v")
-    ) {
-      parsedUrl.searchParams.append("key", this.apiKey);
-    }
-
-    const authHeaders = buildAuthHeaders(this.credentials);
-    const headers = {
-      ...DEFAULT_HEADERS,
-      ...authHeaders,
-      ...init?.headers,
+    const requestInit = {
+      ...init,
+      headers: {
+        ...DEFAULT_HEADERS,
+        ...buildAuthHeaders(this.credentials),
+        ...init?.headers,
+      },
     };
 
-    // debugLog("GET", parsedUrl.toString());
-
-    return fetch(parsedUrl.toString(), {
-      ...init,
-      headers,
-    });
+    return fetch(input, requestInit);
   }
 
   protected log(label: string, ...obj: any) {
     debugLog(`${label}(${this.videoId}):`, ...obj);
+  }
+
+  protected cvPair() {
+    return {
+      channelId: this.channelId,
+      videoId: this.videoId,
+    };
   }
 }

@@ -9,6 +9,9 @@
   - `fetch(options?: FetchChatOptions)`
   - `fetch(token: string, options?: FetchChatOptions)`
 - Renamed `SucceededChatResponse` -> `ChatResponse`
+### extra
+
+- credential-fetcher now supports parsing legacy session id
 
 ## v0.9.0
 
