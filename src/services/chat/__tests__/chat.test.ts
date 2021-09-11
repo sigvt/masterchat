@@ -6,9 +6,9 @@ const mode = (process.env.NOCK_BACK_MODE as any) || "lockdown";
 const record = setupRecorder({ mode });
 
 async function fetchUpcomingStreams() {
-  const data = await fetch("https://holodex.net/api/v2/live?status=live").then(
-    (res) => res.json()
-  );
+  const data = await fetch(
+    "https://holodex.net/api/v2/live?status=live&org=Hololive"
+  ).then((res) => res.json());
   return data;
 }
 
@@ -30,7 +30,6 @@ describe("normal live chat", () => {
   });
 
   it("context match", async () => {
-    expect(mc.title).toBe(subject.title);
     expect(mc.channelId).toBe(subject.channel.id);
     expect(mc.channelName).toBe(subject.channel.name);
   });
@@ -51,7 +50,13 @@ describe("normal live chat", () => {
     const chats = chat.actions.filter(
       (action) => action.type === "addChatItemAction"
     );
-    expect(chats[0]).toEqual(
+    const membershipChat = chats.find(
+      (chat) =>
+        chat.type === "addChatItemAction" &&
+        chat.membership &&
+        "text" in chat.rawMessage[0]
+    );
+    expect(membershipChat).toEqual(
       expect.objectContaining({
         authorName: expect.any(String),
         authorChannelId: expect.any(String),
@@ -62,8 +67,8 @@ describe("normal live chat", () => {
         isVerified: expect.any(Boolean),
         isOwner: expect.any(Boolean),
         membership: {
-          since: expect.stringMatching(/^(2 months)$/),
-          status: expect.stringMatching(/^(Member)$/),
+          since: expect.any(String),
+          status: expect.stringMatching(/^(New Member|Member)$/),
           thumbnail: expect.stringMatching(/^https:\/\/yt\d\.ggpht/),
         },
         timestamp: expect.any(Date),

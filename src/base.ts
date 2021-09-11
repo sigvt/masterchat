@@ -77,10 +77,7 @@ export class Base {
     const res = await fetch(requestUrl, requestInit);
 
     if (res.status !== 200) {
-      debugLog(
-        `post(${this.videoId}):`,
-        `${requestUrl} status=${res.status} ${JSON.stringify(requestInit)}`
-      );
+      debugLog(`post(${this.videoId}):`, `${requestUrl} status=${res.status}`);
     }
 
     return res;
