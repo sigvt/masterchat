@@ -7,6 +7,7 @@ export interface Credentials {
   HSID: string;
   SID: string;
   SSID: string;
+  SESSION_ID?: string;
 }
 
 export function buildAuthHeaders(
@@ -20,7 +21,7 @@ export function buildAuthHeaders(
     Authorization: genAuthToken(creds.SAPISID, DEFAULT_ORIGIN),
     [XO]: DEFAULT_ORIGIN,
     [XGAU]: "0",
-    [XGPID]: sessionId,
+    [XGPID]: creds.SESSION_ID,
   };
 }
 

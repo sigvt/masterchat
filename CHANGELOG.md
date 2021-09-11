@@ -2,11 +2,11 @@
 
 ## Unreleased
 
-- New auth params allows commenting on other streamers' chat
+- Support legacy pageId session (append `SESSION_ID` to `Credentials`)
 
 ### chatActions
 
-- `.remove` will use homebrew protobuf params
+- `.remove` will use homebrew pb params
 
 ### chat
 

@@ -8,7 +8,6 @@ export interface MessageService extends Base {}
 export class MessageService {
   async sendMessage(message: string): Promise<YTLiveChatTextMessageRenderer> {
     const params = smp(this.cvPair());
-    debugLog(params);
 
     const body = withContext({
       richMessage: {
@@ -27,8 +26,6 @@ export class MessageService {
         body: JSON.stringify(body),
       }
     );
-
-    debugLog(res);
 
     const item = res.actions?.[0].addChatItemAction?.item;
     if (!(item && "liveChatTextMessageRenderer" in item)) {

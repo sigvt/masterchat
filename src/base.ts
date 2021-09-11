@@ -53,7 +53,7 @@ export class Base {
     }
   }
 
-  protected async post(input: string, init?: RequestInit) {
+  protected async post(input: string, init?: RequestInit): Promise<Response> {
     if (!input.startsWith("http")) {
       input = DEFAULT_ORIGIN + input;
     }
