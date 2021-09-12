@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>FailedChatResponse | masterchat</title>
+	<title>ChatResponse | masterchat</title>
 	<meta name="description" content="Documentation for masterchat">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -56,21 +56,28 @@
 					<a href="../modules/services_chat_types.html">services/chat/types</a>
 				</li>
 				<li>
-					<a href="services_chat_types.FailedChatResponse.html">FailedChatResponse</a>
+					<a href="services_chat_types.ChatResponse.html">ChatResponse</a>
 				</li>
 			</ul>
-			<h1>Interface FailedChatResponse</h1>
+			<h1>Interface ChatResponse</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>Response</p>
+					</div>
+				</div>
+			</section>
 			<section class="tsd-panel tsd-hierarchy">
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">FailedChatResponse</span>
+						<span class="target">ChatResponse</span>
 					</li>
 				</ul>
 			</section>
@@ -81,7 +88,9 @@
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="services_chat_types.FailedChatResponse.html#error" class="tsd-kind-icon">error</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="services_chat_types.ChatResponse.html#actions" class="tsd-kind-icon">actions</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="services_chat_types.ChatResponse.html#continuation" class="tsd-kind-icon">continuation</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="services_chat_types.ChatResponse.html#error" class="tsd-kind-icon">error</a></li>
 							</ul>
 						</section>
 					</div>
@@ -90,12 +99,32 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="error" class="tsd-anchor"></a>
-					<h3>error</h3>
-					<div class="tsd-signature tsd-kind-icon">error<span class="tsd-signature-symbol">:</span> <a href="services_chat_types.LiveError.html" class="tsd-signature-type" data-tsd-kind="Interface">LiveError</a></div>
+					<a name="actions" class="tsd-anchor"></a>
+					<h3>actions</h3>
+					<div class="tsd-signature tsd-kind-icon">actions<span class="tsd-signature-symbol">:</span> <a href="../modules/services_chat_types.html#Action" class="tsd-signature-type" data-tsd-kind="Type alias">Action</a><span class="tsd-signature-symbol">[]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/holodata/masterchat/blob/0466b5f/src/services/chat/types.ts#L273">services/chat/types.ts:273</a></li>
+							<li>Defined in <a href="https://github.com/holodata/masterchat/blob/cf08f67/src/services/chat/types.ts#L262">services/chat/types.ts:262</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="continuation" class="tsd-anchor"></a>
+					<h3>continuation</h3>
+					<div class="tsd-signature tsd-kind-icon">continuation<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="services_chat_types.TimedContinuation.html" class="tsd-signature-type" data-tsd-kind="Interface">TimedContinuation</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/holodata/masterchat/blob/cf08f67/src/services/chat/types.ts#L263">services/chat/types.ts:263</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="error" class="tsd-anchor"></a>
+					<h3>error</h3>
+					<div class="tsd-signature tsd-kind-icon">error<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">null</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/holodata/masterchat/blob/cf08f67/src/services/chat/types.ts#L264">services/chat/types.ts:264</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -187,9 +216,6 @@
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
 					<li class=" tsd-kind-enum tsd-parent-kind-module">
-						<a href="../enums/services_chat_types.FetchChatErrorStatus.html" class="tsd-kind-icon">Fetch<wbr>Chat<wbr>Error<wbr>Status</a>
-					</li>
-					<li class=" tsd-kind-enum tsd-parent-kind-module">
 						<a href="../enums/services_chat_types.LiveChatMode.html" class="tsd-kind-icon">Live<wbr>Chat<wbr>Mode</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-module">
@@ -222,29 +248,35 @@
 					<li class=" tsd-kind-interface tsd-parent-kind-module">
 						<a href="services_chat_types.AddViewerEngagementMessageAction.html" class="tsd-kind-icon">Add<wbr>Viewer<wbr>Engagement<wbr>Message<wbr>Action</a>
 					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="services_chat_types.CloseLiveChatActionPanelAction.html" class="tsd-kind-icon">Close<wbr>Live<wbr>Chat<wbr>Action<wbr>Panel<wbr>Action</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="services_chat_types.Color.html" class="tsd-kind-icon">Color</a>
-					</li>
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-interface tsd-parent-kind-module">
-						<a href="services_chat_types.FailedChatResponse.html" class="tsd-kind-icon">Failed<wbr>Chat<wbr>Response</a>
+						<a href="services_chat_types.ChatResponse.html" class="tsd-kind-icon">Chat<wbr>Response</a>
 						<ul>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="services_chat_types.FailedChatResponse.html#error" class="tsd-kind-icon">error</a>
+								<a href="services_chat_types.ChatResponse.html#actions" class="tsd-kind-icon">actions</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="services_chat_types.ChatResponse.html#continuation" class="tsd-kind-icon">continuation</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="services_chat_types.ChatResponse.html#error" class="tsd-kind-icon">error</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
 					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="services_chat_types.CloseLiveChatActionPanelAction.html" class="tsd-kind-icon">Close<wbr>Live<wbr>Chat<wbr>Action<wbr>Panel<wbr>Action</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="services_chat_types.Color.html" class="tsd-kind-icon">Color</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
 						<a href="services_chat_types.FetchChatOptions.html" class="tsd-kind-icon">Fetch<wbr>Chat<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="services_chat_types.LiveError.html" class="tsd-kind-icon">Live<wbr>Error</a>
+						<a href="services_chat_types.IterateChatOptions.html" class="tsd-kind-icon">Iterate<wbr>Chat<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-module">
 						<a href="services_chat_types.MarkChatItemAsDeletedAction.html" class="tsd-kind-icon">Mark<wbr>Chat<wbr>Item<wbr>AsDeleted<wbr>Action</a>
@@ -272,9 +304,6 @@
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-module">
 						<a href="services_chat_types.ShowTooltipAction.html" class="tsd-kind-icon">Show<wbr>Tooltip<wbr>Action</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="services_chat_types.SucceededChatResponse.html" class="tsd-kind-icon">Succeeded<wbr>Chat<wbr>Response</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-module">
 						<a href="services_chat_types.SuperChat.html" class="tsd-kind-icon">Super<wbr>Chat</a>

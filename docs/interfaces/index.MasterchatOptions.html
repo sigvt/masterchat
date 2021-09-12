@@ -96,9 +96,14 @@
 					<div class="tsd-signature tsd-kind-icon">credentials<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><a href="auth.Credentials.html" class="tsd-signature-type" data-tsd-kind="Interface">Credentials</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/holodata/masterchat/blob/0466b5f/src/index.ts#L30">index.ts:30</a></li>
+							<li>Defined in <a href="https://github.com/holodata/masterchat/blob/cf08f67/src/index.ts#L31">index.ts:31</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>you can grab Credentials using <code>extra/credential-fetcher</code></p>
+						</div>
+					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 					<a name="isLive" class="tsd-anchor"></a>
@@ -106,9 +111,26 @@
 					<div class="tsd-signature tsd-kind-icon">is<wbr>Live<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/holodata/masterchat/blob/0466b5f/src/index.ts#L31">index.ts:31</a></li>
+							<li>Defined in <a href="https://github.com/holodata/masterchat/blob/cf08f67/src/index.ts#L49">index.ts:49</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>set live stream type</p>
+						</div>
+						<pre><code><span style="color: #AF00DB">if</span><span style="color: #000000"> </span><span style="color: #0000FF">undefined</span><span style="color: #000000">,</span>
+<span style="color: #000000">  </span><span style="color: #001080">live</span><span style="color: #000000"> -&gt; </span><span style="color: #0070C1">OK</span>
+<span style="color: #000000">  </span><span style="color: #001080">archive</span><span style="color: #000000"> -&gt; </span><span style="color: #001080">first</span><span style="color: #000000"> </span><span style="color: #001080">request</span><span style="color: #000000"> </span><span style="color: #001080">fails</span><span style="color: #000000">, </span><span style="color: #001080">then</span><span style="color: #000000"> </span><span style="color: #AF00DB">try</span><span style="color: #000000"> </span><span style="color: #001080">fetching</span><span style="color: #000000"> </span><span style="color: #001080">replay</span><span style="color: #000000"> </span><span style="color: #001080">chat</span><span style="color: #000000"> -&gt; </span><span style="color: #0070C1">OK</span>
+
+<span style="color: #AF00DB">if</span><span style="color: #000000"> </span><span style="color: #001080">set</span><span style="color: #000000"> true:</span>
+<span style="color: #000000">  </span><span style="color: #001080">live</span><span style="color: #000000"> -&gt; </span><span style="color: #0070C1">OK</span>
+<span style="color: #000000">  </span><span style="color: #001080">archive</span><span style="color: #000000"> -&gt; </span><span style="color: #AF00DB">throw</span><span style="color: #000000"> </span><span style="color: #001080">DisabledChatError</span>
+
+<span style="color: #AF00DB">if</span><span style="color: #000000"> </span><span style="color: #001080">set</span><span style="color: #000000"> false:</span>
+<span style="color: #000000">  </span><span style="color: #001080">live</span><span style="color: #000000"> -&gt; </span><span style="color: #AF00DB">throw</span><span style="color: #000000"> </span><span style="color: #001080">DisabledChatError</span>
+<span style="color: #000000">  </span><span style="color: #001080">archive</span><span style="color: #000000"> -&gt; </span><span style="color: #0070C1">OK</span>
+</code></pre>
+					</div>
 				</section>
 			</section>
 		</div>
