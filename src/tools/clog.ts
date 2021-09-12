@@ -14,10 +14,10 @@ async function main({
   videoId: string;
   useCredentials?: boolean;
 }) {
-  const m = await fetchMetadataFromEmbed(videoId);
-  console.log(JSON.stringify(m));
+  // const m = await fetchMetadataFromEmbed(videoId);
+  // console.log(JSON.stringify(m));
 
-  const mc = new Masterchat(videoId, m!.channelId, {
+  const mc = await Masterchat.init(videoId, {
     credentials: useCredentials ? credentials : undefined,
   });
 
