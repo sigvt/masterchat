@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.10.0
 
 - Support legacy pageId session (append `SESSION_ID` to `Credentials`)
 
