@@ -94,10 +94,10 @@ export class ChatService {
               retryRemaining = 0;
               throw new UnavailableError(message);
 
-            // already replay chat OR malformed continuation
+            // stream already turned to archive OR completely malformed token
             case YTChatErrorStatus.Invalid:
               retryRemaining = 0;
-              throw new InvalidArgumentError("malformed continuation");
+              throw new InvalidArgumentError(message);
 
             // it might be temporary issue so should retry immediately
             case YTChatErrorStatus.Unavailable:
@@ -134,9 +134,9 @@ export class ChatService {
         this.log(
           `fetch`,
           `Unrecoverable Error:`,
-          `${(err as any).message} (${(err as any).code}) [${
-            (err as any).type
-          }]`
+          `${(err as any).message} (${(err as any).code ?? ""}|${
+            (err as any).type ?? ""
+          })`
         );
 
         throw err;
@@ -163,7 +163,8 @@ export class ChatService {
             // retry with replay endpoint if isLive is unknown
             if (this.isLive === undefined) {
               this.log("fetch", "switched to replay endpoint");
-              applyNewLiveStatus((this.isLive = false));
+              this.isLive = false;
+              applyNewLiveStatus(false);
               continue loop;
             }
 
