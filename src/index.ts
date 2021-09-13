@@ -17,14 +17,16 @@ export { normalizeVideoId, runsToString, timeoutThen } from "./utils";
 export {
   YTChatError,
   YTChatErrorStatus,
+  YTEmoji,
   YTEmojiRun,
   YTLiveChatTextMessageRenderer,
   YTRun,
   YTRunContainer,
   YTTextRun,
   YTThumbnail,
+  YTThumbnailListWithAccessibility,
 } from "./yt/chat";
-export { YTReloadContinuation } from "./yt/context";
+export { YTAccessibilityData, YTReloadContinuation } from "./yt/context";
 
 export interface MasterchatOptions {
   /** you can grab Credentials using `extra/credential-fetcher` */

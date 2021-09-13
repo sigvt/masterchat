@@ -31,7 +31,7 @@ export interface YTEmoji {
   emojiId: string;
   shortcuts: string[];
   searchTerms: string[];
-  image: YTTickerThumbnailClass;
+  image: YTThumbnailListWithAccessibility;
   isCustomEmoji: boolean;
 }
 
@@ -377,7 +377,7 @@ export interface YTLiveChatPaidStickerRenderer {
   authorPhoto: YTThumbnailList;
   authorName: YTSimpleText;
   authorExternalChannelId: string;
-  sticker: YTTickerThumbnailClass;
+  sticker: YTThumbnailListWithAccessibility;
   moneyChipBackgroundColor: number;
   moneyChipTextColor: number;
   purchaseAmountText: YTSimpleText;
@@ -512,7 +512,7 @@ export interface YTLiveChatTickerPaidMessageItemRenderer {
   amountTextColor: number;
   startBackgroundColor: number;
   endBackgroundColor: number;
-  authorPhoto: YTTickerThumbnailClass;
+  authorPhoto: YTThumbnailListWithAccessibility;
   durationSec: number;
   showItemEndpoint: YTShowLiveChatItemEndpointContainer<YTLiveChatPaidMessageRendererContainer>;
   authorExternalChannelId: string;
@@ -522,14 +522,14 @@ export interface YTLiveChatTickerPaidMessageItemRenderer {
 
 export interface YTLiveChatTickerPaidStickerItemRenderer {
   id: string;
-  authorPhoto: YTTickerThumbnailClass;
+  authorPhoto: YTThumbnailListWithAccessibility;
   startBackgroundColor: number;
   endBackgroundColor: number;
   durationSec: number;
   fullDurationSec: number;
   showItemEndpoint: YTShowLiveChatItemEndpointContainer<YTLiveChatPaidStickerRendererContainer>;
   authorExternalChannelId: string;
-  tickerThumbnails: YTTickerThumbnailClass[];
+  tickerThumbnails: YTThumbnailListWithAccessibility[];
   trackingParams: string;
 }
 
@@ -852,7 +852,7 @@ export interface YTFeedbackEndpoint {
   uiActions: UIActions;
 }
 
-export interface YTTickerThumbnailClass {
+export interface YTThumbnailListWithAccessibility {
   thumbnails: YTThumbnail[];
   accessibility: YTAccessibilityData;
 }

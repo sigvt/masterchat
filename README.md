@@ -118,10 +118,10 @@ main();
 
 ### Faster instantiation
 
-To skip loading watch page, use:
+To skip loading watch page, use `new Masterchat(videoId: string, channelId: string, { isLive?: boolean })`:
 
 ```js
-const live = new Masterchat(videoId, channelId, { isLive });
+const live = new Masterchat(videoId, channelId, { isLive: true });
 ```
 
 instead of:
