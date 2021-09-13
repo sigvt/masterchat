@@ -221,9 +221,9 @@ it("pre-chat disabled", async () => {
   completeRecording();
 });
 
-it.skip("archived stream with chat replay being prepared", async () => {
-  const videoId = "HiAGXND3oq0";
-  const channelId = "UCwL7dgTxKo8Y4RFIKWaf8gA";
+it("archived stream with chat replay being prepared", async () => {
+  const videoId = "K769BpJroos";
+  const channelId = "UC8rcEBzJSleTkf_-agPM20g";
   const { completeRecording } = await record("no_chat_replay");
 
   const mc = await Masterchat.init(videoId);
