@@ -34,7 +34,7 @@ export function runsToString(
         }
 
         const term = emoji.isCustomEmoji
-          ? emoji.shortcuts[emoji.shortcuts.length - 1] + ":"
+          ? emoji.shortcuts[emoji.shortcuts.length - 1]
           : emoji.emojiId;
 
         return term;
