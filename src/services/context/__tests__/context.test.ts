@@ -153,9 +153,9 @@ it("abandoned stream", async () => {
   completeRecording();
 });
 
-it.skip("members-only stream", async () => {
-  const videoId = "aQdznx3GFyc";
-  const channelId = "UC5CwaMl1eIgY8h02uZw7u8A";
+it("members-only stream", async () => {
+  const videoId = "n5cIlKx1hMQ";
+  const channelId = "UCdn5BQ06XqgXoAxIhbqw5Rg";
 
   const { completeRecording } = await record("members_only");
 
@@ -169,7 +169,7 @@ it.skip("members-only stream", async () => {
 
   await expect(
     new Masterchat(videoId, channelId, { isLive: false }).fetch()
-  ).rejects.toBeInstanceOf(MembersOnlyError);
+  ).rejects.toBeInstanceOf(DisabledChatError);
 
   completeRecording();
 });

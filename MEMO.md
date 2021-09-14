@@ -8,7 +8,7 @@
 | pre stream but chat disabled                    | `true`        | `DisabledChatError`      | `DisabledChatError`    | `DisabledChatError`    |
 | archived stream                                 | `false`       | **OK**                   | `DisabledChatError`    | **OK**                 |
 | archived stream but replay chat being processed | `false`       | `DisabledChatError`      | `DisabledChatError`    | `DisabledChatError`    |
-| members-only live stream                        | N/A           | `MembersOnlyError`       | `MembersOnlyError`     | `MembersOnlyError`     |
+| members-only live stream                        | N/A           | `MembersOnlyError`       | `DisabledChatError`    | `MembersOnlyError`     |
 | members-only archived stream                    | N/A           | `MembersOnlyError`       | `DisabledChatError`    | **OK**                 |
 | unarchived stream                               | N/A           | `NoStreamRecordingError` | `DisabledChatError`    | `DisabledChatError`    |
 | privated stream                                 | N/A           | `NoPermissionError`      | `NoPermissionError`    | `NoPermissionError`    |
