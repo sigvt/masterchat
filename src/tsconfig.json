@@ -1,5 +1,5 @@
 {
-  "exclude": ["**/__tests__"],
+  "exclude": ["**/__tests__", "**/*.test.ts"],
   "compilerOptions": {
     /* https://www.typescriptlang.org/docs/handbook/project-references.html */
     "target": "es2020",

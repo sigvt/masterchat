@@ -72,4 +72,4 @@ if (!videoId) {
 
 const credentials = process.env.MC_MSG_TEST_CREDENTIALS;
 
-main({ videoId: normalizeVideoId(videoId) });
+main({ videoId: normalizeVideoId(videoId)! });

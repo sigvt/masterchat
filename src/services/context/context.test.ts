@@ -1,5 +1,5 @@
 import { setupRecorder } from "nock-record";
-import { AddChatItemAction, Masterchat } from "../../..";
+import { Masterchat } from "../..";
 import {
   DisabledChatError,
   InvalidArgumentError,
@@ -7,7 +7,7 @@ import {
   NoPermissionError,
   NoStreamRecordingError,
   UnavailableError,
-} from "../../../error";
+} from "../../error";
 
 const record = setupRecorder({
   mode: (process.env.NOCK_BACK_MODE as any) || "lockdown",
@@ -304,7 +304,7 @@ it("invalid video and channel", async () => {
   const { completeRecording } = await record("invalid_video_id");
 
   await expect(Masterchat.init("invalid_video_id")).rejects.toBeInstanceOf(
-    UnavailableError
+    InvalidArgumentError
   );
 
   await expect(

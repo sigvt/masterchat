@@ -3,7 +3,7 @@ module.exports = {
   testPathIgnorePatterns: ["lib"],
   globals: {
     "ts-jest": {
-      tsconfig: "./src/tsconfig.json",
+      tsconfig: "./src/tsconfig.esm.json",
       useESM: true,
     },
   },

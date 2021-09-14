@@ -13,4 +13,4 @@
 | unarchived stream                               | N/A           | `NoStreamRecordingError` | `DisabledChatError`    | `DisabledChatError`    |
 | privated stream                                 | N/A           | `NoPermissionError`      | `NoPermissionError`    | `NoPermissionError`    |
 | deleted stream                                  | N/A           | `UnavailableError`       | `UnavailableError`     | `UnavailableError`     |
-| invalid video/channel id                        | N/A           | `UnavailableError`       | `InvalidArgumentError` | `InvalidArgumentError` |
+| invalid video/channel id                        | N/A           | `InvalidArgumentError`   | `InvalidArgumentError` | `InvalidArgumentError` |

@@ -1,4 +1,6 @@
-import { h } from "./utils";
+function h(b: TemplateStringsArray) {
+  return Buffer.from(b.raw[0], "hex").toString();
+}
 
 export const DEFAULT_ORIGIN = h`68747470733a2f2f7777772e796f75747562652e636f6d`;
 export const DEFAULT_HEADERS = {

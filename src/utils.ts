@@ -2,49 +2,55 @@ import debug from "debug";
 import { DC } from "./constants";
 import { YTEmoji, YTRun } from "./yt/chat";
 
-export const debugLog = debug("masterchat");
+export interface RunsToStringOptions {
+  // add space between text and emoji tokens
+  spaces?: boolean;
 
-export function guessFreeChat(title: string) {
-  return /(?:[fF]ree\s?[cC]hat|(?:ふりー|フリー)(?:ちゃっと|チャット))/.test(
-    title
-  );
+  // function to process emoji token
+  emojiHandler?: (emoji: YTEmoji) => string;
 }
 
+export const debugLog = debug("masterchat");
+
 export function normalizeVideoId(idOrUrl: string) {
-  return idOrUrl.replace(/^https?:\/\/www\.youtube\.com\/watch\?v=/, "");
+  const match = /(?:[&=/]|^)([A-Za-z0-9_-]{11})(?=(?:[^A-Za-z0-9_-]|$))/.exec(
+    idOrUrl
+  );
+  return match?.[1];
+}
+
+export function simpleEmojiHandler(emoji: YTEmoji) {
+  const term = emoji.isCustomEmoji
+    ? emoji.shortcuts[emoji.shortcuts.length - 1]
+    : emoji.emojiId;
+
+  return term;
 }
 
 export function runsToString(
   runs: YTRun[],
   {
-    emojiHandler = undefined,
-  }: { emojiHandler?: (emoji: YTEmoji) => string } = {}
+    spaces = false,
+    emojiHandler = simpleEmojiHandler,
+  }: RunsToStringOptions = {}
 ): string {
   return runs
     .map((run) => {
-      if ("text" in run) {
-        return run.text;
-      }
-
-      if ("emoji" in run) {
-        const { emoji } = run;
-
-        if (emojiHandler) {
-          return emojiHandler(emoji);
-        }
-
-        const term = emoji.isCustomEmoji
-          ? emoji.shortcuts[emoji.shortcuts.length - 1]
-          : emoji.emojiId;
-
-        return term;
-      }
+      if ("text" in run) return run.text;
+      if ("emoji" in run) return emojiHandler(run.emoji);
+      throw new Error(`Unrecognized run token: ${JSON.stringify(run)}`);
     })
-    .join("");
+    .join(spaces ? " " : "");
 }
 
 export function timeoutThen(duration: number): Promise<number> {
   return new Promise((resolve) => setTimeout(resolve, duration));
+}
+
+export function guessFreeChat(title: string) {
+  return /(?:[fF]ree\s?[cC]hat|(?:ふりー|フリー)(?:ちゃっと|チャット))/.test(
+    title
+  );
 }
 
 export function groupBy<T, K extends keyof T, S extends Extract<T[K], string>>(
@@ -67,8 +73,4 @@ export function withContext(input: any = {}) {
       client: DC,
     },
   };
-}
-
-export function h(b: TemplateStringsArray) {
-  return Buffer.from(b.raw[0], "hex").toString();
 }

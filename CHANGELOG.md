@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- re-export more yt types
+
+### utils
+
+- `normalizeVideoId` will returns `undefined` when the given string doesn't contains any valid id pattern
+- fix format issue of default emoji handler of `runsToString`
+
 ## v0.10.0
 
 - Support legacy pageId session (append `SESSION_ID` to `Credentials`)

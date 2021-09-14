@@ -1,6 +1,7 @@
 import { Credentials } from "./auth";
 import { Base } from "./base";
 import { DAK } from "./constants";
+import { InvalidArgumentError } from "./error";
 import { ChatService } from "./services/chat";
 import { ChatActionService } from "./services/chatAction";
 import { ContextService } from "./services/context";
@@ -58,6 +59,11 @@ export class Masterchat {
    */
   static async init(videoIdOrUrl: string, options: MasterchatOptions = {}) {
     const videoId = normalizeVideoId(videoIdOrUrl);
+    if (!videoId) {
+      throw new InvalidArgumentError(
+        `Failed to extract video id: ${videoIdOrUrl}`
+      );
+    }
     // set channelId "" as populateMetadata will fill out it anyways
     const mc = new Masterchat(videoId, "", {
       ...options,
