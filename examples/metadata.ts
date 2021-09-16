@@ -1,11 +1,7 @@
 #!/usr/bin/env/node
 
-import { Masterchat, runsToString } from "..";
-import { fetchMetadataFromEmbed } from "../services/context";
-
-function log(...obj: any) {
-  console.log(...obj);
-}
+import { Masterchat } from "masterchat";
+import { fetchMetadataFromEmbed } from "masterchat/lib/services/context";
 
 async function main({
   videoId,

@@ -1,8 +1,8 @@
 #!/usr/bin/env/node
 
-import { B64Type, b64d } from "../protobuf/b64";
-import { parse } from "../protobuf/parser";
-import { pprintPbValue } from "../protobuf/util";
+import { b64d, B64Type } from "masterchat/lib/protobuf/b64";
+import { parse } from "masterchat/lib/protobuf/parser";
+import { pprintPbValue } from "masterchat/lib/protobuf/util";
 
 function main(input: string, type: string = B64Type.B2) {
   const buf = b64d(input, type as B64Type);

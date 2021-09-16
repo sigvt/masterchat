@@ -264,7 +264,7 @@ export class ChatService {
 
       token = continuation.token;
 
-      if (this.isLive) {
+      if (this.isLive ?? true) {
         const driftMs = Date.now() - startMs;
         await timeoutThen(Math.max(continuation.timeoutMs - driftMs, 0));
       }

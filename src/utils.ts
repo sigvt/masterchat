@@ -12,7 +12,7 @@ export interface RunsToStringOptions {
 
 export const debugLog = debug("masterchat");
 
-export function normalizeVideoId(idOrUrl: string) {
+export function toVideoId(idOrUrl: string) {
   const match = /(?:[&=/]|^)([A-Za-z0-9_-]{11})(?=(?:[^A-Za-z0-9_-]|$))/.exec(
     idOrUrl
   );

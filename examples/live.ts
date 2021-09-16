@@ -1,7 +1,6 @@
 #!/usr/bin/env/node
 
-import { Masterchat, normalizeVideoId, runsToString } from "..";
-import { fetchMetadataFromEmbed } from "../services/context";
+import { Masterchat, runsToString, toVideoId } from "masterchat";
 
 function log(...obj: any) {
   console.log(...obj);
@@ -72,4 +71,4 @@ if (!videoId) {
 
 const credentials = process.env.MC_MSG_TEST_CREDENTIALS;
 
-main({ videoId: normalizeVideoId(videoId)! });
+main({ videoId: toVideoId(videoId)! });

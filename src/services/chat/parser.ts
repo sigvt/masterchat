@@ -15,7 +15,7 @@ import {
   SUPERCHAT_SIGNIFICANCE_MAP,
   UnknownAction,
 } from "./types";
-import { toTLS } from "../../currency";
+import { toTLS } from "./currency";
 
 export function parseSuperChat(renderer: YTLiveChatPaidMessageRenderer) {
   const AMOUNT_REGEXP = /[\d.,]+/;

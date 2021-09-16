@@ -6,15 +6,17 @@ import { ChatService } from "./services/chat";
 import { ChatActionService } from "./services/chatAction";
 import { ContextService } from "./services/context";
 import { MessageService } from "./services/message";
-import { normalizeVideoId } from "./utils";
+import { toVideoId } from "./utils";
 
+export { MasterchatAgent } from "./agent/agent";
 export { Credentials } from "./auth";
 export * from "./error";
+export { MasterchatManager } from "./agent/manager";
 export * from "./services/chat/types";
 export * from "./services/chatAction/types";
 export * from "./services/context/types";
 export * from "./services/message/types";
-export { normalizeVideoId, runsToString, timeoutThen } from "./utils";
+export { toVideoId, runsToString, timeoutThen } from "./utils";
 export {
   YTChatError,
   YTChatErrorStatus,
@@ -58,7 +60,7 @@ export class Masterchat {
    * Useful when you don't know channelId or isLive status
    */
   static async init(videoIdOrUrl: string, options: MasterchatOptions = {}) {
-    const videoId = normalizeVideoId(videoIdOrUrl);
+    const videoId = toVideoId(videoIdOrUrl);
     if (!videoId) {
       throw new InvalidArgumentError(
         `Failed to extract video id: ${videoIdOrUrl}`
