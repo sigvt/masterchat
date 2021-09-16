@@ -8,7 +8,7 @@ import { ContextService } from "./services/context";
 import { MessageService } from "./services/message";
 import { toVideoId } from "./utils";
 
-export { MasterchatAgent } from "./agent/agent";
+export { MasterchatAgent, MasterchatAgentMetadata } from "./agent/agent";
 export { Credentials } from "./auth";
 export * from "./error";
 export { MasterchatManager } from "./agent/manager";

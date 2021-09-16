@@ -3,15 +3,14 @@
  */
 
 import { EventEmitter } from "events";
+import { Masterchat, MasterchatOptions } from "..";
+import { MasterchatAbortError, MasterchatError } from "../error";
 import {
   Action,
   AddChatItemAction,
   ChatResponse,
   IterateChatOptions,
-  Masterchat,
-  MasterchatError,
-  MasterchatOptions,
-} from "..";
+} from "../services/chat/types";
 
 export type MasterchatEventLoop = Promise<void>;
 
@@ -46,10 +45,19 @@ export interface MasterchatAgent {
   ): boolean;
 }
 
+export interface MasterchatAgentMetadata {
+  videoId: string;
+  channelId: string;
+  channelName?: string;
+  title?: string;
+  isLive?: boolean;
+}
+
 export class MasterchatAgent extends EventEmitter {
   public videoId: string;
   public channelId: string;
   public options?: MasterchatOptions;
+  public metadata: MasterchatAgentMetadata;
 
   private eventLoop: MasterchatEventLoop | null = null;
   private abortController: AbortController;
@@ -60,6 +68,10 @@ export class MasterchatAgent extends EventEmitter {
     this.channelId = channelId;
     this.options = options;
     this.abortController = new AbortController();
+    this.metadata = {
+      videoId: this.videoId,
+      channelId: this.channelId,
+    };
   }
 
   public start(iterateOptions?: IterateChatOptions): void {
@@ -72,6 +84,10 @@ export class MasterchatAgent extends EventEmitter {
         this.emit("end");
       })
       .catch((err) => {
+        if (err instanceof MasterchatAbortError) {
+          // should already be handled by stop()
+          return;
+        }
         this.emit("error", err);
       });
   }
@@ -92,10 +108,18 @@ export class MasterchatAgent extends EventEmitter {
     iterateOptions?: IterateChatOptions;
   }): MasterchatEventLoop {
     signal.addEventListener("abort", () => {
-      throw new Error("Masterchat connection aborted by signal");
+      throw new MasterchatAbortError("Masterchat connection aborted by signal");
     });
 
     const mc = new Masterchat(this.videoId, this.channelId, this.options);
+
+    this.metadata = {
+      videoId: this.videoId,
+      channelId: this.channelId,
+      channelName: mc?.channelName,
+      title: mc?.title,
+      isLive: mc?.isLive,
+    };
 
     // NOTE: `ignoreFirstResponse=false` means you might get chats already processed before when recovering MasterchatAgent from error. Make sure you have unique index for chat id to prevent duplication.
     for await (const res of mc.iterate(iterateOptions)) {

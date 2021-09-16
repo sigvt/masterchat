@@ -2,15 +2,16 @@
 
 ## Unreleased
 
-- Masterchat agent/manager for handling multiple instances of Masterchat
-- now MC requires Node.js v16.6 or higher
+- Masterchat Agent for handling events using EventEmitter
+- Masterchat Manager for processing multiple live streams
+- required Node.js version is now v16.6.0 or higher
 - re-export more yt types
 
 ### utils
 
 - Renamed `normalizedVideoId` -> `toVideoId`
-- `toVideoId` will returns `undefined` when the given string doesn't contains any valid id pattern
-- fix format issue of default emoji handler of `runsToString`
+  - `toVideoId` will returns `undefined` when the given string doesn't contains any valid id pattern
+- fix format issue in default emoji handler of `runsToString`
 
 ## v0.10.0
 

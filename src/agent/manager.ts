@@ -7,16 +7,22 @@ import {
   MasterchatError,
   MasterchatOptions,
 } from "..";
-import { MasterchatAgent } from "./agent";
+import { MasterchatAgent, MasterchatAgentMetadata } from "./agent";
 
 type VideoId = string;
 
 interface MasterchatManagerEvents {
-  data: (videoId: string, data: ChatResponse) => void;
-  actions: (videoId: string, actions: Action[]) => void;
-  chats: (videoId: string, chats: AddChatItemAction[]) => void;
-  end: (videoId: string, reason?: string) => void;
-  error: (videoId: string, error: MasterchatError | Error) => void;
+  data: (metadata: MasterchatAgentMetadata, data: ChatResponse) => void;
+  actions: (metadata: MasterchatAgentMetadata, actions: Action[]) => void;
+  chats: (
+    metadata: MasterchatAgentMetadata,
+    chats: AddChatItemAction[]
+  ) => void;
+  end: (metadata: MasterchatAgentMetadata, reason?: string) => void;
+  error: (
+    metadata: MasterchatAgentMetadata,
+    error: MasterchatError | Error
+  ) => void;
 }
 
 export interface MasterchatManager {
@@ -49,26 +55,39 @@ export class MasterchatManager extends EventEmitter {
   constructor(options?: MasterchatOptions) {
     super();
     this.options = options;
-
-    // ensure manager running
-    new Promise<void>((resolve) =>
-      setInterval(() => {
-        if (this.agentCount() === 0) resolve();
-      }, 10000)
-    );
   }
 
-  agentCount() {
+  /**
+   * resolves after every stream closed
+   */
+  ensure() {
+    return new Promise<void>((resolve) => {
+      const timer = setInterval(() => {
+        if (this.streamCount() === 0) {
+          clearInterval(timer);
+          resolve();
+        }
+      }, 5000);
+    });
+  }
+
+  /**
+   * number of active streams
+   */
+  streamCount() {
     return this.pool.size;
   }
 
+  /**
+   * check if the given stream is already subscribed
+   */
   has(videoId: string) {
     return this.pool.has(videoId);
   }
 
   /**
-   * find or create MasterchatAgent for given stream.
-   * always guarantees single instance for a stream.
+   * subscribe live chat.
+   * always guarantees single instance for each stream.
    */
   subscribe(
     videoId: string,
@@ -81,6 +100,9 @@ export class MasterchatManager extends EventEmitter {
 
     agent.on("end", (reason) => this._handleEnd(agent, reason));
     agent.on("error", (err) => this._handleError(agent, err));
+    agent.on("data", (data) => {
+      this._handleData(agent, data);
+    });
     agent.on("actions", (actions) => {
       this._handleActions(agent, actions);
     });
@@ -94,29 +116,34 @@ export class MasterchatManager extends EventEmitter {
     return agent;
   }
 
+  /**
+   * stop subscribing live chat
+   */
   unsubscribe(videoId: string) {
     const agent = this.pool.get(videoId);
     if (!agent) return;
+    agent.stop("Unsubscribed by user"); // will emit 'end' event
+  }
 
-    agent.stop("Unsubscribed by user");
-    this.pool.delete(videoId);
+  private _handleData(agent: MasterchatAgent, data: ChatResponse) {
+    this.emit("data", agent.metadata, data);
   }
 
   private _handleActions(agent: MasterchatAgent, actions: Action[]) {
-    this.emit("actions", agent.videoId, actions);
+    this.emit("actions", agent.metadata, actions);
   }
 
   private _handleChats(agent: MasterchatAgent, chats: AddChatItemAction[]) {
-    this.emit("chats", agent.videoId, chats);
+    this.emit("chats", agent.metadata, chats);
   }
 
   private _handleEnd(agent: MasterchatAgent, reason?: string) {
     this.pool.delete(agent.videoId);
-    this.emit("end", agent.videoId, reason);
+    this.emit("end", agent.metadata, reason);
   }
 
   private _handleError(agent: MasterchatAgent, err: MasterchatError | Error) {
     this.pool.delete(agent.videoId);
-    this.emit("error", agent.videoId, err);
+    this.emit("error", agent.metadata, err);
   }
 }

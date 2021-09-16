@@ -67,3 +67,5 @@ export class InvalidArgumentError extends MasterchatError {
     Object.setPrototypeOf(this, InvalidArgumentError.prototype);
   }
 }
+
+export class MasterchatAbortError extends Error {}

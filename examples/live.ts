@@ -1,22 +1,19 @@
 #!/usr/bin/env/node
 
-import { Masterchat, runsToString, toVideoId } from "masterchat";
+import { Masterchat, runsToString } from "masterchat";
 
 function log(...obj: any) {
   console.log(...obj);
 }
 
 async function main({
-  videoId,
+  videoIdOrUrl,
   useCredentials = false,
 }: {
-  videoId: string;
+  videoIdOrUrl: string;
   useCredentials?: boolean;
 }) {
-  // const m = await fetchMetadataFromEmbed(videoId);
-  // console.log(JSON.stringify(m));
-
-  const mc = await Masterchat.init(videoId, {
+  const mc = await Masterchat.init(videoIdOrUrl, {
     credentials: useCredentials ? credentials : undefined,
   });
 
@@ -64,11 +61,11 @@ async function main({
   }
 }
 
-const videoId = process.argv[2] || process.env.MC_MSG_TEST_ID;
-if (!videoId) {
-  throw new Error("missing videoId");
+const videoIdOrUrl = process.argv[2] || process.env.MC_MSG_TEST_ID;
+if (!videoIdOrUrl) {
+  throw new Error("missing videoId or URL");
 }
 
 const credentials = process.env.MC_MSG_TEST_CREDENTIALS;
 
-main({ videoId: toVideoId(videoId)! });
+main({ videoIdOrUrl });
