@@ -1,8 +1,8 @@
 import fetch from "cross-fetch";
 import { setupRecorder } from "nock-record";
-import { findCfg, findInitialData } from ".";
 import { buildAuthHeaders } from "../../auth";
 import { DEFAULT_HEADERS } from "../../constants";
+import { findCfg, findInitialData } from "./parser";
 
 const id = process.env.MC_MSG_TEST_ID;
 const channelId = process.env.MC_MSG_TEST_CHANNEL_ID;

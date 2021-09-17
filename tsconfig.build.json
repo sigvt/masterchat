@@ -1,15 +1,17 @@
 {
-  "exclude": ["**/__tests__", "**/*.test.ts"],
+  "exclude": ["**/__tests__", "**/*.test.ts", "examples", "lib"],
   "compilerOptions": {
     /* https://www.typescriptlang.org/docs/handbook/project-references.html */
-    "target": "es2020",
-    "module": "commonjs",
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "node",
     "declaration": true,
-    "outDir": "../lib",
-    "sourceRoot": ".",
+    "outDir": "./lib",
+    "sourceRoot": "./src",
     "sourceMap": true,
     "strict": true,
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   }

@@ -1,4 +1,4 @@
-import { InvalidArgumentError, UnavailableError } from "../..";
+import { InvalidArgumentError, UnavailableError } from "../../error";
 import { Base } from "../../base";
 import { EP_GLC, EP_GLCR } from "../../constants";
 import {

@@ -1,5 +1,4 @@
 import {
-  YTChatErrorStatus,
   YTCloseLiveChatActionPanelAction,
   YTLiveChatActionPanelRenderer,
   YTLiveChatBannerRenderer,

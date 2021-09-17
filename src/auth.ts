@@ -1,4 +1,5 @@
-import sha1 from "sha1";
+// import sha1 from "sha1";
+import crypto from "crypto";
 import { DEFAULT_ORIGIN, SASH, XGAU, XGPID, XO } from "./constants";
 
 export interface Credentials {
@@ -40,6 +41,8 @@ function genSash(sid: string, origin: string): string {
 }
 
 function sha1Digest(payload: string): string {
-  const hash = sha1(payload);
-  return hash;
+  const hash = crypto.createHash("sha1");
+  hash.update(payload);
+  // const hash = sha1(payload);
+  return hash.digest("hex");
 }

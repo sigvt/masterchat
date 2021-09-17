@@ -1,8 +1,8 @@
-import { normalizeVideoId } from "./utils";
+import { toVideoId } from "./utils";
 
-it("normalizeVideoId", () => {
+it("toVideoId", () => {
   expect(
-    normalizeVideoId(
+    toVideoId(
       "https://www.youtube.com/watch?list=PLziarN-vZTxELklDgc_y0q-ynm3DHylaS&v=nya_a4ysYso"
     )
   ).toBe("nya_a4ysYso");
