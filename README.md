@@ -13,7 +13,7 @@
 npm i masterchat
 ```
 
-See [MANUAL](https://github.com/holodata/masterchat/tree/master/USAGE.md) for usage.
+See [MANUAL](https://github.com/holodata/masterchat/tree/master/MANUAL.md) for usage.
 
 ## CLI
 
