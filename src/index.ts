@@ -9,14 +9,15 @@ import { MessageService } from "./services/message";
 import { toVideoId } from "./utils";
 
 export { MasterchatAgent, MasterchatAgentMetadata } from "./agent/agent";
+export { MasterchatManager } from "./agent/manager";
 export { Credentials } from "./auth";
 export * from "./error";
-export { MasterchatManager } from "./agent/manager";
+export * as protobuf from "./protobuf";
 export * from "./services/chat/types";
 export * from "./services/chatAction/types";
 export * from "./services/context/types";
 export * from "./services/message/types";
-export { toVideoId, runsToString, timeoutThen } from "./utils";
+export { runsToString, timeoutThen, toVideoId } from "./utils";
 export {
   YTChatError,
   YTChatErrorStatus,

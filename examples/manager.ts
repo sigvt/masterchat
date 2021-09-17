@@ -1,5 +1,5 @@
 import fetch from "cross-fetch";
-import { MasterchatManager } from "masterchat";
+import { MasterchatManager, runsToString } from "masterchat";
 
 async function getStreams() {
   const res = await fetch(
@@ -18,7 +18,7 @@ async function main() {
       "received",
       chats.length,
       "chats",
-      chats[0]?.rawMessage
+      chats[0] ? runsToString(chats[0].rawMessage) : ""
     )
   );
   manager.on("end", ({ videoId }, reason) =>

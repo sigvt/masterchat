@@ -1,6 +1,6 @@
 #!/usr/bin/env/node
 
-import { Masterchat, runsToString } from "masterchat";
+import { AddBannerAction, Masterchat, runsToString } from "masterchat";
 
 function log(...obj: any) {
   console.log(...obj);

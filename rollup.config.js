@@ -8,14 +8,20 @@ export default [
     output: [
       {
         file: "./lib/masterchat.js",
+        sourcemap: true,
         format: "cjs",
       },
       {
         file: "./lib/masterchat.mjs",
+        sourcemap: true,
         format: "es",
       },
     ],
-    plugins: [typescript({ tsconfig: "./tsconfig.build.json" })],
+    plugins: [
+      typescript({
+        tsconfig: "./tsconfig.build.json",
+      }),
+    ],
     external: ["crypto", "cross-fetch", "debug", "events"],
   },
   {

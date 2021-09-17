@@ -1,14 +1,13 @@
 #!/usr/bin/env/node
 
-import { b64d, B64Type } from "masterchat/lib/protobuf/b64";
-import { parse } from "masterchat/lib/protobuf/parser";
-import { pprintPbValue } from "masterchat/lib/protobuf/util";
+import { protobuf } from "masterchat";
+import { B64Type } from "masterchat/lib/protobuf";
 
 function main(input: string, type: string = B64Type.B2) {
-  const buf = b64d(input, type as B64Type);
-  const pl = parse(buf);
+  const buf = protobuf.b64d(input, type as B64Type);
+  const pl = protobuf.parse(buf);
   console.log(pl);
-  pprintPbValue(pl);
+  protobuf.pprintPbValue(pl);
 }
 
 if (process.argv.length < 3) {
