@@ -1,6 +1,8 @@
 import typescript from "rollup-plugin-typescript2";
 import dts from "rollup-plugin-dts";
-// import { nodeResolve } from "@rollup/plugin-node-resolve";
+import { terser } from "rollup-plugin-terser";
+
+const isProd = process.env.NODE_ENV === "production";
 
 export default [
   {
@@ -21,6 +23,7 @@ export default [
       typescript({
         tsconfig: "./tsconfig.build.json",
       }),
+      isProd && terser(),
     ],
     external: ["crypto", "cross-fetch", "debug", "events"],
   },
