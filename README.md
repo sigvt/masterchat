@@ -2,10 +2,10 @@
 
 [![npm](https://badgen.net/npm/v/masterchat)](https://npmjs.org/package/masterchat)
 [![npm: total downloads](https://badgen.net/npm/dt/masterchat)](https://npmjs.org/package/masterchat)
+[![npm: publish size](https://badgen.net/packagephobia/publish/masterchat)](https://npmjs.org/package/masterchat)
+[![typedoc](https://badgen.net/badge/docs/typedoc/purple)](https://holodata.github.io/masterchat/)
 
-JavaScript library for YouTube Live Chat.
-
-- [Documentation](https://holodata.github.io/masterchat/classes/index.Masterchat.html)
+> Node.js library for YouTube Live Chat
 
 ## Install
 
