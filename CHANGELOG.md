@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.11.0
 
 - Masterchat Agent for handling events using EventEmitter
 - Masterchat Manager for processing multiple live streams
