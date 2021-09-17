@@ -172,7 +172,7 @@ For a desktop app, see [Komet](https://github.com/holodata/komet).
 - [x] Ability to send chat
 - [x] Moderation functionality
 
-## Projects use masterchat
+## masterchat in real world
 
 - [https://holodex.net](Holodex): for their TLDex backend
 - [https://github.com/holodata/honeybee](Honeybee): large-scale chat collection cluster
