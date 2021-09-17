@@ -1,11 +1,11 @@
-import fetch from "cross-fetch";
+import fetch from "node-fetch";
 import { MasterchatManager } from "masterchat";
 
 async function getStreams() {
   const res = await fetch(
     "https://holodex.net/api/v2/live?org=Hololive&max_upcoming_hours=0"
   );
-  const streams = (await res.json()) as any;
+  const streams = await res.json();
   return streams.slice(0, 3);
 }
 
