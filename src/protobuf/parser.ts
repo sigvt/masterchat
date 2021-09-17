@@ -1,8 +1,8 @@
-import debug from "debug";
+import { debuglog } from "util";
 import { ProtoBufReader } from "./reader";
 import { PBToken, PBType, PBValue } from "./token";
 
-const debugLog = debug("masterchat:pb");
+const debugLog = debuglog("masterchat:pb");
 
 export function parse(input: Buffer, depth: number = 0): PBValue {
   function logger(...obj: any) {

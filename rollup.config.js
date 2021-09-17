@@ -25,7 +25,7 @@ export default [
       }),
       isProd && terser(),
     ],
-    external: ["crypto", "cross-fetch", "debug", "events"],
+    external: ["crypto", "cross-fetch", "events", "util"],
   },
   {
     input: "./lib/index.d.ts",
@@ -34,6 +34,6 @@ export default [
       format: "es",
     },
     plugins: [dts()],
-    external: ["events"],
+    external: ["events", "util"],
   },
 ];

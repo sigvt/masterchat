@@ -1,4 +1,4 @@
-import debug from "debug";
+import { debuglog } from "util";
 import { DC } from "./constants";
 import { YTEmoji, YTRun } from "./yt/chat";
 
@@ -10,7 +10,7 @@ export interface RunsToStringOptions {
   emojiHandler?: (emoji: YTEmoji) => string;
 }
 
-export const debugLog = debug("masterchat");
+export const debugLog = debuglog("masterchat");
 
 export function toVideoId(idOrUrl: string) {
   const match = /(?:[&=/]|^)([A-Za-z0-9_-]{11})(?=(?:[^A-Za-z0-9_-]|$))/.exec(
