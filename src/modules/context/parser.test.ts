@@ -1,7 +1,7 @@
 import fetch from "cross-fetch";
 import { setupRecorder } from "nock-record";
 import { buildAuthHeaders } from "../../auth";
-import { DEFAULT_HEADERS } from "../../constants";
+import { DH } from "../../constants";
 import { findCfg, findInitialData } from "./parser";
 
 const id = process.env.MC_MSG_TEST_ID;
@@ -26,7 +26,7 @@ describeif("watch", () => {
     const { completeRecording } = await record("watch");
     const res = await fetch("https://www.youtube.com", {
       headers: {
-        ...DEFAULT_HEADERS,
+        ...DH,
         ...buildAuthHeaders(credentials),
       },
     });

@@ -10,12 +10,12 @@ export default [
     output: [
       {
         file: "./lib/masterchat.js",
-        sourcemap: true,
+        sourcemap: false,
         format: "cjs",
       },
       {
         file: "./lib/masterchat.mjs",
-        sourcemap: true,
+        sourcemap: false,
         format: "es",
       },
     ],
@@ -23,9 +23,9 @@ export default [
       typescript({
         tsconfig: "./tsconfig.build.json",
       }),
-      isProd && terser(),
+      isProd && terser({ keep_classnames: true }),
     ],
-    external: ["crypto", "cross-fetch", "events", "util"],
+    external: ["crypto", "cross-fetch", "events", "util", "buffer", "debug"],
   },
   {
     input: "./lib/index.d.ts",

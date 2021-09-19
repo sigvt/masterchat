@@ -1,5 +1,16 @@
-import { YTContinuationContents } from "../../yt/chat";
+import { YTAction, YTContinuationContents } from "../../yt/chat";
 import { Color, OmitTrackingParams, TimedContinuation } from "./types";
+
+export function unwrapReplayActions(rawActions: YTAction[]) {
+  return rawActions.map(
+    // TODO: verify that an action always holds a single item.
+    (action): YTAction => {
+      const replayAction = Object.values(omitTrackingParams(action))[0] as any;
+
+      return replayAction.actions[0];
+    }
+  );
+}
 
 export function parseColorCode(code: number): Color | undefined {
   if (code > 4294967295) {

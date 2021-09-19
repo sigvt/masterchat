@@ -1,10 +1,11 @@
-import { debuglog } from "util";
+import { Buffer } from "buffer";
+import debug from "debug";
 import { ProtoBufReader } from "./reader";
 import { PBToken, PBType, PBValue } from "./token";
 
-const debugLog = debuglog("masterchat:pb");
+const debugLog = debug("masterchat:pb");
 
-export function parse(input: Buffer, depth: number = 0): PBValue {
+export function parsePb(input: Buffer, depth: number = 0): PBValue {
   function logger(...obj: any) {
     debugLog(depth + "".padEnd(depth * 2, " "), obj.join(" "));
   }
@@ -40,7 +41,7 @@ export function parse(input: Buffer, depth: number = 0): PBValue {
             logger("!empty");
             pbr.rewind();
           } else {
-            const v = parse(inner, depth + 1);
+            const v = parsePb(inner, depth + 1);
             tokens.push({ fid, type: PBType.LD, v });
             break;
           }

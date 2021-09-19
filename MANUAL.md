@@ -10,19 +10,29 @@
 import { Masterchat, runsToString } from "masterchat";
 
 async function main() {
-  try {
-    const client = await Masterchat.init("<videoId>");
+  const mc = await Masterchat.init("<videoId>");
 
-    for await (const { actions } of client.iterate()) {
-      const chats = actions.filter(
-        (action) => action.type === "addChatItemAction"
-      );
-
-      for (const chat of chats) {
-        console.log(chat.authorName, runsToString(chat.rawMessage));
-      }
+  // listen for chats
+  mc.on("chats", (chats) => {
+    for (const chat of chats) {
+      console.log(chat.authorName, runsToString(chat.rawMessage));
     }
-  } catch (err) {
+  });
+
+  // listen for every event
+  mc.on("actions", (actions) => {
+    const chats = actions.filter(
+      (action) => action.type === "addChatItemAction"
+    );
+    const superchats = actions.filter(
+      (action) => action.type === "addSuperChatItemAction"
+    );
+    const placeholderEvents = actions.filter(
+      (action) => action.type === "AddPlaceholderItemAction"
+    );
+  });
+
+  mc.on("error", (err) => {
     console.log(err.code);
     // "disabled" => Live chat is disabled
     // "membersOnly" => No permission (members-only)
@@ -32,7 +42,13 @@ async function main() {
     // "denied" => Access denied
     // "invalid" => Invalid request
     // "unknown" => Unknown error
+  });
+
+  mc.on("end", () => {
+    console.log("Live stream has ended");
   }
+
+  mc.listen();
 }
 
 main();
@@ -45,25 +61,21 @@ import { Masterchat, convertRunsToString } from "masterchat";
 import { appendFile, writeFile, readFile } from "fs/promises";
 
 async function main() {
-  const client = await Masterchat.init("<videoId>");
+  const mc = await Masterchat.init("<videoId>");
 
   const lastContinuation = await readFile("./checkpoint").catch(
     () => undefined
   );
 
-  for await (const { actions, continuation } of client.iterate({
-    continuation: lastContinuation,
-  })) {
-    const chats = actions.filter(
-      (action) => action.type === "addChatItemAction"
-    );
-
+  mc.on("chats", async (chats) => {
     const jsonl = chats.map((chat) => JSON.stringify(chat)).join("\n");
     await appendFile("./chats.jsonl", jsonl + "\n");
 
     // save checkpoint
     await writeFile("./checkpoint", continuation.token);
-  }
+  });
+
+  await mc.listen({ continuation: lastContinuation });
 }
 
 main();
@@ -85,19 +97,21 @@ async function main() {
     SSID: "<value>",
   };
 
-  const client = await Masterchat.init("<videoId>", { credentials });
+  const mc = await Masterchat.init("<videoId>", { credentials });
 
-  for await (const { actions } of client.iterate({
-    ignoreFirstResponse: true,
-  })) {
-    for (const action of actions) {
-      if (action.type !== "addChatItemAction") continue;
+  mc.on("chats", async (chats) => {
+    for (const chat of chats) {
+      const message = runsToString(chat.rawMessage, {
+        emojiHandler: (emoji) => "",
+      });
 
-      if (isSpam(runsToString(action.rawMessage))) {
-        await client.remove(action.id);
+      if (isSpam(message)) {
+        await mc.remove(action.id);
       }
     }
-  }
+  });
+
+  mc.listen();
 }
 
 main();
@@ -107,10 +121,10 @@ main();
 
 ### Faster instantiation
 
-To skip loading watch page, use `new Masterchat(videoId: string, channelId: string, { isLive?: boolean })`:
+To skip loading watch page, use `new Masterchat(videoId: string, channelId: string, { mode?: "live" | "replay" })`:
 
 ```js
-const live = new Masterchat(videoId, channelId, { isLive: true });
+const live = new Masterchat(videoId, channelId, { mode: "live" });
 ```
 
 instead of:
@@ -119,7 +133,7 @@ instead of:
 const live = await Masterchat.init(videoId);
 ```
 
-The former won't populate metadata. If you need metadata, call:
+The former won't fetch metadata. If you need metadata, call:
 
 ```js
 await live.populateMetadata(); // will scrape metadata from watch page
@@ -137,15 +151,15 @@ npm start
 
 ## Stream type
 
-| type                                            | isLive (auto) | auto                     | direct (isLive: true)  | direct (isLive: false) |
-| ----------------------------------------------- | ------------- | ------------------------ | ---------------------- | ---------------------- |
-| live/pre stream                                 | `true`        | **OK**                   | **OK**                 | `DisabledChatError`    |
-| pre stream but chat disabled                    | `true`        | `DisabledChatError`      | `DisabledChatError`    | `DisabledChatError`    |
-| archived stream                                 | `false`       | **OK**                   | `DisabledChatError`    | **OK**                 |
-| archived stream but replay chat being processed | `false`       | `DisabledChatError`      | `DisabledChatError`    | `DisabledChatError`    |
-| members-only live stream                        | N/A           | `MembersOnlyError`       | `DisabledChatError`    | `MembersOnlyError`     |
-| members-only archived stream                    | N/A           | `MembersOnlyError`       | `DisabledChatError`    | **OK**                 |
-| unarchived stream                               | N/A           | `NoStreamRecordingError` | `DisabledChatError`    | `DisabledChatError`    |
-| privated stream                                 | N/A           | `NoPermissionError`      | `NoPermissionError`    | `NoPermissionError`    |
-| deleted stream                                  | N/A           | `UnavailableError`       | `UnavailableError`     | `UnavailableError`     |
-| invalid video/channel id                        | N/A           | `InvalidArgumentError`   | `InvalidArgumentError` | `InvalidArgumentError` |
+| type                                            | metadata.isLive | Masterchat.init()            | mode: undefined        | mode: "live"           | mode: "replay"         |
+| ----------------------------------------------- | --------------- | ---------------------------- | ---------------------- | ---------------------- | ---------------------- |
+| live/pre stream                                 | `true`          | OK                           | OK                     | OK                     | `DisabledChatError`    |
+| pre stream but chat disabled                    | `true`          | `DisabledChatError`          | `DisabledChatError`    | `DisabledChatError`    | `DisabledChatError`    |
+| archived stream                                 | `false`         | OK                           | OK                     | `DisabledChatError`    | OK                     |
+| archived stream but replay chat being processed | `false`         | `DisabledChatError`          | `DisabledChatError`    | `DisabledChatError`    | `DisabledChatError`    |
+| members-only live stream                        | N/A             | `MembersOnlyError`           | `DisabledChatError`    | `MembersOnlyError`     | `DisabledChatError`    |
+| members-only archived stream                    | N/A             | `MembersOnlyError`           | **OK**                 | `DisabledChatError`    | **OK**                 |
+| unarchived stream                               | N/A             | **`NoStreamRecordingError`** | `DisabledChatError`    | `DisabledChatError`    | `DisabledChatError`    |
+| privated stream                                 | N/A             | `NoPermissionError`          | `NoPermissionError`    | `NoPermissionError`    | `NoPermissionError`    |
+| deleted stream                                  | N/A             | `UnavailableError`           | `UnavailableError`     | `UnavailableError`     | `UnavailableError`     |
+| invalid video/channel id                        | N/A             | `InvalidArgumentError`       | `InvalidArgumentError` | `InvalidArgumentError` | `InvalidArgumentError` |

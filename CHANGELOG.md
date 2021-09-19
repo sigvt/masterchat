@@ -1,17 +1,65 @@
 # Changelog
 
+## Unreleased
+
+- BREAKING: Merged `MasterchatAgent` into `Masterchat`
+  - Use `on` and `listen`. `iterate` and `fetch` are still available for advanced users
+- BREAKING: `new Masterchat(..., {isLive?: boolean})` -> `new Masterchat(..., {mode?: "live" | "replay"})`
+- Added type definition for `once`
+- New `metadata` property
+- BREAKING: Renamed `MasterchatManager` -> `StreamPool`
+- BREAKING: In `StreamPool` event callback, `(metadata: Metadata, ...) => {}` -> `(..., mc: Masterchat) => {}`
+  - i.e. `on("actions", ({ videoId }, actions) => {})` -> `on("actions", (actions, { videoId }) => {})`
+  - e.g. `on("data", (data, mc) => { if (...) { mc.stop() } })`
+
+before:
+
+```js
+const mc = new Masterchat(videoId, ...)
+
+try {
+  for await (const { actions } of mc.iterate()) {
+    const chats = actions.filter(action => action.type === "addChatItemAction")
+    ...
+    if (youWant) break;
+  }
+} catch(err) {
+  ...
+}
+```
+
+now:
+
+```js
+const mc = new Masterchat(videoId, ...)
+  .on("chats", chats => {
+    ...
+    if (youWant) mc.stop();
+  })
+  .on("error", err => {
+    ...
+  })
+
+mc.listen()
+```
+
+### utils
+
+- BREAKING: `emojiHandler` in `runsToString` now takes `YTEmojiRun` instead of `YTEmoji`
+- Added `textHandler` option to `runsToString`
+
 ## v0.11.0
 
 - Masterchat Agent for handling events using EventEmitter
 - Masterchat Manager for processing multiple live streams
-- required Node.js version is now v16.6.0 or higher
-- re-export more yt types
+- Required Node.js version is now v16.6.0 or higher
+- Re-export more yt types
 
 ### utils
 
 - Renamed `normalizedVideoId` -> `toVideoId`
   - `toVideoId` will returns `undefined` when the given string doesn't contains any valid id pattern
-- fix format issue in default emoji handler of `runsToString`
+- Fix format issue in default emoji handler of `runsToString`
 
 ## v0.10.0
 

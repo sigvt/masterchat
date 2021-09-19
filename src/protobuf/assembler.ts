@@ -1,3 +1,4 @@
+import { Buffer } from "buffer";
 import { b64d, b64e, B64Type } from "./b64";
 import { bitob, cc } from "./util";
 

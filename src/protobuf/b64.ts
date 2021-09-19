@@ -1,3 +1,5 @@
+import { Buffer } from "buffer";
+
 export enum B64Type {
   B1 = "b1",
   B2 = "b2",

@@ -324,17 +324,7 @@ export interface YTOnCreateListCommandCommandMetadata {
 
 export interface StickyWebCommandMetadata {
   sendPost: boolean;
-  apiUrl?: YTAPIURL;
-}
-
-export enum YTAPIURL {
-  YoutubeiV1AccountAccountMenu = "/youtubei/v1/account/account_menu",
-  YoutubeiV1BrowseEditPlaylist = "/youtubei/v1/browse/edit_playlist",
-  YoutubeiV1Feedback = "/youtubei/v1/feedback",
-  YoutubeiV1Next = "/youtubei/v1/next",
-  YoutubeiV1PlaylistCreate = "/youtubei/v1/playlist/create",
-  YoutubeiV1ShareGetSharePanel = "/youtubei/v1/share/get_share_panel",
-  YoutubeiV1UpdatedMetadata = "/youtubei/v1/updated_metadata",
+  apiUrl?: string;
 }
 
 export interface YTCreatePlaylistServiceEndpoint {

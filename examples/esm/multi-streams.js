@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import { MasterchatManager } from "masterchat";
+import { StreamPool } from "masterchat";
 
 async function getStreams() {
   const res = await fetch(
@@ -10,9 +10,9 @@ async function getStreams() {
 }
 
 async function main() {
-  const manager = new MasterchatManager({ isLive: true });
+  const streams = new StreamPool({ isLive: true });
 
-  manager.on("chats", ({ videoId }, chats) =>
+  streams.on("chats", (chats, { videoId }) =>
     console.log(
       videoId,
       "received",
@@ -21,18 +21,16 @@ async function main() {
       chats[0]?.rawMessage
     )
   );
-  manager.on("end", ({ videoId }, reason) =>
-    console.log(videoId, "ended", reason)
-  );
-  manager.on("error", ({ videoId }, err) =>
+  streams.on("end", ({ videoId }) => console.log(videoId, "ended"));
+  streams.on("error", (err, { videoId }) =>
     console.error(videoId, err.message)
   );
 
   for (const stream of await getStreams()) {
-    manager.subscribe(stream.id, stream.channel.id);
+    streams.subscribe(stream.id, stream.channel.id);
   }
 
-  manager.ensure();
+  streams.ensure();
 }
 
 main();

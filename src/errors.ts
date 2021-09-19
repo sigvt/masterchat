@@ -68,4 +68,4 @@ export class InvalidArgumentError extends MasterchatError {
   }
 }
 
-export class MasterchatAbortError extends Error {}
+export class AbortError extends Error {}

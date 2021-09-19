@@ -1,12 +1,11 @@
 .vscode
 .envrc
-package-lock.json
-yarn.lock
 *.jsonl
 *.schema.json
 .venv
 TODO.md
 res.json
+/*/**/yarn.lock
 
 /lib
 __nock-fixtures__

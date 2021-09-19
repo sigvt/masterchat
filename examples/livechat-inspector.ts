@@ -1,6 +1,6 @@
 #!/usr/bin/env/node
 
-import { AddBannerAction, Masterchat, runsToString } from "masterchat";
+import { Masterchat, runsToString } from "masterchat";
 
 function log(...obj: any) {
   console.log(...obj);
@@ -8,17 +8,16 @@ function log(...obj: any) {
 
 async function main({
   videoIdOrUrl,
-  useCredentials = false,
 }: {
   videoIdOrUrl: string;
   useCredentials?: boolean;
 }) {
   const mc = await Masterchat.init(videoIdOrUrl, {
-    credentials: useCredentials ? credentials : undefined,
+    credentials,
   });
 
-  for await (const res of mc.iterate()) {
-    const { actions, continuation } = res;
+  mc.on("data", (data) => {
+    const { actions, continuation } = data;
     log("token", continuation?.token);
     log("timeoutMs", continuation?.timeoutMs);
     log(
@@ -27,7 +26,7 @@ async function main({
       "next",
       continuation?.timeoutMs && new Date(Date.now() + continuation.timeoutMs)
     );
-    log("actions", actions.length, res.error);
+    log("actions", actions.length);
     for (const action of actions) {
       switch (action.type) {
         case "addBannerAction": {
@@ -58,7 +57,12 @@ async function main({
         }
       }
     }
-  }
+  });
+
+  mc.on("error", (err) => console.log("ERROR", err));
+  mc.on("end", () => console.log("END"));
+
+  mc.listen();
 }
 
 const videoIdOrUrl = process.argv[2] || process.env.MC_MSG_TEST_ID;

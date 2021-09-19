@@ -1,4 +1,4 @@
-export { b64e, b64d } from "./b64";
-export { parse } from "./parser";
+export { b64e, b64d, B64Type } from "./b64";
+export { parsePb } from "./parser";
 export * from "./util";
 export * from "./assembler";

@@ -1,6 +1,6 @@
 // import sha1 from "sha1";
 import crypto from "crypto";
-import { DEFAULT_ORIGIN, SASH, XGAU, XGPID, XO } from "./constants";
+import { DO, SASH, XGAU, XGPID, XO } from "./constants";
 
 export interface Credentials {
   SAPISID: string;
@@ -11,15 +11,13 @@ export interface Credentials {
   SESSION_ID?: string;
 }
 
-export function buildAuthHeaders(creds: Credentials | undefined) {
-  if (!creds) return undefined;
-
+export function buildAuthHeaders(creds: Credentials): Record<string, string> {
   return {
     Cookie: genCookieString(creds),
-    Authorization: genAuthToken(creds.SAPISID, DEFAULT_ORIGIN),
-    [XO]: DEFAULT_ORIGIN,
+    Authorization: genAuthToken(creds.SAPISID, DO),
+    [XO]: DO,
     [XGAU]: "0",
-    [XGPID]: creds.SESSION_ID,
+    ...(creds.SESSION_ID && { [XGPID]: creds.SESSION_ID }),
   };
 }
 

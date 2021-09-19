@@ -1,5 +1,5 @@
 import { setupRecorder } from "nock-record";
-import { AddChatItemAction, Masterchat, timeoutThen } from "../..";
+import { AddChatItemAction, Masterchat, delay } from "../../src";
 
 const id = process.env.MC_MSG_TEST_ID;
 const channelId = process.env.MC_MSG_TEST_CHANNEL_ID;
@@ -95,7 +95,7 @@ describe("moderation (delete)", () => {
 
   describe("check message", () => {
     itif("receive message", async () => {
-      if (mode === "record") await timeoutThen(3000);
+      if (mode === "record") await delay(3000);
 
       const res = await me.fetch();
       const chat = res.actions.find(

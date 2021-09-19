@@ -1,3 +1,5 @@
+import { Buffer } from "buffer";
+
 export class ProtoBufReader {
   buf: Buffer;
   c: number;

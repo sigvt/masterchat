@@ -4,7 +4,7 @@ import {
   NoPermissionError,
   NoStreamRecordingError,
   UnavailableError,
-} from "../../error";
+} from "../../errors";
 import { runsToString } from "../../utils";
 import { YTInitialData, YTPlayabilityStatus } from "../../yt/context";
 
@@ -65,6 +65,8 @@ export function findPlayabilityStatus(
   return (ipr as any)?.playabilityStatus;
 }
 // embed disabled https://www.youtube.com/embed/JfJYHfrOGgQ
+// unavailable video https://www.youtube.com/embed/YEAINgb2xfo
+// private video https://www.youtube.com/embed/UUjdYGda4N4
 // 200 OK
 
 export async function parseMetadataFromEmbed(html: string) {

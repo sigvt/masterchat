@@ -1,7 +1,9 @@
-import { debuglog } from "util";
-import { DC } from "./constants";
+import crossFetch from "cross-fetch";
+import debug from "debug";
+import { DC, DH, DO } from "./constants";
+import { AbortError } from "./errors";
 import {
-  YTEmoji,
+  YTEmojiRun,
   YTRun,
   YTTextRun,
   YTUrlEndpointContainer,
@@ -9,16 +11,35 @@ import {
 } from "./yt/chat";
 import { FluffyBrowseEndpoint, YTBrowseEndpointContainer } from "./yt/context";
 
+export function ytFetch(input: string, init?: RequestInit) {
+  if (!input.startsWith("http")) {
+    input = DO + input;
+  }
+  const parsedUrl = new URL(input);
+
+  const requestUrl = parsedUrl.toString();
+  const requestInit = {
+    ...init,
+    headers: {
+      ...DH,
+      ...init?.headers,
+    },
+  };
+  return crossFetch(requestUrl, requestInit);
+}
+
 export interface RunsToStringOptions {
   // add space between text and emoji tokens
   spaces?: boolean;
 
+  // function to process text token
+  textHandler?: (text: YTTextRun) => string;
+
   // function to process emoji token
-  emojiHandler?: (emoji: YTEmoji) => string;
-  urlHandler?: (text: string, url: string) => string;
+  emojiHandler?: (emoji: YTEmojiRun) => string;
 }
 
-export const debugLog = debuglog("masterchat");
+export const debugLog = debug("masterchat");
 
 export function toVideoId(idOrUrl: string) {
   const match = /(?:[&=/]|^)([A-Za-z0-9_-]{11})(?=(?:[^A-Za-z0-9_-]|$))/.exec(
@@ -27,56 +48,35 @@ export function toVideoId(idOrUrl: string) {
   return match?.[1];
 }
 
-export function removeYoutubeRedirection(url: string) {
+function stripYtRedirection(url: string): string {
   if (!url.startsWith("https://www.youtube.com/redirect?")) {
     return url;
   }
-  const a = url.substr(url.indexOf("?") + 1).split("&");
-  const queryParams: Record<string, string> = {};
-  for (let i = 0; i < a.length; i++) {
-    const p = a[i].split("=");
-    queryParams[p[0]] = decodeURIComponent(p[1].replace(/\+/g, " "));
-  }
-  return queryParams.q || url;
-}
-
-export function fixYoutubeUrl(url: string) {
-  const match =
-    /^([A-Za-z]{3,9}:)?(\/\/)?((?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)?((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?$/
-      .exec(url)
-      ?.slice(1);
-  if (match) {
-    match[0] ??= "https:";
-    match[1] ??= "//";
-    match[2] ??= "www.youtube.com";
-    url = match.join("");
-  }
-  return removeYoutubeRedirection(url);
+  const target = new URL(url);
+  const q = target.searchParams.get("q");
+  return q ? q : target.href;
 }
 
 export function endpointToUrl(
-  navigationEndpoint: YTTextRun["navigationEndpoint"]
+  navigationEndpoint: Exclude<YTTextRun["navigationEndpoint"], undefined>
 ): string {
-  if (!navigationEndpoint) return "";
-  if ("commandMetadata" in navigationEndpoint) {
-    const url = (navigationEndpoint as YTUrlEndpointContainer).commandMetadata
-      ?.webCommandMetadata?.url;
-    if (url) return fixYoutubeUrl(url);
-  }
   if ("watchEndpoint" in navigationEndpoint) {
-    const watchEndpoint = (navigationEndpoint as YTWatchEndpointContainer)
-      .watchEndpoint;
-    let url = `/watch?v=${watchEndpoint.videoId}`;
+    const { watchEndpoint } = navigationEndpoint;
+    let url = DO + `/watch?v=${watchEndpoint.videoId}`;
     if (watchEndpoint.playlistId) url += "&list=" + watchEndpoint.playlistId;
     if (watchEndpoint.index) url += "&index=" + watchEndpoint.index;
     if (watchEndpoint.startTimeSeconds)
       url += "&t=" + watchEndpoint.startTimeSeconds;
-    return fixYoutubeUrl(url);
+    return stripYtRedirection(url);
   }
+
+  if ("urlEndpoint" in navigationEndpoint) {
+    return stripYtRedirection(navigationEndpoint.urlEndpoint.url);
+  }
+
   if ("browseEndpoint" in navigationEndpoint) {
-    const browseEndpoint = (navigationEndpoint as YTBrowseEndpointContainer)
-      .browseEndpoint;
-    const browseId = browseEndpoint.browseId;
+    const { browseEndpoint } = navigationEndpoint;
+    const { browseId } = browseEndpoint;
     let url = "";
     if ("canonicalBaseUrl" in browseEndpoint) {
       url = (browseEndpoint as FluffyBrowseEndpoint).canonicalBaseUrl;
@@ -92,17 +92,19 @@ export function endpointToUrl(
         url = "/channel/" + browseId;
       }
     }
-    if (url) return fixYoutubeUrl(url);
+    stripYtRedirection(url);
   }
-  if ("urlEndpoint" in navigationEndpoint) {
-    return fixYoutubeUrl(
-      (navigationEndpoint as YTUrlEndpointContainer).urlEndpoint.url
-    );
-  }
+
   return "";
 }
 
-export function simpleEmojiHandler(emoji: YTEmoji) {
+export function textRunToPlainText(run: YTTextRun): string {
+  if (run.navigationEndpoint) endpointToUrl(run.navigationEndpoint);
+  return run.text;
+}
+
+export function emojiRunToPlainText(run: YTEmojiRun): string {
+  const emoji = run.emoji;
   const term = emoji.isCustomEmoji
     ? emoji.shortcuts[emoji.shortcuts.length - 1]
     : emoji.emojiId;
@@ -110,35 +112,42 @@ export function simpleEmojiHandler(emoji: YTEmoji) {
   return term;
 }
 
-export function simpleUrlHandler(text: string, url: string) {
-  return text;
-}
-
 export function runsToString(
   runs: YTRun[],
   {
     spaces = false,
-    emojiHandler = simpleEmojiHandler,
-    urlHandler = simpleUrlHandler,
+    textHandler = textRunToPlainText,
+    emojiHandler = emojiRunToPlainText,
   }: RunsToStringOptions = {}
 ): string {
   return runs
     .map((run) => {
-      if ("text" in run) {
-        if ("navigationEndpoint" in run) {
-          const url = endpointToUrl(run.navigationEndpoint);
-          if (url) return urlHandler(run.text, url);
-        }
-        return run.text;
-      }
-      if ("emoji" in run) return emojiHandler(run.emoji);
+      if ("text" in run) return textHandler(run);
+      if ("emoji" in run) return emojiHandler(run);
       throw new Error(`Unrecognized run token: ${JSON.stringify(run)}`);
     })
     .join(spaces ? " " : "");
 }
 
-export function timeoutThen(duration: number): Promise<number> {
-  return new Promise((resolve) => setTimeout(resolve, duration));
+export function delay(duration: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject): void => {
+    if (signal?.aborted) {
+      reject(new AbortError());
+      return;
+    }
+
+    const onAbort = () => {
+      clearTimeout(timer);
+      reject(new AbortError());
+    };
+
+    const timer = setTimeout(() => {
+      signal?.removeEventListener("abort", onAbort);
+      resolve();
+    }, duration);
+
+    signal?.addEventListener("abort", onAbort);
+  });
 }
 
 export function guessFreeChat(title: string) {

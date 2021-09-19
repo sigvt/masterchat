@@ -14,7 +14,7 @@ npm run dev
 ```
 
 ```bash
-NODE_DEBUG=masterchat ./lib/cli.js -c -t all <videoId>
+DEBUG=masterchat ./lib/cli.js -c -t all <videoId>
 ```
 
 ## Testing

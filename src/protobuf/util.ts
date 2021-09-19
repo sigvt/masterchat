@@ -1,3 +1,4 @@
+import { Buffer } from "buffer";
 import { PBToken, PBType, PBValue } from "./token";
 
 function mapType(type: PBType) {
