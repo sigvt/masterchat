@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "cross-fetch": "^3.1.4",
-    "masterchat": "^0.11.0"
+    "masterchat": "link:.."
   },
   "devDependencies": {
     "ts-node": "^10.2.1",

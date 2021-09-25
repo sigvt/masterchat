@@ -3,6 +3,7 @@
 ## Setup
 
 ```bash
+git checkout dev
 npm install
 npm run build
 ```
@@ -14,7 +15,13 @@ npm run dev
 ```
 
 ```bash
-DEBUG=masterchat ./lib/cli.js -c -t all <videoId>
+npm run build
+yarn link
+
+cd examples/
+yarn install
+yarn link masterchat
+DEBUG=masterchat node -r ts-node/register ./livechat-inspector.ts <videoId>
 ```
 
 ## Testing

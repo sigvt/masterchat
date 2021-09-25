@@ -52,21 +52,26 @@ function stripYtRedirection(url: string): string {
   if (!url.startsWith("https://www.youtube.com/redirect?")) {
     return url;
   }
+
   const target = new URL(url);
   const q = target.searchParams.get("q");
+
   return q ? q : target.href;
 }
 
 export function endpointToUrl(
-  navigationEndpoint: Exclude<YTTextRun["navigationEndpoint"], undefined>
+  navigationEndpoint: NonNullable<YTTextRun["navigationEndpoint"]>
 ): string {
   if ("watchEndpoint" in navigationEndpoint) {
     const { watchEndpoint } = navigationEndpoint;
+
     let url = DO + `/watch?v=${watchEndpoint.videoId}`;
+
     if (watchEndpoint.playlistId) url += "&list=" + watchEndpoint.playlistId;
     if (watchEndpoint.index) url += "&index=" + watchEndpoint.index;
     if (watchEndpoint.startTimeSeconds)
       url += "&t=" + watchEndpoint.startTimeSeconds;
+
     return stripYtRedirection(url);
   }
 
@@ -77,11 +82,13 @@ export function endpointToUrl(
   if ("browseEndpoint" in navigationEndpoint) {
     const { browseEndpoint } = navigationEndpoint;
     const { browseId } = browseEndpoint;
+
     let url = "";
     if ("canonicalBaseUrl" in browseEndpoint) {
       url = (browseEndpoint as FluffyBrowseEndpoint).canonicalBaseUrl;
     } else if (browseId) {
       const prefix = browseId.substr(0, 2);
+
       if (prefix === "FE") {
         if (browseId === "FEwhat_to_watch") url = "/";
         else if (browseId === "FEmy_videos") url = "/my_videos";
@@ -92,7 +99,7 @@ export function endpointToUrl(
         url = "/channel/" + browseId;
       }
     }
-    stripYtRedirection(url);
+    return stripYtRedirection(url);
   }
 
   return "";
@@ -104,7 +111,7 @@ export function textRunToPlainText(run: YTTextRun): string {
 }
 
 export function emojiRunToPlainText(run: YTEmojiRun): string {
-  const emoji = run.emoji;
+  const { emoji } = run;
   const term = emoji.isCustomEmoji
     ? emoji.shortcuts[emoji.shortcuts.length - 1]
     : emoji.emojiId;
