@@ -106,7 +106,7 @@ export function endpointToUrl(
 }
 
 export function textRunToPlainText(run: YTTextRun): string {
-  if (run.navigationEndpoint) endpointToUrl(run.navigationEndpoint);
+  if (run.navigationEndpoint) return endpointToUrl(run.navigationEndpoint);
   return run.text;
 }
 

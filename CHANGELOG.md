@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.12.0
 
 - BREAKING: Merged `MasterchatAgent` into `Masterchat`
   - Use `on` and `listen`. `iterate` and `fetch` are still available for advanced users
