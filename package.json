@@ -1,7 +1,7 @@
 {
   "name": "masterchat",
   "description": "JavaScript library for YouTube Live Chat",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "author": "Yasuaki Uechi <y@uechi.io> (https://uechi.io/)",
   "scripts": {
     "build": "cross-env NODE_ENV=production rollup -c",
