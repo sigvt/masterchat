@@ -60,8 +60,19 @@ function stripYtRedirection(url: string): string {
 }
 
 export function endpointToUrl(
-  navigationEndpoint: NonNullable<YTTextRun["navigationEndpoint"]>
-): string {
+  navigationEndpoint: NonNullable<YTTextRun["navigationEndpoint"]>,
+  {
+    expandAll = false,
+  }: {
+    expandAll?: boolean;
+  } = {}
+): string | undefined {
+  if ("urlEndpoint" in navigationEndpoint) {
+    return stripYtRedirection(navigationEndpoint.urlEndpoint.url);
+  }
+
+  if (!expandAll) return;
+
   if ("watchEndpoint" in navigationEndpoint) {
     const { watchEndpoint } = navigationEndpoint;
 
@@ -73,10 +84,6 @@ export function endpointToUrl(
       url += "&t=" + watchEndpoint.startTimeSeconds;
 
     return stripYtRedirection(url);
-  }
-
-  if ("urlEndpoint" in navigationEndpoint) {
-    return stripYtRedirection(navigationEndpoint.urlEndpoint.url);
   }
 
   if ("browseEndpoint" in navigationEndpoint) {
@@ -101,12 +108,14 @@ export function endpointToUrl(
     }
     return stripYtRedirection(url);
   }
-
-  return "";
 }
 
 export function textRunToPlainText(run: YTTextRun): string {
-  if (run.navigationEndpoint) return endpointToUrl(run.navigationEndpoint);
+  if (run.navigationEndpoint) {
+    return (
+      endpointToUrl(run.navigationEndpoint, { expandAll: false }) ?? run.text
+    );
+  }
   return run.text;
 }
 

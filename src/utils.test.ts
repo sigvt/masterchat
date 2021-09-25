@@ -26,7 +26,7 @@ it("textRunToPlainText", () => {
         },
       },
     })
-  ).toBe("https://www.youtube.com/watch?v=uyk91P1vWWA");
+  ).toBe("uyk91P1vWWA");
 
   expect(
     textRunToPlainText({
