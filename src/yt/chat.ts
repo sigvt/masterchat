@@ -20,7 +20,10 @@ export interface YTTextRun {
   text: string;
   bold?: boolean;
   italics?: boolean;
-  navigationEndpoint?: YTUrlEndpointContainer | YTBrowseEndpointContainer;
+  navigationEndpoint?:
+    | YTUrlEndpointContainer
+    | YTBrowseEndpointContainer
+    | YTWatchEndpointContainer;
 }
 
 export interface YTEmojiRun {
@@ -38,7 +41,7 @@ export interface YTEmoji {
 export interface YTUrlEndpointContainer {
   urlEndpoint: YTUrlEndpoint;
   commandMetadata: YTWebPageMetadataContainer;
-  clickTrackingParams: string;
+  clickTrackingParams?: string;
 }
 
 export interface YTUrlEndpoint {
@@ -436,7 +439,7 @@ export interface YTLiveChatPollRenderer {
   liveChatPollId: string;
   header: {
     pollHeaderRenderer: {
-      pollQuestion: YTSimpleText;
+      pollQuestion: YTRunContainer;
       thumbnail: YTThumbnailList;
       metadataText: YTRunContainer;
       liveChatPollType: YTLiveChatPollType;
@@ -452,10 +455,10 @@ export interface YTLiveChatActionPanelRenderer {
 }
 
 export interface YTLiveChatPollChoice {
-  text: YTSimpleText;
+  text: YTRunContainer;
   selected: boolean;
-  voteRatio: number; // 0.0 to 1.0
-  votePercentage: YTSimpleText; // 73%
+  voteRatio?: number; // 0.0 to 1.0
+  votePercentage?: YTSimpleText; // 73%
   signinEndpoint: YTSignInEndpointContainer;
 }
 
@@ -626,8 +629,8 @@ export interface YTSignInEndpointContainer {
 
 export interface YTWatchEndpointContainer {
   watchEndpoint: YTWatchEndpoint;
-  clickTrackingParams: string;
-  commandMetadata: YTIgnoreCommandMetadata;
+  commandMetadata: YTIgnoreCommandMetadata | YTWebPageMetadataContainer;
+  clickTrackingParams?: string;
 }
 
 export interface YTSignInEndpoint {
@@ -636,6 +639,10 @@ export interface YTSignInEndpoint {
 
 export interface YTWatchEndpoint {
   videoId: string;
+  playlistId?: string;
+  index?: string;
+  startTimeSeconds?: number;
+  nofollow?: boolean;
 }
 
 export interface YTIgnoreCommandMetadata {
