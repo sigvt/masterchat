@@ -2,14 +2,8 @@ import crossFetch from "cross-fetch";
 import debug from "debug";
 import { DC, DH, DO } from "./constants";
 import { AbortError } from "./errors";
-import {
-  YTEmojiRun,
-  YTRun,
-  YTTextRun,
-  YTUrlEndpointContainer,
-  YTWatchEndpointContainer,
-} from "./yt/chat";
-import { FluffyBrowseEndpoint, YTBrowseEndpointContainer } from "./yt/context";
+import { YTEmojiRun, YTRun, YTTextRun } from "./yt/chat";
+import { FluffyBrowseEndpoint } from "./yt/context";
 
 export function ytFetch(input: string, init?: RequestInit) {
   if (!input.startsWith("http")) {
@@ -60,18 +54,11 @@ function stripYtRedirection(url: string): string {
 }
 
 export function endpointToUrl(
-  navigationEndpoint: NonNullable<YTTextRun["navigationEndpoint"]>,
-  {
-    expandAll = false,
-  }: {
-    expandAll?: boolean;
-  } = {}
+  navigationEndpoint: NonNullable<YTTextRun["navigationEndpoint"]>
 ): string | undefined {
   if ("urlEndpoint" in navigationEndpoint) {
     return stripYtRedirection(navigationEndpoint.urlEndpoint.url);
   }
-
-  if (!expandAll) return;
 
   if ("watchEndpoint" in navigationEndpoint) {
     const { watchEndpoint } = navigationEndpoint;
@@ -111,10 +98,8 @@ export function endpointToUrl(
 }
 
 export function textRunToPlainText(run: YTTextRun): string {
-  if (run.navigationEndpoint) {
-    return (
-      endpointToUrl(run.navigationEndpoint, { expandAll: false }) ?? run.text
-    );
+  if (run.navigationEndpoint && "urlEndpoint" in run.navigationEndpoint) {
+    return stripYtRedirection(run.navigationEndpoint.urlEndpoint.url);
   }
   return run.text;
 }

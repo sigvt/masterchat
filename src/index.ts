@@ -53,7 +53,7 @@ export * from "./modules/chat";
 export * from "./modules/context";
 export { StreamPool } from "./pool";
 export * from "./protobuf";
-export { delay, runsToString, toVideoId } from "./utils";
+export { delay, runsToString, toVideoId, endpointToUrl } from "./utils";
 export * from "./yt";
 
 export interface Metadata {

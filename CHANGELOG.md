@@ -47,7 +47,7 @@ mc.listen()
 
 - BREAKING: `emojiHandler` in `runsToString` now takes `YTEmojiRun` instead of `YTEmoji`
 - Added `textHandler` option to `runsToString`
-- BREAKING: Expand urls inside chat message (Thanks @stu43005)
+- BREAKING: `runsToString` will expand truncated urls (Thanks @stu43005)
 
 ## v0.11.0
 
