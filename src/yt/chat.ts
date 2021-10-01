@@ -643,6 +643,7 @@ export interface YTWatchEndpoint {
   index?: string;
   startTimeSeconds?: number;
   nofollow?: boolean;
+  params?: string;
 }
 
 export interface YTIgnoreCommandMetadata {

@@ -70,19 +70,21 @@ export function endpointToUrl(
     if (watchEndpoint.startTimeSeconds)
       url += "&t=" + watchEndpoint.startTimeSeconds;
 
-    return stripYtRedirection(url);
+    return url;
   }
 
   if ("browseEndpoint" in navigationEndpoint) {
     const { browseEndpoint } = navigationEndpoint;
     const { browseId } = browseEndpoint;
 
-    let url = "";
     if ("canonicalBaseUrl" in browseEndpoint) {
-      url = (browseEndpoint as FluffyBrowseEndpoint).canonicalBaseUrl;
+      return stripYtRedirection(
+        (browseEndpoint as FluffyBrowseEndpoint).canonicalBaseUrl
+      );
     } else if (browseId) {
       const prefix = browseId.substr(0, 2);
 
+      let url = DO;
       if (prefix === "FE") {
         if (browseId === "FEwhat_to_watch") url = "/";
         else if (browseId === "FEmy_videos") url = "/my_videos";
@@ -92,16 +94,22 @@ export function endpointToUrl(
       } else {
         url = "/channel/" + browseId;
       }
+      return url;
     }
-    return stripYtRedirection(url);
   }
 }
 
 export function textRunToPlainText(run: YTTextRun): string {
-  if (run.navigationEndpoint && "urlEndpoint" in run.navigationEndpoint) {
-    return stripYtRedirection(run.navigationEndpoint.urlEndpoint.url);
+  const { text, navigationEndpoint } = run;
+  if (navigationEndpoint) {
+    if ("urlEndpoint" in navigationEndpoint) {
+      return endpointToUrl(navigationEndpoint) ?? text;
+    }
+    if ("watchEndpoint" in navigationEndpoint && text.startsWith("https://")) {
+      return endpointToUrl(navigationEndpoint) ?? text;
+    }
   }
-  return run.text;
+  return text;
 }
 
 export function emojiRunToPlainText(run: YTEmojiRun): string {
