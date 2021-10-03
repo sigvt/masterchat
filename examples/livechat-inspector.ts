@@ -1,9 +1,29 @@
 #!/usr/bin/env/node
 
-import { Masterchat, runsToString } from "masterchat";
+import { Masterchat, asString, SuperChat } from "masterchat";
+import chalk from "chalk";
 
 function log(...obj: any) {
   console.log(...obj);
+}
+
+function chalkSc(color: SuperChat["color"]) {
+  switch (color) {
+    case "blue":
+      return chalk.blue;
+    case "green":
+      return chalk.green;
+    case "lightblue":
+      return chalk.blueBright;
+    case "magenta":
+      return chalk.magenta;
+    case "orange":
+      return chalk.yellowBright;
+    case "red":
+      return chalk.red;
+    case "yellow":
+      return chalk.yellow;
+  }
 }
 
 async function main({ videoIdOrUrl }: { videoIdOrUrl: string }) {
@@ -24,29 +44,57 @@ async function main({ videoIdOrUrl }: { videoIdOrUrl: string }) {
     log("actions", actions.length);
     for (const action of actions) {
       switch (action.type) {
-        case "addBannerAction": {
-          log("=================");
-          log(
-            runsToString(action.header.liveChatBannerHeaderRenderer.text.runs)
-          );
-          log(
-            runsToString(
-              action.contents.liveChatTextMessageRenderer.message.runs
-            )
-          );
-          log("=================");
-          break;
-        }
         case "addChatItemAction": {
-          log(`-${action.authorName}>`, runsToString(action.rawMessage));
+          log(chalk.gray(`${action.authorName}:`), asString(action.rawMessage));
           break;
         }
         case "addSuperChatItemAction": {
           log(
-            `$${action.authorName}>`,
-            runsToString(action.rawMessage ?? []),
-            action.superchat.amount,
-            action.superchat.currency
+            chalkSc(action.superchat.color)(`$$$$$$$$$$$$$$$$$
+${action.authorName}: ${action.superchat.amount} ${
+              action.superchat.currency
+            } (${action.superchat.color})
+${asString(action.rawMessage ?? "<empty message>")}
+$$$$$$$$$$$$$$$$$`)
+          );
+          break;
+        }
+        case "addMembershipItemAction": {
+          log(
+            chalk.green(`=================
+Welcome ${action.tenant}, ${action.authorName} !
+${action.membership.status} ${action.membership.since ?? ""}
+=================`)
+          );
+          break;
+        }
+        case "addMembershipMilestoneItemAction": {
+          log(
+            chalk.green(`=================
+${action.authorName} (${action.membership.status} ${
+              action.membership.since ?? ""
+            })
+Member of ${action.tenant} for ${action.durationText}
+${action.message ? asString(action.message) : "<empty message>"}
+=================`)
+          );
+          break;
+        }
+        case "addBannerAction": {
+          log(
+            chalk.blue(`=================
+${asString(action.title)}
+${asString(action.message)}
+${action}
+=================`)
+          );
+          break;
+        }
+        case "addViewerEngagementMessageAction": {
+          log(
+            chalk.red(`=================
+[${action.icon.iconType}] ${asString(action.message)}
+=================`)
           );
           break;
         }

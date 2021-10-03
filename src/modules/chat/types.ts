@@ -13,6 +13,7 @@ import {
   YTRemoveBannerForLiveChatCommand,
   YTReplaceChatItemAction,
   YTRun,
+  YTRunContainer,
   YTTooltipRenderer,
 } from "../../yt/chat";
 
@@ -115,7 +116,7 @@ export type Action =
   | AddChatItemAction
   | AddSuperChatItemAction
   | AddSuperStickerItemAction
-  | AddNewMembershipItemAction
+  | AddMembershipItemAction
   | AddMembershipMilestoneItemAction
   | AddPlaceholderItemAction
   | ReplaceChatItemAction
@@ -166,8 +167,8 @@ export interface AddSuperStickerItemAction
   type: "addSuperStickerItemAction";
 }
 
-export interface AddNewMembershipItemAction {
-  type: "addNewMembershipItemAction";
+export interface AddMembershipItemAction {
+  type: "addMembershipItemAction";
   id: string;
   timestamp: Date;
   timestampUsec: string;
@@ -186,7 +187,8 @@ export interface AddMembershipMilestoneItemAction {
   membership: Membership;
   authorName: string;
   authorPhoto: string;
-  message: string | null;
+  durationText: string;
+  message: YTRun[] | null;
 }
 
 export interface AddPlaceholderItemAction
@@ -226,8 +228,21 @@ export interface AddMembershipTickerAction
   type: "addMembershipTickerAction";
 }
 
-export interface AddBannerAction extends YTLiveChatBannerRenderer {
+export interface AddBannerAction {
   type: "addBannerAction";
+  id: string;
+  title: YTRun[];
+  message: YTRun[];
+  timestamp: Date;
+  timestampUsec: string;
+  authorName: string;
+  authorChannelId: string;
+  authorPhoto: string;
+  membership?: Membership;
+  isOwner: boolean;
+  isModerator: boolean;
+  isVerified: boolean;
+  contextMenuEndpointParams?: string;
 }
 
 export interface RemoveBannerAction extends YTRemoveBannerForLiveChatCommand {

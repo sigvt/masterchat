@@ -412,7 +412,7 @@ export interface YTLiveChatMembershipItemRenderer {
   timestampUsec: string;
   timestampText?: YTSimpleTextContainer; // replay
   authorExternalChannelId: string;
-  headerPrimaryText?: YTText; // milestone
+  headerPrimaryText?: YTRunContainer<YTTextRun>; // milestone
   headerSubtext: YTText;
   message?: YTRunContainer; // milestone with message
   empty?: true; // milestone without message

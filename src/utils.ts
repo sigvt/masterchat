@@ -122,14 +122,17 @@ export function emojiRunToPlainText(run: YTEmojiRun): string {
 }
 
 /**
- * {runs: [...]} | {simpleText: "..."} -> string
+ * [...] | {runs: [...]} | {simpleText: "..."} -> string
  */
 export function asString(
-  payload: YTText,
+  payload: YTText | YTRun[] | string,
   runsToStringOptions?: RunsToStringOptions
 ): string {
+  if (typeof payload === "string") return payload;
+  if (Array.isArray(payload)) return runsToString(payload, runsToStringOptions);
+  if ("runs" in payload) return runsToString(payload.runs, runsToStringOptions);
   if ("simpleText" in payload) return payload.simpleText;
-  return runsToString(payload.runs, runsToStringOptions);
+  throw new Error(`Invalid payload format: ${payload}`);
 }
 
 export function runsToString(

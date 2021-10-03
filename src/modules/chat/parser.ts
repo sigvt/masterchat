@@ -1,19 +1,20 @@
+import { asString, debugLog } from "../../utils";
 import {
   YTAction,
   YTAddLiveChatTickerItem,
   YTAuthorBadge,
   YTLiveChatPaidMessageRenderer,
+  YTLiveChatTextMessageRenderer,
   YTRunContainer,
   YTTextRun,
   YTThumbnailList,
 } from "../../yt/chat";
-import { runsToString, debugLog, asString } from "../../utils";
-import { omitTrackingParams, parseColorCode } from "./utils";
+import { toTLS } from "./currency";
 import {
   Action,
   AddChatItemAction,
+  AddMembershipItemAction,
   AddMembershipMilestoneItemAction,
-  AddNewMembershipItemAction,
   AddSuperChatItemAction,
   LiveChatMode,
   Membership,
@@ -22,7 +23,7 @@ import {
   SUPERCHAT_SIGNIFICANCE_MAP,
   UnknownAction,
 } from "./types";
-import { toTLS } from "./currency";
+import { omitTrackingParams, parseColorCode } from "./utils";
 
 const AMOUNT_REGEXP = /[\d.,]+/;
 
@@ -79,39 +80,8 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
             renderer.authorPhoto.thumbnails.length - 1
           ].url;
 
-        let isVerified = false,
-          isOwner = false,
-          isModerator = false,
-          membership: Membership | undefined = undefined;
-
-        if ("authorBadges" in renderer && renderer.authorBadges) {
-          for (const badge of renderer.authorBadges) {
-            const renderer = badge.liveChatAuthorBadgeRenderer;
-            const iconType = renderer.icon?.iconType;
-            switch (iconType) {
-              case "VERIFIED":
-                isVerified = true;
-                break;
-              case "OWNER":
-                isOwner = true;
-                break;
-              case "MODERATOR":
-                isModerator = true;
-                break;
-              case undefined:
-                // membership
-                membership = parseMembership(badge);
-                break;
-              default:
-                debugLog(
-                  `[action required] Unrecognized iconType:`,
-                  iconType,
-                  JSON.stringify(renderer)
-                );
-                throw new Error("Unrecognized iconType: " + iconType);
-            }
-          }
-        }
+        const { isVerified, isOwner, isModerator, membership } =
+          parseBadges(renderer);
 
         const contextMenuEndpointParams =
           renderer.contextMenuEndpoint!.liveChatItemContextMenuEndpoint.params;
@@ -181,7 +151,11 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
         const isMilestoneMessage = "empty" in renderer || "message" in renderer;
 
         if (isMilestoneMessage) {
-          const message = renderer.message ? asString(renderer.message) : null;
+          const message = renderer.message ? renderer.message.runs : null;
+          const durationText = renderer
+            .headerPrimaryText!.runs.slice(1)
+            .map((r) => r.text)
+            .join("");
           const action: AddMembershipMilestoneItemAction = {
             type: "addMembershipMilestoneItemAction",
             id: renderer.id,
@@ -192,12 +166,13 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
             authorName,
             authorPhoto,
             message,
+            durationText,
           };
           return action;
         }
 
-        const action: AddNewMembershipItemAction = {
-          type: "addNewMembershipItemAction",
+        const action: AddMembershipItemAction = {
+          type: "addMembershipItemAction",
           id: renderer.id,
           timestampUsec,
           timestamp,
@@ -359,12 +334,39 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
       if (
         payload.header.liveChatBannerHeaderRenderer.icon.iconType !== "KEEP"
       ) {
-        debugLog("addBannerToLiveChatCommand", JSON.stringify(payload));
+        debugLog(
+          "[action required] Unknown icon type observed in addBannerToLiveChatCommand",
+          JSON.stringify(payload.header.liveChatBannerHeaderRenderer.icon)
+        );
       }
+
+      const title = payload.header.liveChatBannerHeaderRenderer.text.runs;
+      const message = payload.contents.liveChatTextMessageRenderer.message.runs;
+      const renderer = payload.contents.liveChatTextMessageRenderer;
+      const timestampUsec = renderer.timestampUsec;
+      const timestamp = tsToDate(timestampUsec);
+      const authorName = asString(renderer.authorName);
+      const authorPhoto = thumbListToUrl(renderer.authorPhoto);
+      const authorChannelId = renderer.authorExternalChannelId;
+      const { isVerified, isOwner, isModerator, membership } =
+        parseBadges(renderer);
 
       return {
         type: "addBannerAction",
-        ...payload,
+        id: payload.actionId,
+        title,
+        message,
+        timestampUsec,
+        timestamp,
+        authorName,
+        authorPhoto,
+        authorChannelId,
+        isVerified,
+        isOwner,
+        isModerator,
+        membership,
+        contextMenuEndpointParams:
+          renderer.contextMenuEndpoint?.liveChatItemContextMenuEndpoint.params,
       };
     }
 
@@ -450,4 +452,47 @@ function parseMembership(badge: YTAuthorBadge): Membership | undefined {
       return membership;
     }
   }
+}
+
+function parseBadges(renderer: YTLiveChatTextMessageRenderer) {
+  let isVerified = false,
+    isOwner = false,
+    isModerator = false,
+    membership: Membership | undefined = undefined;
+
+  if ("authorBadges" in renderer && renderer.authorBadges) {
+    for (const badge of renderer.authorBadges) {
+      const renderer = badge.liveChatAuthorBadgeRenderer;
+      const iconType = renderer.icon?.iconType;
+      switch (iconType) {
+        case "VERIFIED":
+          isVerified = true;
+          break;
+        case "OWNER":
+          isOwner = true;
+          break;
+        case "MODERATOR":
+          isModerator = true;
+          break;
+        case undefined:
+          // membership
+          membership = parseMembership(badge);
+          break;
+        default:
+          debugLog(
+            `[action required] Unrecognized iconType:`,
+            iconType,
+            JSON.stringify(renderer)
+          );
+          throw new Error("Unrecognized iconType: " + iconType);
+      }
+    }
+  }
+
+  return {
+    isOwner,
+    isVerified,
+    isModerator,
+    membership,
+  };
 }
