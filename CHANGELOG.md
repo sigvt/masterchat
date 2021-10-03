@@ -2,8 +2,9 @@
 
 ## Unreleased
 
-- BREAKING: normalized `addBannerAction`
-- New `AddMembershipMilestoneItemAction` action
+- BREAKING: normalized `AddBannerAction`
+- BREAKING: normalized `AddMembershipItemAction`
+- New action `AddMembershipMilestoneItemAction`. Use `durationText` for the precise membership duration.
 - BREAKING: `end` event will provide a reason (`'privated' | 'deleted' | 'aborted' | null`)
   - `streamPool.on('end', (mc) => {})` -> `streamPool.on('end', (reason, mc) => {})`
 - BREAKING: remove `unknown` type from `MasterchatError`

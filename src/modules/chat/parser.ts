@@ -127,6 +127,7 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
 
         return action;
       } else if ("liveChatPaidStickerRenderer" in item) {
+        // TODO: normalize payload
         // Super Sticker
         const renderer = item["liveChatPaidStickerRenderer"]!;
         return {
@@ -184,6 +185,7 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
         };
         return action;
       } else if ("liveChatPlaceholderItemRenderer" in item) {
+        // TODO: normalize payload
         // Placeholder chat
         const renderer = item["liveChatPlaceholderItemRenderer"]!;
         return {
@@ -191,6 +193,7 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
           ...renderer,
         };
       } else if ("liveChatViewerEngagementMessageRenderer" in item) {
+        // TODO: normalize payload
         // Engagement
         const renderer = item["liveChatViewerEngagementMessageRenderer"]!;
         return {
@@ -282,6 +285,7 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
 
       switch (rendererType) {
         case "liveChatTickerPaidMessageItemRenderer": {
+          // TODO: normalize payload
           // SuperChat ticker
           const renderer = item[rendererType]!;
           return {
@@ -290,6 +294,7 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
           };
         }
         case "liveChatTickerPaidStickerItemRenderer": {
+          // TODO: normalize payload
           // Super Sticker
           const renderer = item[rendererType]!;
           return {
@@ -298,6 +303,7 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
           };
         }
         case "liveChatTickerSponsorItemRenderer": {
+          // TODO: normalize payload
           // Membership
           const renderer = item[rendererType]!;
           return {
@@ -318,7 +324,8 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
     }
 
     case "replaceChatItemAction": {
-      // Replace placeholder item?
+      // TODO: normalize payload
+      // Replace chat item with placeholder or renderer
       const payload = action[type]!;
 
       return {
@@ -371,6 +378,7 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
     }
 
     case "removeBannerForLiveChatCommand": {
+      // TODO: normalize payload
       // remove pinned item
       const payload = action[type]!;
 
@@ -381,6 +389,7 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
     }
 
     case "showLiveChatTooltipCommand": {
+      // TODO: normalize payload
       const payload = action[type]!;
       return {
         type: "showTooltipAction",
@@ -389,6 +398,7 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
     }
 
     case "updateLiveChatPollAction": {
+      // TODO: normalize payload
       const payload = action[type]!;
       return {
         type: "updateLiveChatPollAction",
@@ -397,6 +407,7 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
     }
 
     case "showLiveChatActionPanelAction": {
+      // TODO: normalize payload
       const payload = action[type]!;
       return {
         type: "showLiveChatActionPanelAction",
@@ -405,6 +416,7 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
     }
 
     case "closeLiveChatActionPanelAction": {
+      // TODO: normalize payload
       const payload = action[type]!;
       return {
         type: "closeLiveChatActionPanelAction",
