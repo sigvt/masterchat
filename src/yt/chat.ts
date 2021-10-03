@@ -10,11 +10,17 @@ import {
 // YT Interface
 // --------------------
 
-export type YTRun = YTTextRun | YTEmojiRun;
+export type YTText = YTSimpleTextContainer | YTRunContainer;
+
+export interface YTSimpleTextContainer {
+  simpleText: string;
+}
 
 export interface YTRunContainer<T = YTRun> {
   runs: T[];
 }
+
+export type YTRun = YTTextRun | YTEmojiRun;
 
 export interface YTTextRun {
   text: string;
@@ -341,7 +347,7 @@ export interface YTLiveChatTextMessageRenderer {
   id: string;
   timestampUsec: string;
   message: YTRunContainer;
-  authorName: YTSimpleText;
+  authorName: YTText;
   authorPhoto: YTThumbnailList;
   authorExternalChannelId: string;
 
@@ -356,13 +362,13 @@ export interface YTLiveChatPaidMessageRenderer {
   id: string;
   timestampUsec: string;
   message?: YTRunContainer;
-  authorName: YTSimpleText;
+  authorName: YTText;
   authorPhoto: YTThumbnailList;
   authorExternalChannelId: string;
   contextMenuEndpoint: YTLiveChatItemContextMenuEndpointContainer;
   contextMenuAccessibility: YTAccessibilityData;
 
-  purchaseAmountText: YTSimpleText;
+  purchaseAmountText: YTText;
   timestampColor: number;
   authorNameTextColor: number;
   headerBackgroundColor: number;
@@ -378,12 +384,12 @@ export interface YTLiveChatPaidStickerRenderer {
   contextMenuAccessibility: YTAccessibilityData;
   timestampUsec: string;
   authorPhoto: YTThumbnailList;
-  authorName: YTSimpleText;
+  authorName: YTText;
   authorExternalChannelId: string;
   sticker: YTThumbnailListWithAccessibility;
   moneyChipBackgroundColor: number;
   moneyChipTextColor: number;
-  purchaseAmountText: YTSimpleText;
+  purchaseAmountText: YTText;
   stickerDisplayWidth: number;
   stickerDisplayHeight: number;
   backgroundColor: number;
@@ -391,12 +397,26 @@ export interface YTLiveChatPaidStickerRenderer {
   trackingParams: string;
 }
 
+/**
+ * New Member:
+ * headerPrimary: null
+ * headerSub: Welcome <tenant> ! (YTRun)
+ *
+ * Milestone:
+ * headerPrimary: Member for 11 months (YTRun)
+ * headerSub: <tenant>
+ * message: YTRun OR empty: true
+ */
 export interface YTLiveChatMembershipItemRenderer {
   id: string;
   timestampUsec: string;
+  timestampText?: YTSimpleTextContainer; // replay
   authorExternalChannelId: string;
-  headerSubtext: YTRunContainer;
-  authorName: YTSimpleText;
+  headerPrimaryText?: YTText; // milestone
+  headerSubtext: YTText;
+  message?: YTRunContainer; // milestone with message
+  empty?: true; // milestone without message
+  authorName: YTText;
   authorPhoto: YTThumbnailList;
   authorBadges: YTLiveChatAuthorBadgeRendererContainer[];
   contextMenuEndpoint: YTLiveChatItemContextMenuEndpointContainer;
@@ -420,7 +440,7 @@ export interface YTLiveChatViewerEngagementMessageRenderer {
   id: string;
   timestampUsec: string;
   icon: YTIcon;
-  message: YTRunContainer;
+  message: YTText;
   actionButton: YTActionButtonRendererContainer;
 }
 
@@ -428,7 +448,7 @@ export interface YTTooltipRenderer {
   // TODO: type promoConfig
   promoConfig: any;
   targetId: string;
-  detailsText: YTRunContainer;
+  detailsText: YTText;
   suggestedPosition: YTType;
   dismissStrategy: YTType;
   trackingParams: string;
@@ -439,9 +459,9 @@ export interface YTLiveChatPollRenderer {
   liveChatPollId: string;
   header: {
     pollHeaderRenderer: {
-      pollQuestion: YTRunContainer;
+      pollQuestion: YTText;
       thumbnail: YTThumbnailList;
-      metadataText: YTRunContainer;
+      metadataText: YTText;
       liveChatPollType: YTLiveChatPollType;
       contextMenuButton: YTContextMenuButtonRendererContainer;
     };
@@ -455,10 +475,10 @@ export interface YTLiveChatActionPanelRenderer {
 }
 
 export interface YTLiveChatPollChoice {
-  text: YTRunContainer;
+  text: YTText;
   selected: boolean;
   voteRatio?: number; // 0.0 to 1.0
-  votePercentage?: YTSimpleText; // 73%
+  votePercentage?: YTSimpleTextContainer; // 73%
   signinEndpoint: YTSignInEndpointContainer;
 }
 
@@ -497,8 +517,8 @@ export interface YTLiveChatModeChangeMessageRenderer {
   id: string;
   timestampUsec: string;
   icon: YTIcon;
-  text: YTRunContainer;
-  subtext: YTRunContainer;
+  text: YTText;
+  subtext: YTText;
 }
 
 // Ticker Renderers
@@ -511,7 +531,7 @@ export interface YTAddLiveChatTickerItem {
 
 export interface YTLiveChatTickerPaidMessageItemRenderer {
   id: string;
-  amount: YTSimpleText;
+  amount: YTText;
   amountTextColor: number;
   startBackgroundColor: number;
   endBackgroundColor: number;
@@ -538,7 +558,7 @@ export interface YTLiveChatTickerPaidStickerItemRenderer {
 
 export interface YTLiveChatTickerSponsorItemRenderer {
   id: string;
-  detailText: YTRunContainer;
+  detailText: YTText;
   detailTextColor: number;
   startBackgroundColor: number;
   endBackgroundColor: number;
@@ -586,7 +606,7 @@ export interface YTActionPanel {
 
 export interface YTInputField {
   liveChatTextInputFieldRenderer: {
-    placeholder: YTRunContainer;
+    placeholder: YTText;
     maxCharacterLimit: number;
     emojiCharacterCount: number;
   };
@@ -596,7 +616,7 @@ export interface YTInteractionMessage {
   messageRenderer: {
     trackingParams: string;
     button: YTSigninButtonRendererContainer;
-    subtext: YTSubtext;
+    subtext: YTMessageSubtextRendererContainer;
   };
 }
 
@@ -686,13 +706,9 @@ export enum YTWebPageType {
   WebPageTypeWatch = "WEB_PAGE_TYPE_WATCH",
 }
 
-export interface YTSimpleText {
-  simpleText: string;
-}
-
-export interface YTSubtext {
+export interface YTMessageSubtextRendererContainer {
   messageSubtextRenderer: {
-    text: YTSimpleText;
+    text: YTText;
   };
 }
 
@@ -735,7 +751,7 @@ export interface EmojiPickerRenderer {
 export interface YTEmojiCategory {
   emojiPickerCategoryRenderer: {
     categoryId: string;
-    title: YTSimpleText;
+    title: YTText;
     emojiIds: string[];
     trackingParams: string;
   };
@@ -802,7 +818,7 @@ export interface YTIconButtonRenderer {
 }
 
 export interface YTNavigationButtonRenderer<Endpoint> extends YTButtonRenderer {
-  text: YTSimpleText;
+  text: YTText;
   navigationEndpoint: Endpoint;
 }
 
@@ -927,7 +943,7 @@ export interface YTParticipantsList {
 
 export interface YTParticipant {
   liveChatParticipantRenderer: {
-    authorName: YTSimpleText;
+    authorName: YTText;
     authorPhoto: YTThumbnailList;
     authorBadges: YTLiveChatAuthorBadgeRendererContainer[];
   };

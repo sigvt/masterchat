@@ -1,26 +1,35 @@
 import {
   YTAction,
   YTAddLiveChatTickerItem,
+  YTAuthorBadge,
   YTLiveChatPaidMessageRenderer,
+  YTRunContainer,
+  YTTextRun,
+  YTThumbnailList,
 } from "../../yt/chat";
-import { runsToString, debugLog } from "../../utils";
+import { runsToString, debugLog, asString } from "../../utils";
 import { omitTrackingParams, parseColorCode } from "./utils";
 import {
   Action,
   AddChatItemAction,
+  AddMembershipMilestoneItemAction,
+  AddNewMembershipItemAction,
   AddSuperChatItemAction,
   LiveChatMode,
   Membership,
+  SuperChat,
   SUPERCHAT_COLOR_MAP,
   SUPERCHAT_SIGNIFICANCE_MAP,
   UnknownAction,
 } from "./types";
 import { toTLS } from "./currency";
 
-export function parseSuperChat(renderer: YTLiveChatPaidMessageRenderer) {
-  const AMOUNT_REGEXP = /[\d.,]+/;
+const AMOUNT_REGEXP = /[\d.,]+/;
 
-  const input = renderer.purchaseAmountText.simpleText;
+export function parseSuperChat(
+  renderer: YTLiveChatPaidMessageRenderer
+): SuperChat {
+  const input = asString(renderer.purchaseAmountText);
   const amountString = AMOUNT_REGEXP.exec(input)![0].replace(/,/g, "");
 
   const amount = parseFloat(amountString);
@@ -63,7 +72,7 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
           authorExternalChannelId: authorChannelId,
         } = renderer;
 
-        const timestamp = new Date(parseInt(timestampUsec, 10) / 1000);
+        const timestamp = tsToDate(timestampUsec);
 
         const authorPhoto =
           renderer.authorPhoto.thumbnails[
@@ -91,20 +100,7 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
                 break;
               case undefined:
                 // membership
-                if (renderer.customThumbnail) {
-                  const match = /^(.+?)(?:\s\((.+)\))?$/.exec(renderer.tooltip);
-                  if (match) {
-                    const [_, status, since] = match;
-                    membership = {
-                      status,
-                      since,
-                      thumbnail:
-                        renderer.customThumbnail.thumbnails[
-                          renderer.customThumbnail.thumbnails.length - 1
-                        ].url,
-                    };
-                  }
-                }
+                membership = parseMembership(badge);
                 break;
               default:
                 debugLog(
@@ -120,13 +116,13 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
         const contextMenuEndpointParams =
           renderer.contextMenuEndpoint!.liveChatItemContextMenuEndpoint.params;
 
-        const raw: AddChatItemAction = {
+        const action: AddChatItemAction = {
           type: "addChatItemAction",
           id,
           timestamp,
           timestampUsec,
           rawMessage: renderer.message.runs,
-          authorName: renderer.authorName?.simpleText,
+          authorName: asString(renderer.authorName),
           authorPhoto,
           authorChannelId,
           membership,
@@ -136,33 +132,30 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
           contextMenuEndpointParams,
         };
 
-        return raw;
+        return action;
       } else if ("liveChatPaidMessageRenderer" in item) {
         // Super Chat
         const renderer = item["liveChatPaidMessageRenderer"]!;
         const { timestampUsec, authorExternalChannelId: authorChannelId } =
           renderer;
 
-        const timestamp = new Date(parseInt(timestampUsec, 10) / 1000);
+        const timestamp = tsToDate(timestampUsec);
 
-        const authorPhoto =
-          renderer.authorPhoto.thumbnails[
-            renderer.authorPhoto.thumbnails.length - 1
-          ].url;
+        const authorPhoto = thumbListToUrl(renderer.authorPhoto);
 
-        const raw: AddSuperChatItemAction = {
+        const action: AddSuperChatItemAction = {
           type: "addSuperChatItemAction",
           id: renderer.id,
           timestamp,
           timestampUsec,
           rawMessage: renderer.message?.runs,
-          authorName: renderer.authorName?.simpleText,
+          authorName: asString(renderer.authorName),
           authorPhoto,
           authorChannelId,
           superchat: parseSuperChat(renderer),
         };
 
-        return raw;
+        return action;
       } else if ("liveChatPaidStickerRenderer" in item) {
         // Super Sticker
         const renderer = item["liveChatPaidStickerRenderer"]!;
@@ -173,10 +166,48 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
       } else if ("liveChatMembershipItemRenderer" in item) {
         // Membership updates
         const renderer = item["liveChatMembershipItemRenderer"]!;
-        return {
-          type: "addMembershipItemAction",
-          ...renderer,
+
+        const timestampUsec = renderer.timestampUsec;
+        const timestamp = tsToDate(timestampUsec);
+        const authorName = asString(renderer.authorName);
+        const authorPhoto = thumbListToUrl(renderer.authorPhoto);
+        const membership = parseMembership(renderer.authorBadges[0]);
+        if (!membership)
+          throw new Error(
+            `Failed to parse membership while handling liveChatMembershipItemRenderer: ${JSON.stringify(
+              renderer.authorBadges
+            )}`
+          );
+        const isMilestoneMessage = "empty" in renderer || "message" in renderer;
+
+        if (isMilestoneMessage) {
+          const message = renderer.message ? asString(renderer.message) : null;
+          const action: AddMembershipMilestoneItemAction = {
+            type: "addMembershipMilestoneItemAction",
+            id: renderer.id,
+            timestampUsec,
+            timestamp,
+            tenant: asString(renderer.headerSubtext),
+            membership,
+            authorName,
+            authorPhoto,
+            message,
+          };
+          return action;
+        }
+
+        const action: AddNewMembershipItemAction = {
+          type: "addNewMembershipItemAction",
+          id: renderer.id,
+          timestampUsec,
+          timestamp,
+          tenant: (renderer.headerSubtext as YTRunContainer<YTTextRun>).runs[1]
+            .text,
+          membership,
+          authorName,
+          authorPhoto,
         };
+        return action;
       } else if ("liveChatPlaceholderItemRenderer" in item) {
         // Placeholder chat
         const renderer = item["liveChatPlaceholderItemRenderer"]!;
@@ -194,8 +225,8 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
       } else if ("liveChatModeChangeMessageRenderer" in item) {
         // Mode Change Message (e.g. toggle members-only)
         const renderer = item["liveChatModeChangeMessageRenderer"]!;
-        const text = runsToString(renderer.text.runs);
-        const subtext = runsToString(renderer.subtext.runs);
+        const text = asString(renderer.text);
+        const subtext = asString(renderer.subtext);
 
         let mode = LiveChatMode.Unknown;
         if (/Slow mode/.test(text)) {
@@ -388,9 +419,35 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
     }
   }
 
-  // TODO: remove unknown type in the future
   return {
     type: "unknown",
     payload: action,
   };
+}
+
+function thumbListToUrl(thumbList: YTThumbnailList): string {
+  return thumbList.thumbnails[thumbList.thumbnails.length - 1].url;
+}
+
+function tsToDate(ts: string): Date {
+  return new Date(Number(BigInt(ts) / BigInt(1000)));
+}
+
+function parseMembership(badge: YTAuthorBadge): Membership | undefined {
+  const renderer = badge.liveChatAuthorBadgeRenderer;
+  if (renderer.customThumbnail) {
+    const match = /^(.+?)(?:\s\((.+)\))?$/.exec(renderer.tooltip);
+    if (match) {
+      const [_, status, since] = match;
+      const membership = {
+        status,
+        since,
+        thumbnail:
+          renderer.customThumbnail.thumbnails[
+            renderer.customThumbnail.thumbnails.length - 1
+          ].url,
+      };
+      return membership;
+    }
+  }
 }

@@ -2,7 +2,7 @@ import crossFetch from "cross-fetch";
 import debug from "debug";
 import { DC, DH, DO } from "./constants";
 import { AbortError } from "./errors";
-import { YTEmojiRun, YTRun, YTTextRun } from "./yt/chat";
+import { YTEmojiRun, YTRun, YTText, YTTextRun } from "./yt/chat";
 import { FluffyBrowseEndpoint } from "./yt/context";
 
 export function ytFetch(input: string, init?: RequestInit) {
@@ -119,6 +119,17 @@ export function emojiRunToPlainText(run: YTEmojiRun): string {
     : emoji.emojiId;
 
   return term;
+}
+
+/**
+ * {runs: [...]} | {simpleText: "..."} -> string
+ */
+export function asString(
+  payload: YTText,
+  runsToStringOptions?: RunsToStringOptions
+): string {
+  if ("simpleText" in payload) return payload.simpleText;
+  return runsToString(payload.runs, runsToStringOptions);
 }
 
 export function runsToString(

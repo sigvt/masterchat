@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- BREAKING: Deprecate `AddMembershipItemAction` in favor of new `AddNewMembershipItemAction` and `AddMembershipMilestoneItemAction`
 - BREAKING: `end` event will provide a reason (`'privated' | 'deleted' | 'aborted' | null`)
   - `streamPool.on('end', (mc) => {})` -> `streamPool.on('end', (reason, mc) => {})`
 - BREAKING: remove `unknown` type from `MasterchatError`
@@ -9,6 +10,7 @@
 
 ### utils
 
+- New `asString` utility for transforming both YTRunContainer and YTSimpleText into string
 - `runsToPlainText` expands `watchEndpoint` when `text` is a fragment of URL
 
 ## v0.12.0

@@ -115,7 +115,8 @@ export type Action =
   | AddChatItemAction
   | AddSuperChatItemAction
   | AddSuperStickerItemAction
-  | AddMembershipItemAction
+  | AddNewMembershipItemAction
+  | AddMembershipMilestoneItemAction
   | AddPlaceholderItemAction
   | ReplaceChatItemAction
   | MarkChatItemAsDeletedAction
@@ -165,9 +166,27 @@ export interface AddSuperStickerItemAction
   type: "addSuperStickerItemAction";
 }
 
-export interface AddMembershipItemAction
-  extends YTLiveChatMembershipItemRenderer {
-  type: "addMembershipItemAction";
+export interface AddNewMembershipItemAction {
+  type: "addNewMembershipItemAction";
+  id: string;
+  timestamp: Date;
+  timestampUsec: string;
+  tenant: string;
+  membership: Membership;
+  authorName: string;
+  authorPhoto: string;
+}
+
+export interface AddMembershipMilestoneItemAction {
+  type: "addMembershipMilestoneItemAction";
+  id: string;
+  timestamp: Date;
+  timestampUsec: string;
+  tenant: string;
+  membership: Membership;
+  authorName: string;
+  authorPhoto: string;
+  message: string | null;
 }
 
 export interface AddPlaceholderItemAction

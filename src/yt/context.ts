@@ -5,7 +5,8 @@ import {
   YTOverflowMenu,
   YTRun,
   YTRunContainer,
-  YTSimpleText,
+  YTSimpleTextContainer,
+  YTText,
   YTThumbnailList,
   YTWebPageType,
 } from "./chat";
@@ -22,7 +23,7 @@ export interface YTPlayabilityStatus {
   reason?: string;
   errorScreen?: {
     playerErrorMessageRenderer?: {
-      reason: YTSimpleText;
+      reason: YTSimpleTextContainer;
       thumbnail: YTThumbnailList;
       icon: YTIcon;
     };
@@ -54,7 +55,7 @@ export interface YTPlayabilityStatus {
         liveStreamOfflineSlateRenderer: {
           scheduledStartTime: string;
           mainText: YTRunContainer;
-          subtitleText: YTSimpleText;
+          subtitleText: YTSimpleTextContainer;
           thumbnail: YTThumbnailList;
           pollDelayMs: string;
         };
@@ -342,7 +343,7 @@ export interface PurplePopup {
 }
 
 export interface NotificationActionRenderer {
-  responseText: YTSimpleText;
+  responseText: YTSimpleTextContainer;
   trackingParams: string;
 }
 
@@ -354,12 +355,6 @@ export interface LengthText {
 export interface ShortViewCountText {
   simpleText?: string;
   runs?: YTRun[];
-}
-
-export interface YTText {
-  simpleText?: string;
-  runs?: YTRun[];
-  accessibility: YTAccessibilityData;
 }
 
 export enum PopupType {
@@ -395,8 +390,8 @@ export interface YTShowHideButton {
 export interface ShowHideButtonToggleButtonRenderer {
   isToggled: boolean;
   isDisabled: boolean;
-  defaultText: YTSimpleText;
-  toggledText: YTSimpleText;
+  defaultText: YTSimpleTextContainer;
+  toggledText: YTSimpleTextContainer;
   trackingParams: string;
 }
 
@@ -423,7 +418,7 @@ export interface VideoPrimaryInfoRenderer {
   sentimentBar: SentimentBar;
   badges?: MetadataBadgeRendererContainer[];
   superTitleLink: SuperTitleLink;
-  dateText: YTSimpleText;
+  dateText: YTSimpleTextContainer;
 }
 
 export interface SentimentBar {
@@ -519,7 +514,7 @@ export interface PurpleModal {
 }
 
 export interface PurpleModalWithTitleAndButtonRenderer {
-  title: YTSimpleText;
+  title: YTSimpleTextContainer;
   content: ShortViewCountText;
   button: PurpleButton;
 }
@@ -532,7 +527,7 @@ export interface PurpleButtonRenderer {
   style: string;
   size: string;
   isDisabled: boolean;
-  text: YTSimpleText;
+  text: YTSimpleTextContainer;
   navigationEndpoint: TentacledNavigationEndpoint;
   trackingParams: string;
 }
@@ -619,8 +614,8 @@ export interface FluffyModal {
 }
 
 export interface FluffyModalWithTitleAndButtonRenderer {
-  title: YTSimpleText;
-  content: YTSimpleText;
+  title: YTSimpleTextContainer;
+  content: YTSimpleTextContainer;
   button: FluffyButton;
 }
 
@@ -632,7 +627,7 @@ export interface FluffyButtonRenderer {
   style: string;
   size: string;
   isDisabled: boolean;
-  text: YTSimpleText;
+  text: YTSimpleTextContainer;
   navigationEndpoint: StickyNavigationEndpoint;
   trackingParams: string;
 }
@@ -708,9 +703,9 @@ export interface RichMetadataRowRendererContent {
 export interface RichMetadataRenderer {
   style: string;
   thumbnail: Background;
-  title: YTSimpleText;
-  subtitle?: YTSimpleText;
-  callToAction: YTSimpleText;
+  title: YTSimpleTextContainer;
+  subtitle?: YTSimpleTextContainer;
+  callToAction: YTSimpleTextContainer;
   callToActionIcon: Icon;
   endpoint: YTBrowseEndpointContainer;
   trackingParams: string;
@@ -799,8 +794,8 @@ export interface TentacledModal {
 }
 
 export interface TentacledModalWithTitleAndButtonRenderer {
-  title: YTSimpleText;
-  content: YTSimpleText;
+  title: YTSimpleTextContainer;
+  content: YTSimpleTextContainer;
   button: TentacledButton;
 }
 
@@ -812,7 +807,7 @@ export interface TentacledButtonRenderer {
   style: string;
   size: string;
   isDisabled: boolean;
-  text: YTSimpleText;
+  text: YTSimpleTextContainer;
   navigationEndpoint: IndecentNavigationEndpoint;
   trackingParams: string;
 }
@@ -872,8 +867,8 @@ export interface StickyModal {
 }
 
 export interface StickyModalWithTitleAndButtonRenderer {
-  title: YTSimpleText;
-  content: YTSimpleText;
+  title: YTSimpleTextContainer;
+  content: YTSimpleTextContainer;
   button: StickyButton;
 }
 
@@ -885,7 +880,7 @@ export interface StickyButtonRenderer {
   style: string;
   size: string;
   isDisabled: boolean;
-  text: YTSimpleText;
+  text: YTSimpleTextContainer;
   navigationEndpoint: AmbitiousNavigationEndpoint;
   trackingParams: string;
 }
@@ -919,7 +914,7 @@ export interface SecondaryResultsResult {
 }
 
 export interface CompactAutoplayRenderer {
-  title: YTSimpleText;
+  title: YTSimpleTextContainer;
   toggleDescription: YTRunContainer;
   infoIcon: Icon;
   infoText: YTRunContainer;
@@ -936,8 +931,8 @@ export interface ContentCompactVideoRenderer {
   thumbnail: Background;
   title: LengthText;
   longBylineText: BylineText;
-  publishedTimeText: YTSimpleText;
-  viewCountText: YTSimpleText;
+  publishedTimeText: YTSimpleTextContainer;
+  viewCountText: YTSimpleTextContainer;
   lengthText: LengthText;
   navigationEndpoint: CompactVideoRendererNavigationEndpoint;
   shortBylineText: BylineText;
@@ -945,7 +940,7 @@ export interface ContentCompactVideoRenderer {
   channelThumbnail: Background;
   ownerBadges: MetadataBadgeRendererContainer[];
   trackingParams: string;
-  shortViewCountText: YTSimpleText;
+  shortViewCountText: YTSimpleTextContainer;
   menu: Menu;
   thumbnailOverlays: CompactVideoRendererThumbnailOverlay[];
   accessibility: YTAccessibilityData;
@@ -1108,7 +1103,7 @@ export interface ResultCompactVideoRenderer {
   thumbnail: Background;
   title: LengthText;
   longBylineText: BylineText;
-  publishedTimeText?: YTSimpleText;
+  publishedTimeText?: YTSimpleTextContainer;
   viewCountText: ShortViewCountText;
   lengthText?: LengthText;
   navigationEndpoint: CompactVideoRendererNavigationEndpoint;
@@ -1239,21 +1234,21 @@ export interface PlayerOverlayRendererAutoplay {
 }
 
 export interface PlayerOverlayAutoplayRenderer {
-  title: YTSimpleText;
-  videoTitle: YTSimpleText;
+  title: YTSimpleTextContainer;
+  videoTitle: YTSimpleTextContainer;
   byline: Byline;
-  cancelText: YTSimpleText;
-  pauseText: YTSimpleText;
+  cancelText: YTSimpleTextContainer;
+  pauseText: YTSimpleTextContainer;
   background: Background;
   countDownSecs: number;
   nextButton: NextButton;
   trackingParams: string;
   preferImmediateRedirect: boolean;
   videoId: string;
-  publishedTimeText: YTSimpleText;
+  publishedTimeText: YTSimpleTextContainer;
   webShowNewAutonavCountdown: boolean;
   webShowBigThumbnailEndscreen: boolean;
-  shortViewCountText: YTSimpleText;
+  shortViewCountText: YTSimpleTextContainer;
 }
 
 export interface NextButton {
@@ -1272,7 +1267,7 @@ export interface EndScreen {
 
 export interface WatchNextEndScreenRenderer {
   results: WatchNextEndScreenRendererResult[];
-  title: YTSimpleText;
+  title: YTSimpleTextContainer;
   trackingParams: string;
 }
 
@@ -1290,7 +1285,7 @@ export interface EndScreenVideoRenderer {
   navigationEndpoint: CurrentVideoEndpointClass;
   trackingParams: string;
   shortViewCountText: ShortViewCountText;
-  publishedTimeText: YTSimpleText;
+  publishedTimeText: YTSimpleTextContainer;
   thumbnailOverlays: EndScreenVideoRendererThumbnailOverlay[];
 }
 
