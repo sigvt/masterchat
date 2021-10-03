@@ -1,3 +1,9 @@
+export type EndReason =
+  | "privated" // Privated by streamer
+  | "deleted" // Deleted by streamer
+  | "aborted" // Aborted by user
+  | null; // Stream ended normally
+
 export type ErrorCode =
   | "unavailable" // Deleted video OR wrong video id
   | "disabled" // Live chat is disabled
@@ -5,8 +11,7 @@ export type ErrorCode =
   | "membersOnly" // No permission (members-only)
   | "unarchived" // Live stream recording is not available
   | "denied" // Access denied (429)
-  | "invalid" // Invalid request
-  | "unknown"; // Unknown error
+  | "invalid"; // Invalid request
 
 export class MasterchatError extends Error {
   public code: ErrorCode;

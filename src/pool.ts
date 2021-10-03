@@ -4,6 +4,7 @@ import {
   AddChatItemAction,
   ChatResponse,
   Credentials,
+  EndReason,
   IterateChatOptions,
   Masterchat,
   MasterchatError,
@@ -17,7 +18,7 @@ interface StreamPoolEvents {
   data: (data: ChatResponse, metadata: Metadata) => void;
   actions: (actions: Action[], metadata: Metadata) => void;
   chats: (chats: AddChatItemAction[], metadata: Metadata) => void;
-  end: (metadata: Metadata) => void;
+  end: (reason: EndReason, metadata: Metadata) => void;
   error: (error: MasterchatError | Error, metadata: Metadata) => void;
 }
 
@@ -120,7 +121,7 @@ export class StreamPool extends EventEmitter {
 
     const mc = new Masterchat(videoId, channelId, this.options);
 
-    mc.on("end", () => this._handleEnd(mc));
+    mc.on("end", (reason) => this._handleEnd(mc, reason));
     mc.on("error", (err) => this._handleError(mc, err));
     mc.on("data", (data) => {
       this._handleData(mc, data);
@@ -164,9 +165,9 @@ export class StreamPool extends EventEmitter {
     this.emit("chats", chats, mc.metadata);
   }
 
-  private _handleEnd(mc: Masterchat) {
+  private _handleEnd(mc: Masterchat, reason: EndReason) {
     this.pool.delete(mc.videoId);
-    this.emit("end", mc.metadata);
+    this.emit("end", reason, mc.metadata);
   }
 
   private _handleError(mc: Masterchat, err: MasterchatError | Error) {

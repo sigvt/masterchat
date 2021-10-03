@@ -13,7 +13,7 @@ import { YTInitialData, YTPlayabilityStatus } from "../../yt/context";
 // LIVE_STREAM_OFFLINE => Offline (chat may be available)
 function assertPlayability(playabilityStatus: YTPlayabilityStatus | undefined) {
   if (!playabilityStatus) {
-    throw new MasterchatError("unknown", "Missing playabilityStatus: ");
+    throw new Error("playabilityStatus missing");
   }
   switch (playabilityStatus.status) {
     case "ERROR":

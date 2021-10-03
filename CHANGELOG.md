@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+- BREAKING: `end` event will provide a reason (`'privated' | 'deleted' | 'aborted' | null`)
+  - `streamPool.on('end', (mc) => {})` -> `streamPool.on('end', (reason, mc) => {})`
+- BREAKING: remove `unknown` type from `MasterchatError`
+- BREAKING: instance will emits `end` instead of `error` in some special cases where the unrecoverable error code is either `private` or `unavailable` and it was not occurred during the first request (this usually happens when a streamer deletes or privates their live stream after the stream ends)
+
+### utils
+
+- `runsToPlainText` expands `watchEndpoint` when `text` is a fragment of URL
+
 ## v0.12.0
 
 - BREAKING: Merged `MasterchatAgent` into `Masterchat`

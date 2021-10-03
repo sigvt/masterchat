@@ -6,12 +6,7 @@ function log(...obj: any) {
   console.log(...obj);
 }
 
-async function main({
-  videoIdOrUrl,
-}: {
-  videoIdOrUrl: string;
-  useCredentials?: boolean;
-}) {
+async function main({ videoIdOrUrl }: { videoIdOrUrl: string }) {
   const mc = await Masterchat.init(videoIdOrUrl, {
     credentials,
   });

@@ -6,6 +6,7 @@ import {
   AbortError,
   AccessDeniedError,
   DisabledChatError,
+  EndReason,
   InvalidArgumentError,
   MasterchatError,
   MembersOnlyError,
@@ -55,10 +56,10 @@ export { StreamPool } from "./pool";
 export * from "./protobuf";
 export {
   delay,
-  runsToString,
-  toVideoId,
   endpointToUrl,
   guessFreeChat,
+  runsToString,
+  toVideoId,
 } from "./utils";
 export * from "./yt";
 
@@ -74,7 +75,7 @@ export interface Events {
   data: (data: ChatResponse, mc: Masterchat) => void;
   actions: (actions: Action[], mc: Masterchat) => void;
   chats: (chats: AddChatItemAction[], mc: Masterchat) => void;
-  end: () => void;
+  end: (reason: EndReason) => void;
   error: (error: MasterchatError | Error) => void;
 }
 
@@ -203,6 +204,8 @@ export class Masterchat extends EventEmitter {
 
     this.listenerAbortion = new AbortController();
 
+    let handledFirstResponse = false;
+
     const makePromise = async ({
       iterateOptions,
     }: {
@@ -210,6 +213,8 @@ export class Masterchat extends EventEmitter {
     }) => {
       // NOTE: `ignoreFirstResponse=false` means you might get chats already processed before when recovering MasterchatAgent from error. Make sure you have unique index for chat id to prevent duplication.
       for await (const res of this.iterate(iterateOptions)) {
+        handledFirstResponse = true;
+
         this.emit("data", res, this);
 
         const { actions } = res;
@@ -231,10 +236,24 @@ export class Masterchat extends EventEmitter {
     })
       .then(() => {
         // live chat closed by streamer
-        this.emit("end");
+        this.emit("end", null);
       })
       .catch((err) => {
         if (err instanceof AbortError) return;
+
+        // special treatment for unrecoverable unavailable/private errors
+        // emit 'end' only if ->
+        //   (not first response) && unrecoverable (private || unavailable)
+        if (
+          err instanceof MasterchatError &&
+          ["private", "unavailable"].includes(err.code) &&
+          handledFirstResponse
+        ) {
+          const reason = err.code === "private" ? "privated" : "deleted";
+          this.emit("end", reason);
+          return;
+        }
+
         this.emit("error", err);
       })
       .finally(() => {
@@ -247,7 +266,7 @@ export class Masterchat extends EventEmitter {
   public stop(): void {
     if (!this.listener) return;
     this.listenerAbortion.abort();
-    this.emit("end");
+    this.emit("end", "aborted");
   }
 
   async fetch(options?: FetchChatOptions): Promise<ChatResponse>;
@@ -500,7 +519,7 @@ export class Masterchat extends EventEmitter {
         const driftMs = Date.now() - startMs;
         // this.log("iterate", `driftMs: ${driftMs}`);
         const timeoutMs = continuation.timeoutMs - driftMs;
-        if (timeoutMs > 0) {
+        if (timeoutMs > 500) {
           await delay(timeoutMs, signal);
         }
       }

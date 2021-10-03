@@ -22,7 +22,11 @@ export interface FetchChatOptions {
 }
 
 export interface IterateChatOptions extends FetchChatOptions {
-  /** ignore first response fetched by reload token */
+  /**
+   * ignore first response fetched by reload token
+   * set it to false which means you might get chats already processed before when recovering MasterchatAgent from error. Make sure you have unique index for chat id to prevent duplication.
+   * @default false
+   * */
   ignoreFirstResponse?: boolean;
 
   /** pass previously fetched token to resume chat fetching */
