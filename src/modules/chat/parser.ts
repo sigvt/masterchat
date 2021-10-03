@@ -157,28 +157,44 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
             .headerPrimaryText!.runs.slice(1)
             .map((r) => r.text)
             .join("");
+          // duration > membership.since
+          // e.g. 12 months > 6 months
+          const duration = durationToSeconds(durationText);
+
+          const level = renderer.headerSubtext
+            ? asString(renderer.headerSubtext)
+            : undefined;
+
           const action: AddMembershipMilestoneItemAction = {
             type: "addMembershipMilestoneItemAction",
             id: renderer.id,
             timestampUsec,
             timestamp,
-            tenant: asString(renderer.headerSubtext),
+            level,
             membership,
             authorName,
             authorPhoto,
             message,
+            duration,
             durationText,
           };
           return action;
         }
+
+        /**
+         * no level -> ["New Member"]
+         * multiple levels -> ["Welcome", "<level>", "!"]
+         */
+        const subRuns = (renderer.headerSubtext as YTRunContainer<YTTextRun>)
+          .runs;
+        const level = subRuns.length > 1 ? subRuns[1].text : undefined;
 
         const action: AddMembershipItemAction = {
           type: "addMembershipItemAction",
           id: renderer.id,
           timestampUsec,
           timestamp,
-          tenant: (renderer.headerSubtext as YTRunContainer<YTTextRun>).runs[1]
-            .text,
+          level,
           membership,
           authorName,
           authorPhoto,
@@ -194,14 +210,19 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
         };
       } else if ("liveChatViewerEngagementMessageRenderer" in item) {
         // TODO: normalize payload
-        // Engagement
+        // Engagement message
+        /**
+         * .icon.iconType
+         * YOUTUBE_ROUND: engagement message
+         * POLL: poll result message
+         */
         const renderer = item["liveChatViewerEngagementMessageRenderer"]!;
         return {
           type: "addViewerEngagementMessageAction",
           ...renderer,
         };
       } else if ("liveChatModeChangeMessageRenderer" in item) {
-        // Mode Change Message (e.g. toggle members-only)
+        // Mode change message (e.g. toggle members-only)
         const renderer = item["liveChatModeChangeMessageRenderer"]!;
         const text = asString(renderer.text);
         const subtext = asString(renderer.subtext);
@@ -449,20 +470,20 @@ function tsToDate(ts: string): Date {
 
 function parseMembership(badge: YTAuthorBadge): Membership | undefined {
   const renderer = badge.liveChatAuthorBadgeRenderer;
-  if (renderer.customThumbnail) {
-    const match = /^(.+?)(?:\s\((.+)\))?$/.exec(renderer.tooltip);
-    if (match) {
-      const [_, status, since] = match;
-      const membership = {
-        status,
-        since,
-        thumbnail:
-          renderer.customThumbnail.thumbnails[
-            renderer.customThumbnail.thumbnails.length - 1
-          ].url,
-      };
-      return membership;
-    }
+  if (!renderer.customThumbnail) return;
+
+  const match = /^(.+?)(?:\s\((.+)\))?$/.exec(renderer.tooltip);
+  if (match) {
+    const [_, status, since] = match;
+    const membership = {
+      status,
+      since,
+      thumbnail:
+        renderer.customThumbnail.thumbnails[
+          renderer.customThumbnail.thumbnails.length - 1
+        ].url,
+    };
+    return membership;
   }
 }
 
@@ -507,4 +528,48 @@ function parseBadges(renderer: YTLiveChatTextMessageRenderer) {
     isModerator,
     membership,
   };
+}
+
+function toISO8601Duration(durationText: string): string {
+  const match = /^(a|\d+)\s(year|month|week|day|hour|minute|second)s?$/.exec(
+    durationText
+  );
+  if (!match) throw new Error(`Invalid duration: ${durationText}`);
+
+  const [_, duration, unit] = match;
+  const durationInt = parseInt(duration) || 1;
+  const durationUnit = {
+    year: "Y",
+    month: "M",
+    week: "W",
+    day: "D",
+    hour: "TH",
+    minute: "TM",
+    second: "TS",
+  }[unit];
+  if (!durationUnit) throw new Error(`Invalid duration unit: ${unit}`);
+
+  return `P${durationInt}${durationUnit}`;
+}
+
+function durationToSeconds(durationText: string): number {
+  const match = /^(a|\d+)\s(year|month|week|day|hour|minute|second)s?$/.exec(
+    durationText
+  );
+  if (!match) throw new Error(`Invalid duration: ${durationText}`);
+
+  const [_, duration, unit] = match;
+  const durationInt = parseInt(duration) || 1;
+  const multiplier = {
+    year: 31536000,
+    month: 2628000,
+    week: 604800,
+    day: 86400,
+    hour: 3600,
+    minute: 60,
+    second: 1,
+  }[unit];
+  if (!multiplier) throw new Error(`Invalid duration unit: ${unit}`);
+
+  return durationInt * multiplier;
 }

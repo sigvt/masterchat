@@ -45,7 +45,10 @@ async function main({ videoIdOrUrl }: { videoIdOrUrl: string }) {
     for (const action of actions) {
       switch (action.type) {
         case "addChatItemAction": {
-          log(chalk.gray(`${action.authorName}:`), asString(action.rawMessage));
+          log(
+            chalk.gray(`${action.authorChannelId} ${action.authorName}:`),
+            asString(action.rawMessage)
+          );
           break;
         }
         case "addSuperChatItemAction": {
@@ -62,7 +65,7 @@ $$$$$$$$$$$$$$$$$`)
         case "addMembershipItemAction": {
           log(
             chalk.green(`=================
-Welcome ${action.tenant}, ${action.authorName} !
+Welcome${action.level ? ` ${action.level},` : ""} ${action.authorName} !
 ${action.membership.status} ${action.membership.since ?? ""}
 =================`)
           );
@@ -74,7 +77,9 @@ ${action.membership.status} ${action.membership.since ?? ""}
 ${action.authorName} (${action.membership.status} ${
               action.membership.since ?? ""
             })
-Member of ${action.tenant} for ${action.durationText}
+Member${action.level ? ` of ${action.level}` : ""} for ${
+              action.durationText
+            } (${action.duration})
 ${action.message ? asString(action.message) : "<empty message>"}
 =================`)
           );
@@ -94,6 +99,71 @@ ${action}
           log(
             chalk.red(`=================
 [${action.icon.iconType}] ${asString(action.message)}
+=================`)
+          );
+          break;
+        }
+        case "modeChangeAction": {
+          log(
+            chalk.cyan(`=================
+[${action.mode} = ${action.enabled}] ${asString(action.description)}
+=================`)
+          );
+          break;
+        }
+        case "showLiveChatActionPanelAction": {
+          console.log(JSON.stringify(action));
+          log(
+            chalk.cyan(`=================
+[open ${action.targetId}]
+${action.contents.pollRenderer.choices.map((choice, i) => {
+  return `${i + 1}: ${choice.text} ${choice.votePercentage} ${
+    choice.voteRatio
+  } ${choice.selected}\n`;
+})}
+${action.contents.pollRenderer.header.pollHeaderRenderer.liveChatPollType}
+${asString(action.contents.pollRenderer.header.pollHeaderRenderer.metadataText)}
+${asString(action.contents.pollRenderer.header.pollHeaderRenderer.pollQuestion)}
+=================`)
+          );
+          break;
+        }
+        case "updateLiveChatPollAction": {
+          log(
+            chalk.cyan(`=================
+${action.choices.map((choice, i) => {
+  return `${i + 1}: ${choice.text} ${choice.votePercentage} ${
+    choice.voteRatio
+  } ${choice.selected}\n`;
+})}
+${action.header.pollHeaderRenderer.liveChatPollType}
+${asString(action.header.pollHeaderRenderer.pollQuestion)}
+${asString(action.header.pollHeaderRenderer.metadataText)}
+=================`)
+          );
+          break;
+        }
+        case "closeLiveChatActionPanelAction": {
+          log(
+            chalk.cyan(`=================
+[close ${action.targetPanelId}]
+${action.skipOnDismissCommand}
+=================`)
+          );
+          break;
+        }
+        case "markChatItemAsDeletedAction": {
+          log(
+            chalk.bgYellow.black(`=================
+[delete ${action.targetId} retracted=${action.retracted}]
+=================`)
+          );
+          break;
+        }
+        case "markChatItemsByAuthorAsDeletedAction": {
+          log(
+            chalk.bgRed(`=================
+[ban ${action.channelId}]
 =================`)
           );
           break;

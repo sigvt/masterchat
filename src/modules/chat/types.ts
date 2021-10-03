@@ -172,7 +172,10 @@ export interface AddMembershipItemAction {
   id: string;
   timestamp: Date;
   timestampUsec: string;
-  tenant: string;
+
+  // `level` is only shown when there's multiple levels available
+  level?: string;
+
   membership: Membership;
   authorName: string;
   authorPhoto: string;
@@ -183,11 +186,27 @@ export interface AddMembershipMilestoneItemAction {
   id: string;
   timestamp: Date;
   timestampUsec: string;
-  tenant: string;
+
+  // `level` is only shown when there's multiple levels available
+  level?: string;
+
   membership: Membership;
   authorName: string;
   authorPhoto: string;
+
+  /**
+   * Membership duration in seconds
+   */
+  duration: number;
+
+  /**
+   * Human readable membership duration
+   */
   durationText: string;
+
+  /**
+   * Milestone message
+   */
   message: YTRun[] | null;
 }
 
