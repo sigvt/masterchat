@@ -1,6 +1,5 @@
-import { Buffer } from "buffer";
 import { b64d, b64e, B64Type } from "./b64";
-import { bitob, cc } from "./util";
+import { bitob, concatu8 as cc, u8tob64 } from "./util";
 
 export type CVPair = {
   channelId: string;
@@ -150,11 +149,9 @@ function cht(chatId: string) {
 }
 
 function hdt(tgt: CVPair): string {
-  return cc([
-    ld(1, cvt(tgt)),
-    ld(3, ld(48687757, ld(1, tgt.videoId))),
-    vt(4, 1),
-  ]).toString("base64");
+  return u8tob64(
+    cc([ld(1, cvt(tgt)), ld(3, ld(48687757, ld(1, tgt.videoId))), vt(4, 1)])
+  );
 }
 
 function truc(i: string) {
@@ -165,18 +162,21 @@ function truc(i: string) {
  * Builder
  */
 
-function ld(fid: bigint | number, payload: Buffer[] | Buffer | string): Buffer {
+function ld(
+  fid: bigint | number,
+  payload: Uint8Array[] | Uint8Array | string
+): Uint8Array {
   const b =
     typeof payload === "string"
-      ? Buffer.from(payload)
+      ? new TextEncoder().encode(payload)
       : Array.isArray(payload)
-      ? Buffer.concat(payload)
+      ? cc(payload)
       : payload;
   const bLen = b.byteLength;
   return cc([bitob(pbh(fid, 2)), bitob(encv(BigInt(bLen))), b]);
 }
 
-function vt(fid: bigint | number, payload: bigint | number): Buffer {
+function vt(fid: bigint | number, payload: bigint | number): Uint8Array {
   return cc([bitob(pbh(fid, 0)), bitob(payload)]);
 }
 

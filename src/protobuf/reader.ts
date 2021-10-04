@@ -1,7 +1,5 @@
-import { Buffer } from "buffer";
-
 export class ProtoBufReader {
-  buf: Buffer;
+  buf: Uint8Array;
   c: number;
   s: number = 0;
 
@@ -9,33 +7,35 @@ export class ProtoBufReader {
     return [n >> 3n, Number(n & 0x7n)];
   }
 
-  static parseVariant(buf: Buffer): bigint {
+  static parseVariant(buf: Uint8Array): bigint {
     return buf.reduce(
       (r, b, i) => r | ((BigInt(b) & 0x7fn) << (BigInt(i) * 7n)),
       0n
     );
   }
 
-  constructor(buf: Buffer) {
+  constructor(buf: Uint8Array) {
     this.buf = buf;
     this.c = 0;
   }
 
-  eat(bytes: number): Buffer | null {
+  eat(bytes: number): Uint8Array | null {
     if (this.isEnded()) return null;
     return this.buf.slice(this.c, (this.c += bytes));
   }
 
   eatUInt32(): number | null {
     if (this.isEnded()) return null;
-    const n = this.buf.readUInt32LE(this.c);
+    const n = new DataView(this.buf).getUint32(this.c, true);
+    // const n = this.buf.readUInt32LE(this.c);
     this.c += 4;
     return n;
   }
 
   eatUInt64(): bigint | null {
     if (this.isEnded()) return null;
-    const n = this.buf.readBigUInt64LE(this.c);
+    const n = new DataView(this.buf).getBigUint64(this.c, true);
+    // const n = this.buf.readBigUInt64LE(this.c);
     this.c += 8;
     return n;
   }
