@@ -1,4 +1,5 @@
 #!/usr/bin/env/node
+// livechat inspector
 
 import chalk from "chalk";
 import {
@@ -10,7 +11,7 @@ import {
 } from "masterchat";
 
 const MAX_VISIBLE_CHATS = 2;
-const CHAT_HISTORY_SIZE = 500;
+const CHAT_HISTORY_SIZE = 5000;
 
 async function main({ videoIdOrUrl }: { videoIdOrUrl: string }) {
   const history = new ChatHistory();

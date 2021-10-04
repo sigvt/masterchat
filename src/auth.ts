@@ -1,5 +1,5 @@
 // import sha1 from "sha1";
-import crypto from "crypto";
+import * as crypto from "crypto";
 import { DO, SASH, XGAU, XGPID, XO } from "./constants";
 
 export interface Credentials {
