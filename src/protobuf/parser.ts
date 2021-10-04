@@ -1,11 +1,10 @@
-import { Buffer } from "buffer";
 import debug from "debug";
 import { ProtoBufReader } from "./reader";
 import { PBToken, PBType, PBValue } from "./token";
 
 const debugLog = debug("masterchat:pb");
 
-export function parsePb(input: Buffer, depth: number = 0): PBValue {
+export function parsePb(input: Uint8Array, depth: number = 0): PBValue {
   function logger(...obj: any) {
     debugLog(depth + "".padEnd(depth * 2, " "), obj.join(" "));
   }
