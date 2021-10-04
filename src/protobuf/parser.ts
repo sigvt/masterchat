@@ -62,7 +62,7 @@ export function parsePb(input: Uint8Array, depth: number = 0): PBValue {
       // }
       default: {
         // throw new Error("Unknown type: " + type);
-        const res = input.toString();
+        const res = new TextDecoder().decode(input);
         logger("└str>", res);
         return res;
       }
