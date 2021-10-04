@@ -5,23 +5,23 @@
 ```bash
 git checkout dev
 npm install
-npm run build
+yarn build
 ```
 
 ## Development Flow
 
 ```bash
-npm run dev
+yarn dev
 ```
 
 ```bash
-npm run build
+yarn build
 yarn link
 
 cd tools/
 yarn install
 yarn link masterchat
-DEBUG=masterchat node -r ts-node/register ./livechat-inspector.ts <videoId>
+DEBUG=masterchat ts-node ./inspector.ts <videoId>
 ```
 
 ## Testing

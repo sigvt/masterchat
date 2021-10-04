@@ -43,7 +43,7 @@ async function main({ videoIdOrUrl }: { videoIdOrUrl: string }) {
           // if ("liveChatPlaceholderItemRenderer" in item) {
           //   item.liveChatPlaceholderItemRenderer.id;
           // }
-          const target = history.findOne(id);
+          const target = history.findOne(id)?.[2];
           log(
             chalk.blue(`=================
 [replace ${id}]
@@ -122,7 +122,6 @@ ${action.message ? stringify(action.message) : "<empty message>"}
             chalk.blue(`=================
 ${stringify(action.title)}
 ${stringify(action.message)}
-${JSON.stringify(action)}
 =================`)
           );
           break;
@@ -193,7 +192,7 @@ ${action.skipOnDismissCommand}
           log(
             chalk.bgYellow.black(`=================
 [${action.retracted ? "retracted" : "deleted"} ${action.targetId}]
-${chat}
+${chat?.[2]} (${chat?.[1]})
 =================`)
           );
           break;
@@ -203,7 +202,7 @@ ${chat}
           log(
             chalk.bgRed(`=================
 [hidden|timeout ${action.channelId}]
-${chats.map((chat) => `- ${chat}\n`)}
+${chats.map((chat) => `- ${chat}`).join("\n")}
 =================`)
           );
           break;
@@ -262,7 +261,7 @@ class ChatHistory {
     return this.db.filter((rec) => rec[1] === channelId).map((rec) => rec[2]);
   }
   findOne(chatId: string) {
-    return this.db.find((rec) => rec[0] === chatId)?.[2];
+    return this.db.find((rec) => rec[0] === chatId);
   }
 }
 
