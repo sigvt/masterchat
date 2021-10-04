@@ -44,7 +44,7 @@ export function printBuf(buf: Uint8Array) {
 export function toJSON(tokens: PBToken[]): string {
   return JSON.stringify(
     tokens,
-    (k, v) => (typeof v === "bigint" ? v.toString() : v),
+    (_, v) => (typeof v === "bigint" ? v.toString() : v),
     2
   );
 }
