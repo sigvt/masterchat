@@ -1,4 +1,3 @@
-import { Buffer } from "buffer";
 import { EventEmitter } from "events";
 import { buildAuthHeaders, Credentials } from "./auth";
 import * as constants from "./constants";
@@ -32,6 +31,7 @@ import {
   parseMetadataFromWatch,
 } from "./modules/context/parser";
 import { lrc, rmp, rtc, smp } from "./protobuf/assembler";
+import { b64tou8 } from "./protobuf/util";
 import {
   debugLog,
   delay,
@@ -55,15 +55,15 @@ export * from "./modules/context";
 export { StreamPool } from "./pool";
 export * from "./protobuf";
 export {
+  ColorFormat,
   delay,
   endpointToUrl,
+  formatColor,
   guessFreeChat,
   runsToString,
   stringify,
   toISO8601Duration,
   toVideoId,
-  formatColor,
-  ColorFormat,
 } from "./utils";
 export * from "./yt";
 
@@ -192,7 +192,7 @@ export class Masterchat extends EventEmitter {
   setCredentials(credentials?: Credentials | string): void {
     if (typeof credentials === "string") {
       credentials = JSON.parse(
-        Buffer.from(credentials, "base64").toString()
+        new TextDecoder().decode(b64tou8(credentials))
       ) as Credentials;
     }
 

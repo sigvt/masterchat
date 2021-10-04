@@ -1,11 +1,11 @@
-import { Buffer } from "buffer";
+import { hextou8 } from "./protobuf/util";
 
 function h(b: TemplateStringsArray): string {
-  return Buffer.from(b.raw[0], "hex").toString();
+  return new TextDecoder().decode(hextou8(b.raw[0]));
 }
 
 function hj(b: TemplateStringsArray): any {
-  return JSON.parse(Buffer.from(b.raw[0], "hex").toString());
+  return JSON.parse(h(b));
 }
 
 export const DH = hj`7b224163636570742d4c616e6775616765223a22656e222c22557365722d4167656e74223a224d6f7a696c6c612f352e3020284d6163696e746f73683b20496e74656c204d6163204f5320582031305f31355f3729204170706c655765624b69742f3533372e333620284b48544d4c2c206c696b65204765636b6f29204368726f6d652f39302e302e343433302e3933205361666172692f3533372e3336227d`;

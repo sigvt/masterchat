@@ -25,7 +25,7 @@ export default [
       }),
       isProd && terser({ keep_classnames: true }),
     ],
-    external: ["crypto", "cross-fetch", "events", "util", "buffer", "debug"],
+    external: ["crypto", "cross-fetch", "events", "debug"],
   },
   {
     input: "./lib/index.d.ts",
@@ -34,6 +34,6 @@ export default [
       format: "es",
     },
     plugins: [dts()],
-    external: ["events", "util"],
+    external: ["events"],
   },
 ];
