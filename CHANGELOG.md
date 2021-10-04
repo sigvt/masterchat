@@ -17,6 +17,7 @@
 - New util `stringify` to transform `YTRun[]`, `YTRunContainer` and `YTSimpleText` into string
 - New util `formatColor` to format `Color` into CSS rgba() or HEX representation
 - New util `toISO8601Duration` to format duration text into ISO8601 duration format
+- use Uint8Array instead of Buffer in protobuf lib (by @jprochazk)
 
 ## v0.12.0
 
@@ -65,7 +66,7 @@ mc.listen()
 
 - BREAKING: `emojiHandler` in `runsToString` now takes `YTEmojiRun` instead of `YTEmoji`
 - Added `textHandler` option to `runsToString`
-- BREAKING: `runsToString` will expand truncated urls (Thanks @stu43005)
+- BREAKING: `runsToString` will expand truncated urls (by @stu43005)
 
 ## v0.11.0
 
