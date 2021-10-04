@@ -1,19 +1,16 @@
 import {
   YTCloseLiveChatActionPanelAction,
   YTLiveChatActionPanelRenderer,
-  YTLiveChatBannerRenderer,
-  YTLiveChatMembershipItemRenderer,
   YTLiveChatPaidStickerRenderer,
   YTLiveChatPlaceholderItemRenderer,
   YTLiveChatPollRenderer,
   YTLiveChatTickerPaidMessageItemRenderer,
   YTLiveChatTickerPaidStickerItemRenderer,
   YTLiveChatTickerSponsorItemRenderer,
-  YTLiveChatViewerEngagementMessageRenderer,
   YTRemoveBannerForLiveChatCommand,
   YTReplaceChatItemAction,
   YTRun,
-  YTRunContainer,
+  YTText,
   YTTooltipRenderer,
 } from "../../yt/chat";
 
@@ -72,6 +69,9 @@ export interface Membership {
   thumbnail: string;
 }
 
+/**
+ * 0 - 255
+ */
 export interface Color {
   r: number;
   g: number;
@@ -90,6 +90,8 @@ export interface SuperChat {
   currency: string;
   color: SuperChatColor;
   significance: SuperChatSignificance;
+  authorNameTextColor: Color;
+  timestampColor: Color;
   headerBackgroundColor: Color;
   headerTextColor: Color;
   bodyBackgroundColor: Color;
@@ -232,9 +234,19 @@ export interface MarkChatItemsByAuthorAsDeletedAction {
   timestamp: Date;
 }
 
-export interface AddSuperChatTickerAction
-  extends OmitTrackingParams<YTLiveChatTickerPaidMessageItemRenderer> {
+export interface AddSuperChatTickerAction {
   type: "addSuperChatTickerAction";
+  id: string;
+  amountText: string;
+  authorChannelId: string;
+  authorName: string;
+  authorPhoto: string;
+  durationSec: number;
+  fullDurationSec: number;
+  superchat: SuperChat;
+  amountTextColor: Color;
+  startBackgroundColor: Color;
+  endBackgroundColor: Color;
 }
 
 export interface AddSuperStickerTickerAction
@@ -272,9 +284,14 @@ export interface ShowTooltipAction extends YTTooltipRenderer {
   type: "showTooltipAction";
 }
 
-export interface AddViewerEngagementMessageAction
-  extends YTLiveChatViewerEngagementMessageRenderer {
+export interface AddViewerEngagementMessageAction {
   type: "addViewerEngagementMessageAction";
+  id: string;
+  messageType: "engagement" | "poll" | string;
+  message: YTText;
+  url: string;
+  timestamp: Date;
+  timestampUsec: string;
 }
 
 export interface ShowLiveChatActionPanelAction

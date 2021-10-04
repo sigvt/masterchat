@@ -1,6 +1,7 @@
 export type EndReason =
   | "privated" // Privated by streamer
   | "deleted" // Deleted by streamer
+  | "disabled" // Chat disabled by streamer
   | "aborted" // Aborted by user
   | null; // Stream ended normally
 

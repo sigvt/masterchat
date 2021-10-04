@@ -12,9 +12,9 @@ export function unwrapReplayActions(rawActions: YTAction[]) {
   );
 }
 
-export function parseColorCode(code: number): Color | undefined {
+export function parseColorCode(code: number): Color {
   if (code > 4294967295) {
-    return undefined;
+    throw new Error(`Invalid color code: ${code}`);
   }
 
   const b = code & 0xff;

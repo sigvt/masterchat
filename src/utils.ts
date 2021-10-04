@@ -2,8 +2,33 @@ import crossFetch from "cross-fetch";
 import debug from "debug";
 import { DC, DH, DO } from "./constants";
 import { AbortError } from "./errors";
+import { Color } from "./modules/chat/types";
 import { YTEmojiRun, YTRun, YTText, YTTextRun } from "./yt/chat";
 import { FluffyBrowseEndpoint } from "./yt/context";
+
+export type ColorFormat = "rgb" | "hex";
+
+export interface RunsToStringOptions {
+  // add space between text and emoji tokens
+  spaces?: boolean;
+
+  // function to process text token
+  textHandler?: (text: YTTextRun) => string;
+
+  // function to process emoji token
+  emojiHandler?: (emoji: YTEmojiRun) => string;
+}
+
+export function formatColor(color: Color, format: ColorFormat = "rgb"): string {
+  switch (format) {
+    case "rgb":
+      return `rgba(${color.r},${color.g},${color.b},${color.opacity / 255})`;
+    case "hex":
+      return `#${color.r.toString(16)}${color.g.toString(16)}${color.b.toString(
+        16
+      )}${color.opacity.toString(16)}`;
+  }
+}
 
 export function ytFetch(input: string, init?: RequestInit) {
   if (!input.startsWith("http")) {
@@ -20,17 +45,6 @@ export function ytFetch(input: string, init?: RequestInit) {
     },
   };
   return crossFetch(requestUrl, requestInit);
-}
-
-export interface RunsToStringOptions {
-  // add space between text and emoji tokens
-  spaces?: boolean;
-
-  // function to process text token
-  textHandler?: (text: YTTextRun) => string;
-
-  // function to process emoji token
-  emojiHandler?: (emoji: YTEmojiRun) => string;
 }
 
 export const debugLog = debug("masterchat");
@@ -122,12 +136,22 @@ export function emojiRunToPlainText(run: YTEmojiRun): string {
 }
 
 /**
- * [...] | {runs: [...]} | {simpleText: "..."} -> string
+ * Convert any yt text container into string
+ * `[...] | {runs: [...]} | {simpleText: "..."} -> string`
  */
-export function asString(
+export function stringify(
   payload: YTText | YTRun[] | string,
   runsToStringOptions?: RunsToStringOptions
-): string {
+): string;
+export function stringify(
+  payload: undefined,
+  runsToStringOptions?: RunsToStringOptions
+): undefined;
+export function stringify(
+  payload: YTText | YTRun[] | string | undefined,
+  runsToStringOptions?: RunsToStringOptions
+): string | undefined {
+  if (payload === undefined) return undefined;
   if (typeof payload === "string") return payload;
   if (Array.isArray(payload)) return runsToString(payload, runsToStringOptions);
   if ("runs" in payload) return runsToString(payload.runs, runsToStringOptions);
@@ -199,4 +223,26 @@ export function withContext(input: any = {}) {
       client: DC,
     },
   };
+}
+
+export function toISO8601Duration(durationText: string): string {
+  const match = /^(a|\d+)\s(year|month|week|day|hour|minute|second)s?$/.exec(
+    durationText
+  );
+  if (!match) throw new Error(`Invalid duration: ${durationText}`);
+
+  const [_, duration, unit] = match;
+  const durationInt = parseInt(duration) || 1;
+  const durationUnit = {
+    year: "Y",
+    month: "M",
+    week: "W",
+    day: "D",
+    hour: "TH",
+    minute: "TM",
+    second: "TS",
+  }[unit];
+  if (!durationUnit) throw new Error(`Invalid duration unit: ${unit}`);
+
+  return `P${durationInt}${durationUnit}`;
 }

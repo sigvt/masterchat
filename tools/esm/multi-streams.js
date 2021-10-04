@@ -21,7 +21,9 @@ async function main() {
       chats[0]?.rawMessage
     )
   );
-  streams.on("end", ({ videoId }) => console.log(videoId, "ended"));
+  streams.on("end", (reason, { videoId }) =>
+    console.log(videoId, "ended", reason)
+  );
   streams.on("error", (err, { videoId }) =>
     console.error(videoId, err.message)
   );

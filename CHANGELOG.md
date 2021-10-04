@@ -1,19 +1,22 @@
 # Changelog
 
-## Unreleased
+## v0.13.0
 
-- BREAKING: normalized `AddBannerAction`
-- BREAKING: normalized `AddMembershipItemAction`
-- New action `AddMembershipMilestoneItemAction`. Use `durationText` for the precise membership duration.
-- BREAKING: `end` event will provide a reason (`'privated' | 'deleted' | 'aborted' | null`)
+- BREAKING: normalized action payload of
+  - `AddViewerEngagementMessageAction`
+  - `AddBannerAction`
+  - `AddMembershipItemAction`
+  - `AddSuperChatTickerAction`
+- New action: `AddMembershipMilestoneItemAction`. Use `duration` for the precise membership duration
+- Add `timestampColor` and `authorNameTextColor` to `SuperChat`
+- BREAKING: `end` event will provide a reason (`'privated' | 'deleted' | 'disabled' | 'aborted' | null`)
   - `streamPool.on('end', (mc) => {})` -> `streamPool.on('end', (reason, mc) => {})`
 - BREAKING: remove `unknown` type from `MasterchatError`
 - BREAKING: instance will emits `end` instead of `error` in some special cases where the unrecoverable error code is either `private` or `unavailable` and it was not occurred during the first request (this usually happens when a streamer deletes or privates their live stream after the stream ends)
-
-### utils
-
-- New `asString` utility for transforming YTRun[], YTRunContainer and YTSimpleText into string
 - `runsToPlainText` expands `watchEndpoint` when `text` is a fragment of URL
+- New util `stringify` to transform `YTRun[]`, `YTRunContainer` and `YTSimpleText` into string
+- New util `formatColor` to format `Color` into CSS rgba() or HEX representation
+- New util `toISO8601Duration` to format duration text into ISO8601 duration format
 
 ## v0.12.0
 

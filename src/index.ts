@@ -35,7 +35,7 @@ import { lrc, rmp, rtc, smp } from "./protobuf/assembler";
 import {
   debugLog,
   delay,
-  runsToString,
+  stringify,
   toVideoId,
   withContext,
   ytFetch,
@@ -59,8 +59,11 @@ export {
   endpointToUrl,
   guessFreeChat,
   runsToString,
+  stringify,
+  toISO8601Duration,
   toVideoId,
-  asString,
+  formatColor,
+  ColorFormat,
 } from "./utils";
 export * from "./yt";
 
@@ -247,10 +250,25 @@ export class Masterchat extends EventEmitter {
         //   (not first response) && unrecoverable (private || unavailable)
         if (
           err instanceof MasterchatError &&
-          ["private", "unavailable"].includes(err.code) &&
+          [
+            "private", // privated
+            "unavailable", // deleted
+            "disabled", // disabled ()
+          ].includes(err.code) &&
           handledFirstResponse
         ) {
-          const reason = err.code === "private" ? "privated" : "deleted";
+          const reason = (() => {
+            switch (err.code) {
+              case "private":
+                return "privated";
+              case "unavailable":
+                return "deleted";
+              case "disabled":
+                return "disabled";
+              default:
+                return null;
+            }
+          })();
           this.emit("end", reason);
           return;
         }
@@ -350,7 +368,7 @@ export class Masterchat extends EventEmitter {
 
             default:
               this.log(
-                `<!>fetch`,
+                `[action required] fetch`,
                 `Unrecognized error code`,
                 status,
                 message,
@@ -406,7 +424,7 @@ export class Masterchat extends EventEmitter {
         delete obj["responseContext"];
 
         if ("contents" in obj) {
-          const reason = runsToString(obj.contents.messageRenderer.text.runs);
+          const reason = stringify(obj.contents.messageRenderer.text.runs);
           if (/disabled/.test(reason)) {
             // {contents: "Chat is disabled for this live stream."} => pre-chat unavailable
             // or accessing replay chat with live chat token
@@ -431,7 +449,7 @@ export class Masterchat extends EventEmitter {
           // {trackingParams} => ?
           this.log(
             `fetch`,
-            `<!>continuationNotFound(with trackingParams)`,
+            `[action required] continuationNotFound(with trackingParams)`,
             JSON.stringify(obj)
           );
         }
@@ -510,7 +528,7 @@ export class Masterchat extends EventEmitter {
       const { continuation } = res;
 
       if (!continuation) {
-        this.log("iterate", "will break loop as missing continuation");
+        // stream ended normally
         break;
       }
 
@@ -518,7 +536,6 @@ export class Masterchat extends EventEmitter {
 
       if (this.isLive ?? true) {
         const driftMs = Date.now() - startMs;
-        // this.log("iterate", `driftMs: ${driftMs}`);
         const timeoutMs = continuation.timeoutMs - driftMs;
         if (timeoutMs > 500) {
           await delay(timeoutMs, signal);

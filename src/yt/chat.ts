@@ -368,7 +368,7 @@ export interface YTLiveChatPaidMessageRenderer {
   contextMenuEndpoint: YTLiveChatItemContextMenuEndpointContainer;
   contextMenuAccessibility: YTAccessibilityData;
 
-  purchaseAmountText: YTText;
+  purchaseAmountText: YTSimpleTextContainer;
   timestampColor: number;
   authorNameTextColor: number;
   headerBackgroundColor: number;
@@ -389,7 +389,7 @@ export interface YTLiveChatPaidStickerRenderer {
   sticker: YTThumbnailListWithAccessibility;
   moneyChipBackgroundColor: number;
   moneyChipTextColor: number;
-  purchaseAmountText: YTText;
+  purchaseAmountText: YTSimpleTextContainer;
   stickerDisplayWidth: number;
   stickerDisplayHeight: number;
   backgroundColor: number;
@@ -531,7 +531,7 @@ export interface YTAddLiveChatTickerItem {
 
 export interface YTLiveChatTickerPaidMessageItemRenderer {
   id: string;
-  amount: YTText;
+  amount: YTSimpleTextContainer;
   amountTextColor: number;
   startBackgroundColor: number;
   endBackgroundColor: number;
@@ -818,7 +818,7 @@ export interface YTIconButtonRenderer {
 }
 
 export interface YTNavigationButtonRenderer<Endpoint> extends YTButtonRenderer {
-  text: YTText;
+  text: YTSimpleTextContainer;
   navigationEndpoint: Endpoint;
 }
 

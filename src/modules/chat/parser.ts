@@ -1,4 +1,4 @@
-import { asString, debugLog } from "../../utils";
+import { stringify, debugLog } from "../../utils";
 import {
   YTAction,
   YTAddLiveChatTickerItem,
@@ -16,6 +16,7 @@ import {
   AddMembershipItemAction,
   AddMembershipMilestoneItemAction,
   AddSuperChatItemAction,
+  AddViewerEngagementMessageAction,
   LiveChatMode,
   Membership,
   SuperChat,
@@ -27,10 +28,102 @@ import { omitTrackingParams, parseColorCode } from "./utils";
 
 const AMOUNT_REGEXP = /[\d.,]+/;
 
+function pickThumbUrl(thumbList: YTThumbnailList): string {
+  return thumbList.thumbnails[thumbList.thumbnails.length - 1].url;
+}
+
+function tsToDate(ts: string): Date {
+  return new Date(Number(BigInt(ts) / BigInt(1000)));
+}
+
+function parseMembership(badge: YTAuthorBadge): Membership | undefined {
+  const renderer = badge.liveChatAuthorBadgeRenderer;
+  if (!renderer.customThumbnail) return;
+
+  const match = /^(.+?)(?:\s\((.+)\))?$/.exec(renderer.tooltip);
+  if (match) {
+    const [_, status, since] = match;
+    const membership = {
+      status,
+      since,
+      thumbnail:
+        renderer.customThumbnail.thumbnails[
+          renderer.customThumbnail.thumbnails.length - 1
+        ].url,
+    };
+    return membership;
+  }
+}
+
+function parseBadges(renderer: YTLiveChatTextMessageRenderer) {
+  let isVerified = false,
+    isOwner = false,
+    isModerator = false,
+    membership: Membership | undefined = undefined;
+
+  if ("authorBadges" in renderer && renderer.authorBadges) {
+    for (const badge of renderer.authorBadges) {
+      const renderer = badge.liveChatAuthorBadgeRenderer;
+      const iconType = renderer.icon?.iconType;
+      switch (iconType) {
+        case "VERIFIED":
+          isVerified = true;
+          break;
+        case "OWNER":
+          isOwner = true;
+          break;
+        case "MODERATOR":
+          isModerator = true;
+          break;
+        case undefined:
+          // membership
+          membership = parseMembership(badge);
+          break;
+        default:
+          debugLog(
+            `[action required] Unrecognized iconType:`,
+            iconType,
+            JSON.stringify(renderer)
+          );
+          throw new Error("Unrecognized iconType: " + iconType);
+      }
+    }
+  }
+
+  return {
+    isOwner,
+    isVerified,
+    isModerator,
+    membership,
+  };
+}
+
+function durationToSeconds(durationText: string): number {
+  const match = /^(a|\d+)\s(year|month|week|day|hour|minute|second)s?$/.exec(
+    durationText
+  );
+  if (!match) throw new Error(`Invalid duration: ${durationText}`);
+
+  const [_, duration, unit] = match;
+  const durationInt = parseInt(duration) || 1;
+  const multiplier = {
+    year: 31536000,
+    month: 2628000,
+    week: 604800,
+    day: 86400,
+    hour: 3600,
+    minute: 60,
+    second: 1,
+  }[unit];
+  if (!multiplier) throw new Error(`Invalid duration unit: ${unit}`);
+
+  return durationInt * multiplier;
+}
+
 export function parseSuperChat(
   renderer: YTLiveChatPaidMessageRenderer
 ): SuperChat {
-  const input = asString(renderer.purchaseAmountText);
+  const input = stringify(renderer.purchaseAmountText);
   const amountString = AMOUNT_REGEXP.exec(input)![0].replace(/,/g, "");
 
   const amount = parseFloat(amountString);
@@ -46,10 +139,12 @@ export function parseSuperChat(
     currency,
     color,
     significance,
-    headerBackgroundColor: parseColorCode(renderer.headerBackgroundColor)!,
-    headerTextColor: parseColorCode(renderer.headerTextColor)!,
-    bodyBackgroundColor: parseColorCode(renderer.bodyBackgroundColor)!,
-    bodyTextColor: parseColorCode(renderer.bodyTextColor)!,
+    authorNameTextColor: parseColorCode(renderer.authorNameTextColor),
+    timestampColor: parseColorCode(renderer.timestampColor),
+    headerBackgroundColor: parseColorCode(renderer.headerBackgroundColor),
+    headerTextColor: parseColorCode(renderer.headerTextColor),
+    bodyBackgroundColor: parseColorCode(renderer.bodyBackgroundColor),
+    bodyTextColor: parseColorCode(renderer.bodyTextColor),
   };
 }
 
@@ -92,7 +187,7 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
           timestamp,
           timestampUsec,
           rawMessage: renderer.message.runs,
-          authorName: asString(renderer.authorName),
+          authorName: stringify(renderer.authorName),
           authorPhoto,
           authorChannelId,
           membership,
@@ -111,7 +206,7 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
 
         const timestamp = tsToDate(timestampUsec);
 
-        const authorPhoto = thumbListToUrl(renderer.authorPhoto);
+        const authorPhoto = pickThumbUrl(renderer.authorPhoto);
 
         const action: AddSuperChatItemAction = {
           type: "addSuperChatItemAction",
@@ -119,7 +214,7 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
           timestamp,
           timestampUsec,
           rawMessage: renderer.message?.runs,
-          authorName: asString(renderer.authorName),
+          authorName: stringify(renderer.authorName),
           authorPhoto,
           authorChannelId,
           superchat: parseSuperChat(renderer),
@@ -140,8 +235,8 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
 
         const timestampUsec = renderer.timestampUsec;
         const timestamp = tsToDate(timestampUsec);
-        const authorName = asString(renderer.authorName);
-        const authorPhoto = thumbListToUrl(renderer.authorPhoto);
+        const authorName = stringify(renderer.authorName);
+        const authorPhoto = pickThumbUrl(renderer.authorPhoto);
         const membership = parseMembership(renderer.authorBadges[0]);
         if (!membership)
           throw new Error(
@@ -162,7 +257,7 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
           const duration = durationToSeconds(durationText);
 
           const level = renderer.headerSubtext
-            ? asString(renderer.headerSubtext)
+            ? stringify(renderer.headerSubtext)
             : undefined;
 
           const action: AddMembershipMilestoneItemAction = {
@@ -209,23 +304,55 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
           ...renderer,
         };
       } else if ("liveChatViewerEngagementMessageRenderer" in item) {
-        // TODO: normalize payload
         // Engagement message
+        const renderer = item["liveChatViewerEngagementMessageRenderer"]!;
+
         /**
-         * .icon.iconType
          * YOUTUBE_ROUND: engagement message
          * POLL: poll result message
          */
-        const renderer = item["liveChatViewerEngagementMessageRenderer"]!;
-        return {
+        const { iconType } = renderer.icon;
+
+        let messageType = iconType;
+        switch (iconType) {
+          case "YOUTUBE_ROUND":
+            messageType = "engagement";
+            break;
+          case "POLL":
+            messageType = "poll";
+            break;
+          default:
+            debugLog(
+              "[action required] unknown icon type (EngagementMessage):",
+              JSON.stringify(renderer)
+            );
+        }
+
+        const timestampUsec = renderer.timestampUsec;
+        const timestamp = tsToDate(timestampUsec);
+        const url =
+          renderer?.actionButton?.buttonRenderer?.navigationEndpoint
+            ?.urlEndpoint?.url;
+        if (!url) {
+          debugLog("[action required] empty url:", JSON.stringify(renderer));
+        }
+
+        // TODO: add action url from YTLiveChatViewerEngagementMessageRenderer
+        const action: AddViewerEngagementMessageAction = {
           type: "addViewerEngagementMessageAction",
-          ...renderer,
+          id: renderer.id,
+          messageType,
+          message: renderer.message,
+          url,
+          timestamp,
+          timestampUsec,
         };
+        return action;
       } else if ("liveChatModeChangeMessageRenderer" in item) {
         // Mode change message (e.g. toggle members-only)
         const renderer = item["liveChatModeChangeMessageRenderer"]!;
-        const text = asString(renderer.text);
-        const subtext = asString(renderer.subtext);
+        const text = stringify(renderer.text);
+        const subtext = stringify(renderer.subtext);
 
         let mode = LiveChatMode.Unknown;
         if (/Slow mode/.test(text)) {
@@ -298,7 +425,7 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
     }
 
     case "addLiveChatTickerItemAction": {
-      const { item } = action[type]!;
+      const { item, durationSec } = action[type]!;
 
       const rendererType = Object.keys(
         item
@@ -306,12 +433,33 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
 
       switch (rendererType) {
         case "liveChatTickerPaidMessageItemRenderer": {
-          // TODO: normalize payload
-          // SuperChat ticker
+          // SuperChat Ticker
           const renderer = item[rendererType]!;
+
+          const superchat = parseSuperChat(
+            renderer.showItemEndpoint.showLiveChatItemEndpoint.renderer
+              .liveChatPaidMessageRenderer
+          );
+          const authorName = stringify(
+            renderer.showItemEndpoint.showLiveChatItemEndpoint.renderer
+              .liveChatPaidMessageRenderer.authorName
+          );
+
           return {
             type: "addSuperChatTickerAction",
-            ...omitTrackingParams(renderer),
+            id: renderer.id,
+            amountText: stringify(renderer.amount),
+            durationSec: Number(durationSec),
+            fullDurationSec: renderer.fullDurationSec,
+            authorChannelId: renderer.authorExternalChannelId,
+            authorName,
+            authorPhoto: pickThumbUrl(renderer.authorPhoto),
+            superchat,
+            amountTextColor: parseColorCode(renderer.amountTextColor),
+            startBackgroundColor: parseColorCode(
+              renderer.startBackgroundColor
+            )!,
+            endBackgroundColor: parseColorCode(renderer.endBackgroundColor),
           };
         }
         case "liveChatTickerPaidStickerItemRenderer": {
@@ -363,7 +511,7 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
         payload.header.liveChatBannerHeaderRenderer.icon.iconType !== "KEEP"
       ) {
         debugLog(
-          "[action required] Unknown icon type observed in addBannerToLiveChatCommand",
+          "[action required] unknown icon type (addBannerToLiveChatCommand)",
           JSON.stringify(payload.header.liveChatBannerHeaderRenderer.icon)
         );
       }
@@ -373,8 +521,8 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
       const renderer = payload.contents.liveChatTextMessageRenderer;
       const timestampUsec = renderer.timestampUsec;
       const timestamp = tsToDate(timestampUsec);
-      const authorName = asString(renderer.authorName);
-      const authorPhoto = thumbListToUrl(renderer.authorPhoto);
+      const authorName = stringify(renderer.authorName);
+      const authorPhoto = pickThumbUrl(renderer.authorPhoto);
       const authorChannelId = renderer.authorExternalChannelId;
       const { isVerified, isOwner, isModerator, membership } =
         parseBadges(renderer);
@@ -430,6 +578,10 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
     case "showLiveChatActionPanelAction": {
       // TODO: normalize payload
       const payload = action[type]!;
+      debugLog(
+        "[action required] showLiveChatActionPanelAction",
+        JSON.stringify(payload)
+      );
       return {
         type: "showLiveChatActionPanelAction",
         ...payload["panelToShow"]["liveChatActionPanelRenderer"],
@@ -439,6 +591,10 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
     case "closeLiveChatActionPanelAction": {
       // TODO: normalize payload
       const payload = action[type]!;
+      debugLog(
+        "[action required] closeLiveChatActionPanelAction",
+        JSON.stringify(payload)
+      );
       return {
         type: "closeLiveChatActionPanelAction",
         ...payload,
@@ -458,118 +614,4 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
     type: "unknown",
     payload: action,
   };
-}
-
-function thumbListToUrl(thumbList: YTThumbnailList): string {
-  return thumbList.thumbnails[thumbList.thumbnails.length - 1].url;
-}
-
-function tsToDate(ts: string): Date {
-  return new Date(Number(BigInt(ts) / BigInt(1000)));
-}
-
-function parseMembership(badge: YTAuthorBadge): Membership | undefined {
-  const renderer = badge.liveChatAuthorBadgeRenderer;
-  if (!renderer.customThumbnail) return;
-
-  const match = /^(.+?)(?:\s\((.+)\))?$/.exec(renderer.tooltip);
-  if (match) {
-    const [_, status, since] = match;
-    const membership = {
-      status,
-      since,
-      thumbnail:
-        renderer.customThumbnail.thumbnails[
-          renderer.customThumbnail.thumbnails.length - 1
-        ].url,
-    };
-    return membership;
-  }
-}
-
-function parseBadges(renderer: YTLiveChatTextMessageRenderer) {
-  let isVerified = false,
-    isOwner = false,
-    isModerator = false,
-    membership: Membership | undefined = undefined;
-
-  if ("authorBadges" in renderer && renderer.authorBadges) {
-    for (const badge of renderer.authorBadges) {
-      const renderer = badge.liveChatAuthorBadgeRenderer;
-      const iconType = renderer.icon?.iconType;
-      switch (iconType) {
-        case "VERIFIED":
-          isVerified = true;
-          break;
-        case "OWNER":
-          isOwner = true;
-          break;
-        case "MODERATOR":
-          isModerator = true;
-          break;
-        case undefined:
-          // membership
-          membership = parseMembership(badge);
-          break;
-        default:
-          debugLog(
-            `[action required] Unrecognized iconType:`,
-            iconType,
-            JSON.stringify(renderer)
-          );
-          throw new Error("Unrecognized iconType: " + iconType);
-      }
-    }
-  }
-
-  return {
-    isOwner,
-    isVerified,
-    isModerator,
-    membership,
-  };
-}
-
-function toISO8601Duration(durationText: string): string {
-  const match = /^(a|\d+)\s(year|month|week|day|hour|minute|second)s?$/.exec(
-    durationText
-  );
-  if (!match) throw new Error(`Invalid duration: ${durationText}`);
-
-  const [_, duration, unit] = match;
-  const durationInt = parseInt(duration) || 1;
-  const durationUnit = {
-    year: "Y",
-    month: "M",
-    week: "W",
-    day: "D",
-    hour: "TH",
-    minute: "TM",
-    second: "TS",
-  }[unit];
-  if (!durationUnit) throw new Error(`Invalid duration unit: ${unit}`);
-
-  return `P${durationInt}${durationUnit}`;
-}
-
-function durationToSeconds(durationText: string): number {
-  const match = /^(a|\d+)\s(year|month|week|day|hour|minute|second)s?$/.exec(
-    durationText
-  );
-  if (!match) throw new Error(`Invalid duration: ${durationText}`);
-
-  const [_, duration, unit] = match;
-  const durationInt = parseInt(duration) || 1;
-  const multiplier = {
-    year: 31536000,
-    month: 2628000,
-    week: 604800,
-    day: 86400,
-    hour: 3600,
-    minute: 60,
-    second: 1,
-  }[unit];
-  if (!multiplier) throw new Error(`Invalid duration unit: ${unit}`);
-
-  return durationInt * multiplier;
 }

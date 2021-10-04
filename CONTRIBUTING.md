@@ -18,7 +18,7 @@ npm run dev
 npm run build
 yarn link
 
-cd examples/
+cd tools/
 yarn install
 yarn link masterchat
 DEBUG=masterchat node -r ts-node/register ./livechat-inspector.ts <videoId>

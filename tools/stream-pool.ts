@@ -1,5 +1,5 @@
 import fetch from "cross-fetch";
-import { StreamPool, runsToString } from "masterchat";
+import { StreamPool, stringify } from "masterchat";
 
 async function getStreams() {
   const res = await fetch(
@@ -20,12 +20,14 @@ async function main() {
         "received",
         chats.length,
         "chats",
-        chats[0] ? runsToString(chats[0].rawMessage) : ""
+        chats[0] ? stringify(chats[0].rawMessage) : ""
       )
 
     // if (youWant) streams.unsubscribe(videoId)
   );
-  streams.on("end", ({ videoId }) => console.log(videoId, "ended"));
+  streams.on("end", (reason, { videoId }) =>
+    console.log(videoId, "ended.", "reason is", reason)
+  );
   streams.on("error", (err, { videoId }) =>
     console.error(videoId, err.message)
   );
