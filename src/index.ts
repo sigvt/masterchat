@@ -1,6 +1,9 @@
 import { EventEmitter } from "events";
-import { buildAuthHeaders, Credentials } from "./auth";
+import { buildMeta } from "./api";
+import { buildAuthHeaders } from "./auth";
+import { parseAction } from "./chat";
 import * as constants from "./constants";
+import { parseMetadataFromEmbed, parseMetadataFromWatch } from "./context";
 import {
   AbortError,
   AccessDeniedError,
@@ -12,60 +15,47 @@ import {
   NoPermissionError,
   UnavailableError,
 } from "./errors";
-import { buildMeta } from "./modules/actions/parser";
-import { ActionCatalog, ActionInfo } from "./modules/actions/types";
-import { parseChatAction } from "./modules/chat/parser";
-import {
-  Action,
-  AddChatItemAction,
-  ChatResponse,
-  FetchChatOptions,
-  IterateChatOptions,
-} from "./modules/chat/types";
-import {
-  getTimedContinuation,
-  unwrapReplayActions,
-} from "./modules/chat/utils";
-import {
-  parseMetadataFromEmbed,
-  parseMetadataFromWatch,
-} from "./modules/context/parser";
-import { lrc, rmp, rtc, smp } from "./protobuf/assembler";
-import { b64tou8 } from "./protobuf/util";
-import {
-  debugLog,
-  delay,
-  stringify,
-  toVideoId,
-  withContext,
-  ytFetch,
-} from "./utils";
-import { YTChatErrorStatus, YTLiveChatTextMessageRenderer } from "./yt";
+import { Credentials, TimedContinuation } from "./interfaces";
+import { Action, AddChatItemAction } from "./interfaces/actions";
+import { ActionCatalog, ActionInfo } from "./interfaces/contextActions";
 import {
   YTAction,
   YTActionResponse,
+  YTChatErrorStatus,
   YTChatResponse,
   YTGetItemContextMenuResponse,
-} from "./yt/chat";
-export { Credentials } from "./auth";
+  YTLiveChatTextMessageRenderer,
+} from "./interfaces/yt/chat";
+import { b64tou8, lrc, rmp, rtc, smp } from "./protobuf";
+import {
+  debugLog,
+  delay,
+  getTimedContinuation,
+  stringify,
+  toVideoId,
+  unwrapReplayActions,
+  withContext,
+  ytFetch,
+} from "./utils";
 export * from "./errors";
-export * from "./modules/actions";
-export * from "./modules/chat";
-export * from "./modules/context";
+export * from "./interfaces";
 export { StreamPool } from "./pool";
 export * from "./protobuf";
 export {
   ColorFormat,
   delay,
+  durationToISO8601,
+  durationToSeconds,
   endpointToUrl,
   formatColor,
+  groupBy,
   guessFreeChat,
   runsToString,
   stringify,
-  toISO8601Duration,
   toVideoId,
+  tsToDate,
+  tsToNumber,
 } from "./utils";
-export * from "./yt";
 
 export interface Metadata {
   videoId: string;
@@ -75,6 +65,34 @@ export interface Metadata {
   isLive?: boolean;
 }
 
+export interface ChatResponse {
+  actions: Action[];
+  continuation: TimedContinuation | undefined;
+  error: null;
+}
+
+export type RetryOptions = {
+  retry?: number;
+  retryInterval?: number;
+};
+
+export interface IterateChatOptions extends FetchChatOptions {
+  /**
+   * ignore first response fetched by reload token
+   * set it to false which means you might get chats already processed before when recovering MasterchatAgent from error. Make sure you have unique index for chat id to prevent duplication.
+   * @default false
+   * */
+  ignoreFirstResponse?: boolean;
+
+  /** pass previously fetched token to resume chat fetching */
+  continuation?: string;
+}
+
+export interface FetchChatOptions {
+  /** fetch top chat instead of all chat */
+  topChat?: boolean;
+}
+
 export interface Events {
   data: (data: ChatResponse, mc: Masterchat) => void;
   actions: (actions: Action[], mc: Masterchat) => void;
@@ -82,11 +100,6 @@ export interface Events {
   end: (reason: EndReason) => void;
   error: (error: MasterchatError | Error) => void;
 }
-
-export type RetryOptions = {
-  retry?: number;
-  retryInterval?: number;
-};
 
 export type ChatListener = Promise<void>;
 
@@ -125,7 +138,6 @@ export interface MasterchatOptions {
   mode?: "live" | "replay";
 }
 
-// umbrella class
 export class Masterchat extends EventEmitter {
   public isLive?: boolean;
   public videoId!: string;
@@ -286,6 +298,56 @@ export class Masterchat extends EventEmitter {
     if (!this.listener) return;
     this.listenerAbortion.abort();
     this.emit("end", "aborted");
+  }
+
+  /**
+   * Iterate chat until live stream ends
+   */
+  async *iterate({
+    topChat = false,
+    ignoreFirstResponse = false,
+    continuation,
+  }: IterateChatOptions = {}): AsyncGenerator<ChatResponse> {
+    const signal = this.listenerAbortion.signal;
+
+    if (signal.aborted) {
+      throw new AbortError();
+    }
+
+    let token: any = continuation ? continuation : { top: topChat };
+
+    let treatedFirstResponse = false;
+
+    // continuously fetch chat fragments
+    while (true) {
+      const res = await this.fetch(token);
+      const startMs = Date.now();
+
+      // handle chats
+      if (!(ignoreFirstResponse && !treatedFirstResponse)) {
+        yield res;
+      }
+
+      treatedFirstResponse = true;
+
+      // refresh continuation token
+      const { continuation } = res;
+
+      if (!continuation) {
+        // stream ended normally
+        break;
+      }
+
+      token = continuation.token;
+
+      if (this.isLive ?? true) {
+        const driftMs = Date.now() - startMs;
+        const timeoutMs = continuation.timeoutMs - driftMs;
+        if (timeoutMs > 500) {
+          await delay(timeoutMs, signal);
+        }
+      }
+    }
   }
 
   async fetch(options?: FetchChatOptions): Promise<ChatResponse>;
@@ -481,7 +543,7 @@ export class Masterchat extends EventEmitter {
       }
 
       const actions = rawActions
-        .map(parseChatAction)
+        .map(parseAction)
         .filter((a): a is Action => a !== undefined);
 
       const chat: ChatResponse = {
@@ -491,56 +553,6 @@ export class Masterchat extends EventEmitter {
       };
 
       return chat;
-    }
-  }
-
-  /**
-   * Iterate chat until live stream ends
-   */
-  async *iterate({
-    topChat = false,
-    ignoreFirstResponse = false,
-    continuation,
-  }: IterateChatOptions = {}): AsyncGenerator<ChatResponse> {
-    const signal = this.listenerAbortion.signal;
-
-    if (signal.aborted) {
-      throw new AbortError();
-    }
-
-    let token: any = continuation ? continuation : { top: topChat };
-
-    let treatedFirstResponse = false;
-
-    // continuously fetch chat fragments
-    while (true) {
-      const res = await this.fetch(token);
-      const startMs = Date.now();
-
-      // handle chats
-      if (!(ignoreFirstResponse && !treatedFirstResponse)) {
-        yield res;
-      }
-
-      treatedFirstResponse = true;
-
-      // refresh continuation token
-      const { continuation } = res;
-
-      if (!continuation) {
-        // stream ended normally
-        break;
-      }
-
-      token = continuation.token;
-
-      if (this.isLive ?? true) {
-        const driftMs = Date.now() - startMs;
-        const timeoutMs = continuation.timeoutMs - driftMs;
-        if (timeoutMs > 500) {
-          await delay(timeoutMs, signal);
-        }
-      }
     }
   }
 

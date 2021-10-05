@@ -1,15 +1,7 @@
 // import sha1 from "sha1";
 import * as crypto from "crypto";
 import { DO, SASH, XGAU, XGPID, XO } from "./constants";
-
-export interface Credentials {
-  SAPISID: string;
-  APISID: string;
-  HSID: string;
-  SID: string;
-  SSID: string;
-  SESSION_ID?: string;
-}
+import { Credentials } from "./interfaces";
 
 export function buildAuthHeaders(creds: Credentials): Record<string, string> {
   return {

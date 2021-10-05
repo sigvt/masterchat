@@ -1,5 +1,5 @@
-import { YTTimedContinuationData } from "../../yt/chat";
-import { YTReloadContinuationData } from "../../yt/context";
+import { YTTimedContinuationData } from "./yt/chat";
+import { YTReloadContinuationData } from "./yt/context";
 
 export interface ClientInfo {
   clientName: string;

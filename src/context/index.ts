@@ -1,12 +1,11 @@
 import {
-  MasterchatError,
   MembersOnlyError,
   NoPermissionError,
   NoStreamRecordingError,
   UnavailableError,
-} from "../../errors";
-import { runsToString } from "../../utils";
-import { YTInitialData, YTPlayabilityStatus } from "../../yt/context";
+} from "../errors";
+import { runsToString } from "../utils";
+import { YTInitialData, YTPlayabilityStatus } from "../interfaces/yt/context";
 
 // OK duration=">0" => Archived (replay chat may be available)
 // OK duration="0" => Live (chat may be available)

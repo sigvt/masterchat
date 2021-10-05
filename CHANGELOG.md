@@ -16,7 +16,11 @@
 - `runsToPlainText` expands `watchEndpoint` when `text` is a fragment of URL
 - New util `stringify` to transform `YTRun[]`, `YTRunContainer` and `YTSimpleText` into string
 - New util `formatColor` to format `Color` into CSS rgba() or HEX representation
-- New util `toISO8601Duration` to format duration text into ISO8601 duration format
+- New util `durationToISO8601` to format duration text into ISO8601 duration format
+- New util `durationToSeconds` to format duration text into seconds
+- New util `tsToDate` to format timestampUsec to Date
+- New util `tsToNumber` to format timestampUsec to number
+- New util `groupBy` to group actions by its type
 - use Uint8Array instead of Buffer in protobuf lib (by @jprochazk)
 
 ## v0.12.0

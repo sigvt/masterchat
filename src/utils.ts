@@ -2,9 +2,16 @@ import crossFetch from "cross-fetch";
 import debug from "debug";
 import { DC, DH, DO } from "./constants";
 import { AbortError } from "./errors";
-import { Color } from "./modules/chat/types";
-import { YTEmojiRun, YTRun, YTText, YTTextRun } from "./yt/chat";
-import { FluffyBrowseEndpoint } from "./yt/context";
+import { Color, TimedContinuation } from "./interfaces/misc";
+import {
+  YTAction,
+  YTContinuationContents,
+  YTEmojiRun,
+  YTRun,
+  YTText,
+  YTTextRun,
+} from "./interfaces/yt/chat";
+import { FluffyBrowseEndpoint } from "./interfaces/yt/context";
 
 export type ColorFormat = "rgb" | "hex";
 
@@ -19,7 +26,21 @@ export interface RunsToStringOptions {
   emojiHandler?: (emoji: YTEmojiRun) => string;
 }
 
-export function formatColor(color: Color, format: ColorFormat = "rgb"): string {
+/**
+ * Convert timestampUsec into Date
+ */
+export function tsToDate(timestampUsec: string): Date {
+  return new Date(Number(BigInt(timestampUsec) / BigInt(1000)));
+}
+
+/**
+ * Convert timestampUsec into number
+ */
+export function tsToNumber(timestampUsec: string): number {
+  return Number(BigInt(timestampUsec) / BigInt(1000));
+}
+
+export function formatColor(color: Color, format: ColorFormat = "hex"): string {
   switch (format) {
     case "rgb":
       return `rgba(${color.r},${color.g},${color.b},${color.opacity / 255})`;
@@ -225,7 +246,29 @@ export function withContext(input: any = {}) {
   };
 }
 
-export function toISO8601Duration(durationText: string): string {
+export function durationToSeconds(durationText: string): number {
+  const match = /^(a|\d+)\s(year|month|week|day|hour|minute|second)s?$/.exec(
+    durationText
+  );
+  if (!match) throw new Error(`Invalid duration: ${durationText}`);
+
+  const [_, duration, unit] = match;
+  const durationInt = parseInt(duration) || 1;
+  const multiplier = {
+    year: 31536000,
+    month: 2628000,
+    week: 604800,
+    day: 86400,
+    hour: 3600,
+    minute: 60,
+    second: 1,
+  }[unit];
+  if (!multiplier) throw new Error(`Invalid duration unit: ${unit}`);
+
+  return durationInt * multiplier;
+}
+
+export function durationToISO8601(durationText: string): string {
   const match = /^(a|\d+)\s(year|month|week|day|hour|minute|second)s?$/.exec(
     durationText
   );
@@ -245,4 +288,61 @@ export function toISO8601Duration(durationText: string): string {
   if (!durationUnit) throw new Error(`Invalid duration unit: ${unit}`);
 
   return `P${durationInt}${durationUnit}`;
+}
+
+export function unwrapReplayActions(rawActions: YTAction[]) {
+  return rawActions.map(
+    // TODO: verify that an action always holds a single item.
+    (action): YTAction => {
+      const replayAction = Object.values(omitTrackingParams(action))[0] as any;
+
+      return replayAction.actions[0];
+    }
+  );
+}
+
+export function getTimedContinuation(
+  continuationContents: YTContinuationContents
+): TimedContinuation | undefined {
+  /**
+   * observed k: invalidationContinuationData | timedContinuationData | liveChatReplayContinuationData
+   * continuations[1] would be playerSeekContinuationData
+   */
+  if (
+    Object.keys(
+      continuationContents.liveChatContinuation.continuations[0]
+    )[0] === "playerSeekContinuationData"
+  ) {
+    // only playerSeekContinuationData
+    return undefined;
+  }
+
+  const continuation = Object.values(
+    continuationContents.liveChatContinuation.continuations[0]
+  )[0];
+  if (!continuation) {
+    // no continuation
+    return undefined;
+  }
+  return {
+    token: continuation.continuation,
+    timeoutMs: continuation.timeoutMs,
+  };
+}
+
+export type OmitTrackingParams<T> = Omit<
+  T,
+  "clickTrackingParams" | "trackingParams"
+>;
+
+/**
+ * Remove `clickTrackingParams` and `trackingParams` from object
+ */
+export function omitTrackingParams<T>(obj: T): OmitTrackingParams<T> {
+  return Object.entries(obj)
+    .filter(([k]) => k !== "clickTrackingParams" && k !== "trackingParams")
+    .reduce(
+      (sum, [k, v]) => ((sum[k as keyof OmitTrackingParams<T>] = v), sum),
+      {} as OmitTrackingParams<T>
+    );
 }

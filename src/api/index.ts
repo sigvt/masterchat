@@ -74,9 +74,9 @@
  * key: manageLiveChatUserEndpoint
  */
 
-import { YTLiveChatServiceEndpointContainer } from "../../yt/chat";
+import { YTLiveChatServiceEndpointContainer } from "../interfaces/yt/chat";
 
-export function findParams(obj: any): string | undefined {
+function findParams(obj: any): string | undefined {
   const keys = Object.keys(obj).filter(
     (key) => !["clickTrackingParams", "commandMetadata"].includes(key)
   );

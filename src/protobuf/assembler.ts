@@ -1,5 +1,5 @@
 import { b64d, b64e, B64Type } from "./b64";
-import { bitob, concatu8 as cc, u8tob64 } from "./util";
+import { bitou8, concatu8 as cc, u8tob64 } from "./util";
 
 export type CVPair = {
   channelId: string;
@@ -190,11 +190,11 @@ function ld(
       ? cc(payload)
       : payload;
   const bLen = b.byteLength;
-  return cc([bitob(pbh(fid, 2)), bitob(encv(BigInt(bLen))), b]);
+  return cc([bitou8(pbh(fid, 2)), bitou8(encv(BigInt(bLen))), b]);
 }
 
 function vt(fid: bigint | number, payload: bigint | number): Uint8Array {
-  return cc([bitob(pbh(fid, 0)), bitob(payload)]);
+  return cc([bitou8(pbh(fid, 0)), bitou8(payload)]);
 }
 
 // function f3(fid: bigint | number, payload: bigint): Buffer {

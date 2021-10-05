@@ -49,13 +49,13 @@ export function toJSON(tokens: PBToken[]): string {
   );
 }
 
-export function bitob(n: bigint | number): Uint8Array {
+export function bitou8(n: bigint | number): Uint8Array {
   let hv = n.toString(16);
   hv = "".padStart(hv.length % 2, "0") + hv;
   return hextou8(hv);
 }
 
-export function btobi(buf: Uint8Array): bigint {
+export function u8tobi(buf: Uint8Array): bigint {
   return BigInt(`0x${u8tohex(buf)}`);
 }
 
@@ -93,12 +93,14 @@ export function u8tohex(data: Uint8Array): string {
 
 const _atob = globalThis.atob as ((data: string) => string) | undefined;
 const _btoa = globalThis.btoa as ((data: string) => string) | undefined;
+
 export const b64tou8 = _atob
   ? (data: string) => Uint8Array.from(_atob(data), (c) => c.charCodeAt(0))
   : (data: string) => {
       const buf = Buffer.from(data, "base64");
       return new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
     };
+
 export const u8tob64 = _btoa
   ? (data: Uint8Array) => _btoa(String.fromCharCode.apply(null, data as any))
   : (data: Uint8Array) => Buffer.from(data).toString("base64");
