@@ -34,7 +34,7 @@ export default [
           keep_classnames: true, // avoid Error class mangling
         }),
     ],
-    external: ["cross-fetch", "debug", "crypto"],
+    external: ["cross-fetch", "debug"],
   },
   {
     input: "./lib/index.d.ts",

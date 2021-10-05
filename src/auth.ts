@@ -1,5 +1,4 @@
-// import sha1 from "sha1";
-import * as crypto from "crypto";
+import sha1 from "sha1";
 import { DO, SASH, XGAU, XGPID, XO } from "./constants";
 import { Credentials } from "./interfaces";
 
@@ -31,8 +30,6 @@ function genSash(sid: string, origin: string): string {
 }
 
 function sha1Digest(payload: string): string {
-  const hash = crypto.createHash("sha1");
-  hash.update(payload);
-  // const hash = sha1(payload);
-  return hash.digest("hex");
+  const hash = sha1(payload);
+  return hash.toString();
 }
