@@ -44,15 +44,32 @@ export function ltc(
   );
 }
 
-export function rtc(
+export function rrc(
   origin: CVPair,
-  { top = false, seek = 0 }: { top?: boolean; seek?: number } = {}
+  { top = false, seekMs = 0 }: { top?: boolean; seekMs?: number } = {}
 ): string {
   const chatType = top ? 4 : 1;
   return b64e(
     ld(156074452, [
       ld(3, hdt(origin)),
-      vt(5, seek),
+      vt(8, 1),
+      ld(11, vt(2, seekMs)),
+      ld(14, vt(1, chatType)),
+      vt(15, 1),
+    ]),
+    B64Type.B1
+  );
+}
+
+export function rtc(
+  origin: CVPair,
+  { top = false, seekMs = 0 }: { top?: boolean; seekMs?: number } = {}
+): string {
+  const chatType = top ? 4 : 1;
+  return b64e(
+    ld(156074452, [
+      ld(3, hdt(origin)),
+      vt(5, seekMs),
       vt(8, 0),
       vt(9, 4), // 3
       ld(10, vt(4, 0)),
