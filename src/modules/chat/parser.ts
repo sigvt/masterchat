@@ -320,6 +320,10 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
             break;
           case "POLL":
             messageType = "poll";
+            debugLog(
+              "[action required] poll (EngagementMessage):",
+              JSON.stringify(renderer)
+            );
             break;
           default:
             debugLog(
@@ -329,7 +333,7 @@ export function parseChatAction(action: YTAction): Action | UnknownAction {
         }
 
         const timestampUsec = renderer.timestampUsec;
-        const timestamp = tsToDate(timestampUsec);
+        const timestamp = timestampUsec ? tsToDate(timestampUsec) : undefined;
         const url =
           renderer?.actionButton?.buttonRenderer?.navigationEndpoint
             ?.urlEndpoint?.url;

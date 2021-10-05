@@ -148,7 +148,7 @@ ${stringify(action.message)}
             chalk.cyan(`=================
 [open ${action.targetId}]
 ${action.contents.pollRenderer.choices.map((choice, i) => {
-  return `${i + 1}: ${choice.text} ${choice.votePercentage} ${
+  return `${i + 1}: ${stringify(choice.text)} ${choice.votePercentage} ${
     choice.voteRatio
   } ${choice.selected}\n`;
 })}

@@ -290,8 +290,8 @@ export interface AddViewerEngagementMessageAction {
   messageType: "engagement" | "poll" | string;
   message: YTText;
   url: string;
-  timestamp: Date;
-  timestampUsec: string;
+  timestamp?: Date;
+  timestampUsec?: string;
 }
 
 export interface ShowLiveChatActionPanelAction

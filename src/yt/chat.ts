@@ -438,7 +438,7 @@ export interface YTLiveChatBannerRenderer {
 
 export interface YTLiveChatViewerEngagementMessageRenderer {
   id: string;
-  timestampUsec: string;
+  timestampUsec?: string;
   icon: YTIcon;
   message: YTText;
   actionButton: YTActionButtonRendererContainer;
@@ -477,9 +477,13 @@ export interface YTLiveChatActionPanelRenderer {
 export interface YTLiveChatPollChoice {
   text: YTText;
   selected: boolean;
-  voteRatio?: number; // 0.0 to 1.0
-  votePercentage?: YTSimpleTextContainer; // 73%
   signinEndpoint: YTSignInEndpointContainer;
+
+  /** not available in showLiveChatActionPanelAction event */
+  voteRatio?: number; // 0.0 to 1.0
+
+  /** not available in showLiveChatActionPanelAction event */
+  votePercentage?: YTSimpleTextContainer; // 73%
 }
 
 export enum YTLiveChatPollType {
