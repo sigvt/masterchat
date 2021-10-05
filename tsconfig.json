@@ -2,7 +2,7 @@
   "exclude": ["tools", "lib"],
   "compilerOptions": {
     /* https://www.typescriptlang.org/docs/handbook/project-references.html */
-    "target": "esnext",
+    "target": "es2020",
     "module": "esnext",
     "moduleResolution": "node",
     "declaration": true,

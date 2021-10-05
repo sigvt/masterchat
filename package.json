@@ -25,6 +25,8 @@
     "events": "^3.3.0"
   },
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^21.0.0",
+    "@rollup/plugin-node-resolve": "^13.0.5",
     "@types/debug": "^4.1.7",
     "@types/events": "^3.0.0",
     "@types/jest": "^27.0.2",

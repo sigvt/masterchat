@@ -1,6 +1,8 @@
-import typescript from "rollup-plugin-typescript2";
+import commonjs from "@rollup/plugin-commonjs";
+import { nodeResolve } from "@rollup/plugin-node-resolve";
 import dts from "rollup-plugin-dts";
 import { terser } from "rollup-plugin-terser";
+import typescript from "rollup-plugin-typescript2";
 
 const isProd = process.env.NODE_ENV === "production";
 
@@ -23,9 +25,16 @@ export default [
       typescript({
         tsconfig: "./tsconfig.build.json",
       }),
-      isProd && terser({ keep_classnames: true }),
+      nodeResolve({
+        preferBuiltins: false, // required for `events` polyfill
+      }),
+      commonjs(),
+      isProd &&
+        terser({
+          keep_classnames: true, // avoid Error class mangling
+        }),
     ],
-    external: ["crypto", "cross-fetch", "events", "debug"],
+    external: ["cross-fetch", "debug", "events", "crypto"],
   },
   {
     input: "./lib/index.d.ts",
@@ -34,6 +43,5 @@ export default [
       format: "es",
     },
     plugins: [dts()],
-    external: ["events"],
   },
 ];
