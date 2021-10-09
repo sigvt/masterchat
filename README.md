@@ -40,6 +40,7 @@ For a desktop app, see [Komet](https://github.com/holodata/komet).
 ## Show case
 
 - [Holodex](https://holodex.net) (TLDex backend)
+- [Luna's Translation](https://github.com/luna-translations-bot/luna-translations-bot)
 - [Honeybee](https://github.com/holodata/honeybee)
 - [Komet](https://github.com/holodata/Komet)
 

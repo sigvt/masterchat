@@ -26,18 +26,26 @@ export class ProtoBufReader {
 
   eatUInt32(): number | null {
     if (this.isEnded()) return null;
-    const n = new DataView(this.buf).getUint32(this.c, true);
-    // const n = this.buf.readUInt32LE(this.c);
-    this.c += 4;
-    return n;
+    try {
+      const n = new DataView(this.buf.buffer).getUint32(this.c, true);
+      // const n = this.buf.readUInt32LE(this.c);
+      this.c += 4;
+      return n;
+    } catch (err) {
+      return null;
+    }
   }
 
   eatUInt64(): bigint | null {
     if (this.isEnded()) return null;
-    const n = new DataView(this.buf).getBigUint64(this.c, true);
-    // const n = this.buf.readBigUInt64LE(this.c);
-    this.c += 8;
-    return n;
+    try {
+      const n = new DataView(this.buf.buffer).getBigUint64(this.c, true);
+      // const n = this.buf.readBigUInt64LE(this.c);
+      this.c += 8;
+      return n;
+    } catch (err) {
+      return null;
+    }
   }
 
   eatVariant(): bigint | null {

@@ -46,20 +46,30 @@ export function parsePb(input: Uint8Array, depth: number = 0): PBValue {
           }
         }
       }
-      // case 5: {
-      //   const v = pbr.eatUInt32();
-      //   logger("└f32>", v);
-      //   if (v == null) throw new Error("Invalid sequence (f32)");
-      //   tokens.push({ fid, type: PBType.F32, v });
-      //   break;
-      // }
-      // case 1: {
-      //   const v = pbr.eatUInt64();
-      //   logger("└f64>", v);
-      //   if (v == null) throw new Error("Invalid sequence (f64)");
-      //   tokens.push({ fid, type: PBType.F64, v });
-      //   break;
-      // }
+      case 1: {
+        pbr.save();
+        const v = pbr.eatUInt64();
+        logger("└f64>", v);
+        if (v !== null) {
+          tokens.push({ fid, type: PBType.F64, v });
+          break;
+        }
+        // throw new Error("Invalid sequence (f64)");
+        pbr.rewind();
+      }
+      case 5: {
+        pbr.save();
+        const v = pbr.eatUInt32();
+        logger("└f32>", v);
+
+        if (v !== null) {
+          tokens.push({ fid, type: PBType.F32, v });
+          break;
+        }
+
+        // throw new Error("Invalid sequence (f32)");
+        pbr.rewind();
+      }
       default: {
         // throw new Error("Unknown type: " + type);
         debugLog(input);

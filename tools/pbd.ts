@@ -3,7 +3,7 @@
 
 import { b64d, B64Type, parsePb, pprintPbValue } from "masterchat";
 
-function main(input: string, type: string = B64Type.B2) {
+function main(input: string, type: string = B64Type.B1) {
   const buf = b64d(input, type as B64Type);
   const pl = parsePb(buf);
   pprintPbValue(pl);
