@@ -59,7 +59,7 @@ async function createWindow() {
       console.log("Login succeeded. Use credential token below:");
       console.log(
         Buffer.from(
-          JSON.stringify({ ...creds, SESSION_ID: sessionId })
+          JSON.stringify({ ...creds, DELEGATED_SESSION_ID: sessionId })
         ).toString("base64")
       );
 

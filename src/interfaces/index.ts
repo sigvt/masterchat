@@ -10,5 +10,14 @@ export interface Credentials {
   HSID: string;
   SID: string;
   SSID: string;
+
+  /**
+   * @deprecated Use DELEGATED_SESSION_ID
+   */
   SESSION_ID?: string;
+
+  /**
+   * Delegated session id for brand account
+   */
+  DELEGATED_SESSION_ID?: string;
 }

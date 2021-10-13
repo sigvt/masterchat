@@ -3,12 +3,13 @@ import { DO, SASH, XGAU, XGPID, XO } from "./constants";
 import { Credentials } from "./interfaces";
 
 export function buildAuthHeaders(creds: Credentials): Record<string, string> {
+  const dsid = creds.DELEGATED_SESSION_ID ?? creds.SESSION_ID;
   return {
     Cookie: genCookieString(creds),
     Authorization: genAuthToken(creds.SAPISID, DO),
     [XO]: DO,
     [XGAU]: "0",
-    ...(creds.SESSION_ID && { [XGPID]: creds.SESSION_ID }),
+    ...(dsid && { [XGPID]: dsid }),
   };
 }
 
