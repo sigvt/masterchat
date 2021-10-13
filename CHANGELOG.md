@@ -1,27 +1,38 @@
 # Changelog
 
-## v0.13.0
+## Unreleased
 
-- BREAKING: normalized action payload of
+### New
+
+- New action: `AddMembershipMilestoneItemAction`. Refer to `duration` for a precise membership duration
+- New action: `ShowPollPanelAction`.
+- Add `timestampColor` and `authorNameTextColor` to `SuperChat`
+- New util `stringify` to transform `YTRun[]`, `YTRunContainer` and `YTSimpleText` into string
+- New util `formatColor` to format `Color` into CSS rgba() or HEX string
+- New util `durationToISO8601` to format duration text into ISO8601 duration string
+- New util `durationToSeconds` to format duration text into integer seconds
+- New util `tsToDate` to format timestampUsec to Date
+- New util `tsToNumber` to format timestampUsec to number
+
+### Improvements
+
+- BREAKING: normalized action payload:
   - `AddViewerEngagementMessageAction`
   - `AddBannerAction`
   - `AddMembershipItemAction`
   - `AddSuperChatTickerAction`
-- New action: `AddMembershipMilestoneItemAction`. Use `duration` for the precise membership duration
-- Add `timestampColor` and `authorNameTextColor` to `SuperChat`
+  - `ShowLiveChatActionPanelAction`
+  - `CloseLiveChatActionPanelAction`
 - BREAKING: `end` event will provide a reason (`'privated' | 'deleted' | 'disabled' | 'aborted' | null`)
   - `streamPool.on('end', (mc) => {})` -> `streamPool.on('end', (reason, mc) => {})`
-- BREAKING: remove `unknown` type from `MasterchatError`
 - BREAKING: instance will emits `end` instead of `error` in some special cases where the unrecoverable error code is either `private` or `unavailable` and it was not occurred during the first request (this usually happens when a streamer deletes or privates their live stream after the stream ends)
-- `runsToPlainText` expands `watchEndpoint` when `text` is a fragment of URL
-- New util `stringify` to transform `YTRun[]`, `YTRunContainer` and `YTSimpleText` into string
-- New util `formatColor` to format `Color` into CSS rgba() or HEX representation
-- New util `durationToISO8601` to format duration text into ISO8601 duration format
-- New util `durationToSeconds` to format duration text into seconds
-- New util `tsToDate` to format timestampUsec to Date
-- New util `tsToNumber` to format timestampUsec to number
-- New util `groupBy` to group actions by its type
+- BREAKING: `runsToPlainText` will expand `watchEndpoint` when `text` is a fragment of URL
 - use Uint8Array instead of Buffer in protobuf lib (by @jprochazk)
+
+### Fixes
+
+- BREAKING: remove `unknown` type from `MasterchatError`
+- Deprecate `Credentials.SESSION_ID` in favor of `Credentials.DELEGATED_SESSION_ID`
 
 ## v0.12.0
 

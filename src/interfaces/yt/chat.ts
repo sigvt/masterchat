@@ -283,7 +283,7 @@ export interface YTRemoveBannerForLiveChatCommand {
 }
 
 export interface YTUpdateLiveChatPollAction {
-  pollToUpdate: YYLiveChatPollRendererContainer;
+  pollToUpdate: YTLiveChatPollRendererContainer;
 }
 
 export interface YTShowLiveChatActionPanelAction {
@@ -329,7 +329,7 @@ export interface YTTooltipRendererContainer {
   tooltipRenderer: YTTooltipRenderer;
 }
 
-export interface YYLiveChatPollRendererContainer {
+export interface YTLiveChatPollRendererContainer {
   pollRenderer: YTLiveChatPollRenderer;
 }
 
@@ -441,7 +441,8 @@ export interface YTLiveChatViewerEngagementMessageRenderer {
   timestampUsec?: string;
   icon: YTIcon;
   message: YTText;
-  actionButton: YTActionButtonRendererContainer;
+  actionButton?: YTActionButtonRendererContainer;
+  contextMenuEndpoint?: YTLiveChatItemContextMenuEndpointContainer;
 }
 
 export interface YTTooltipRenderer {
@@ -459,9 +460,9 @@ export interface YTLiveChatPollRenderer {
   liveChatPollId: string;
   header: {
     pollHeaderRenderer: {
-      pollQuestion: YTText;
+      pollQuestion: YTSimpleTextContainer;
       thumbnail: YTThumbnailList;
-      metadataText: YTText;
+      metadataText: YTRunContainer<YTTextRun>;
       liveChatPollType: YTLiveChatPollType;
       contextMenuButton: YTContextMenuButtonRendererContainer;
     };
@@ -469,7 +470,7 @@ export interface YTLiveChatPollRenderer {
 }
 
 export interface YTLiveChatActionPanelRenderer {
-  contents: YYLiveChatPollRendererContainer;
+  contents: YTLiveChatPollRendererContainer | any;
   id: string;
   targetId: string;
 }

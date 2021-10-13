@@ -53,7 +53,8 @@ export function parseAction(action: YTAction): Action | UnknownAction {
       return parseShowLiveChatTooltipCommand(action[type]!);
 
     case "showLiveChatActionPanelAction":
-      return parseShowLiveChatActionPanelAction(action[type]!);
+      const parsed = parseShowLiveChatActionPanelAction(action[type]!);
+      return parsed;
 
     case "updateLiveChatPollAction":
       return parseUpdateLiveChatPollAction(action[type]!);

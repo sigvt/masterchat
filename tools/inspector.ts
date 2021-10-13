@@ -142,23 +142,19 @@ ${stringify(action.message)}
           );
           break;
         }
-        case "showLiveChatActionPanelAction": {
+        case "showPollPanelAction": {
           console.log(JSON.stringify(action));
           log(
             chalk.cyan(`=================
 [open ${action.targetId}]
-${action.contents.pollRenderer.choices.map((choice, i) => {
+${action.choices.map((choice, i) => {
   return `${i + 1}: ${stringify(choice.text)} ${choice.votePercentage} ${
     choice.voteRatio
   } ${choice.selected}\n`;
 })}
-${action.contents.pollRenderer.header.pollHeaderRenderer.liveChatPollType}
-${stringify(
-  action.contents.pollRenderer.header.pollHeaderRenderer.metadataText
-)}
-${stringify(
-  action.contents.pollRenderer.header.pollHeaderRenderer.pollQuestion
-)}
+${action.pollType}
+${action.question}
+${action.authorName}
 =================`)
           );
           break;

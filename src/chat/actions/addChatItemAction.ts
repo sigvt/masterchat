@@ -198,20 +198,15 @@ export function parseAddChatItemAction(payload: YTAddChatItemAction) {
 
     const timestampUsec = renderer.timestampUsec;
     const timestamp = timestampUsec ? tsToDate(timestampUsec) : undefined;
-    const url =
-      renderer?.actionButton?.buttonRenderer?.navigationEndpoint?.urlEndpoint
-        ?.url;
-    if (!url) {
-      debugLog("[action required] empty url:", JSON.stringify(renderer));
-    }
+    const actionUrl =
+      renderer.actionButton?.buttonRenderer.navigationEndpoint.urlEndpoint.url;
 
-    // TODO: add action url from YTLiveChatViewerEngagementMessageRenderer
     const parsed: AddViewerEngagementMessageAction = {
       type: "addViewerEngagementMessageAction",
       id: renderer.id,
       messageType,
       message: renderer.message,
-      url,
+      actionUrl,
       timestamp,
       timestampUsec,
     };

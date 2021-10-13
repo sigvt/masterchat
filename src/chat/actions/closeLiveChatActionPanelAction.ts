@@ -1,18 +1,13 @@
-import { debugLog } from "../../utils";
-import { YTCloseLiveChatActionPanelAction } from "../../interfaces/yt/chat";
 import { CloseLiveChatActionPanelAction } from "../../interfaces/actions";
+import { YTCloseLiveChatActionPanelAction } from "../../interfaces/yt/chat";
 
 export function parseCloseLiveChatActionPanelAction(
   payload: YTCloseLiveChatActionPanelAction
 ) {
-  // TODO: normalize payload
-  debugLog(
-    "[action required] closeLiveChatActionPanelAction",
-    JSON.stringify(payload)
-  );
   const parsed: CloseLiveChatActionPanelAction = {
     type: "closeLiveChatActionPanelAction",
-    ...payload,
+    targetPanelId: payload.targetPanelId,
+    skipOnDismissCommand: payload.skipOnDismissCommand,
   };
   return parsed;
 }

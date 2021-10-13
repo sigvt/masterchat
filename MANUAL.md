@@ -7,7 +7,7 @@
 ### Iterate live chats
 
 ```js
-import { Masterchat, runsToString } from "masterchat";
+import { Masterchat, stringify } from "masterchat";
 
 async function main() {
   const mc = await Masterchat.init("<videoId>");
@@ -15,7 +15,7 @@ async function main() {
   // listen for chats
   mc.on("chats", (chats) => {
     for (const chat of chats) {
-      console.log(chat.authorName, runsToString(chat.rawMessage));
+      console.log(chat.authorName, stringify(chat.rawMessage));
     }
   });
 
@@ -57,7 +57,7 @@ main();
 ### Download replay chat as JSONLines
 
 ```js
-import { Masterchat, convertRunsToString } from "masterchat";
+import { Masterchat } from "masterchat";
 import { appendFile, writeFile, readFile } from "fs/promises";
 
 async function main() {
@@ -84,7 +84,7 @@ main();
 ### Auto-moderator
 
 ```js
-import { Masterchat, runsToString } from "masterchat";
+import { Masterchat, stringify } from "masterchat";
 import { isSpam } from "spamreaper";
 
 async function main() {
@@ -101,7 +101,7 @@ async function main() {
 
   mc.on("chats", async (chats) => {
     for (const chat of chats) {
-      const message = runsToString(chat.rawMessage, {
+      const message = stringify(chat.rawMessage, {
         emojiHandler: (emoji) => "",
       });
 

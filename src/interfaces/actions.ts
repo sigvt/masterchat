@@ -5,7 +5,9 @@ import {
   YTLiveChatActionPanelRenderer,
   YTLiveChatPaidStickerRenderer,
   YTLiveChatPlaceholderItemRenderer,
+  YTLiveChatPollChoice,
   YTLiveChatPollRenderer,
+  YTLiveChatPollType,
   YTLiveChatTickerPaidStickerItemRenderer,
   YTLiveChatTickerSponsorItemRenderer,
   YTRemoveBannerForLiveChatCommand,
@@ -36,6 +38,7 @@ export type Action =
   | RemoveBannerAction
   | AddViewerEngagementMessageAction
   | ShowLiveChatActionPanelAction
+  | ShowPollPanelAction
   | CloseLiveChatActionPanelAction
   | UpdateLiveChatPollAction
   | ShowTooltipAction
@@ -194,19 +197,31 @@ export interface AddViewerEngagementMessageAction {
   id: string;
   messageType: "engagement" | "poll" | string;
   message: YTText;
-  url: string;
+  actionUrl?: string;
   timestamp?: Date;
   timestampUsec?: string;
 }
 
-export interface ShowLiveChatActionPanelAction
-  extends YTLiveChatActionPanelRenderer {
+export interface ShowLiveChatActionPanelAction {
   type: "showLiveChatActionPanelAction";
+  panelToShow: any;
 }
 
-export interface CloseLiveChatActionPanelAction
-  extends YTCloseLiveChatActionPanelAction {
+export interface ShowPollPanelAction {
+  type: "showPollPanelAction";
+  id: string;
+  targetId: string;
+  choices: YTLiveChatPollChoice[];
+  question: string;
+  authorName: string;
+  authorPhoto: string;
+  pollType: YTLiveChatPollType;
+}
+
+export interface CloseLiveChatActionPanelAction {
   type: "closeLiveChatActionPanelAction";
+  targetPanelId: string;
+  skipOnDismissCommand: boolean;
 }
 
 export interface UpdateLiveChatPollAction extends YTLiveChatPollRenderer {
