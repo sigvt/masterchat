@@ -53,7 +53,6 @@ export class StreamPool extends EventEmitter {
   constructor(options?: MasterchatOptions) {
     super();
     this.options = options;
-    this.ensure();
   }
 
   public get entries() {
@@ -83,7 +82,7 @@ export class StreamPool extends EventEmitter {
   /**
    * resolves after every stream closed
    */
-  private ensure() {
+  public ensure() {
     return new Promise<void>((resolve) => {
       const timer = setInterval(() => {
         if (this.streamCount() === 0) {
