@@ -509,11 +509,6 @@ export class Masterchat extends EventEmitter {
           this.log(`fetch`, `continuationNotFound(with contents)`, reason);
         } else if ("trackingParams" in obj) {
           // {trackingParams} => ?
-          this.log(
-            `fetch`,
-            `[action required] continuationNotFound(with trackingParams)`,
-            JSON.stringify(obj)
-          );
         }
 
         // {} => Live stream ended

@@ -20,8 +20,8 @@ export function parseAddLiveChatTickerItemAction(
   const rendererType = Object.keys(item)[0] as keyof YTAddLiveChatTickerItem;
 
   switch (rendererType) {
+    // SuperChat Ticker
     case "liveChatTickerPaidMessageItemRenderer": {
-      // SuperChat Ticker
       const renderer = item[rendererType]!;
 
       const superchat = parseSuperChat(
@@ -32,6 +32,14 @@ export function parseAddLiveChatTickerItemAction(
         renderer.showItemEndpoint.showLiveChatItemEndpoint.renderer
           .liveChatPaidMessageRenderer.authorName
       );
+      const authorPhoto = pickThumbUrl(renderer.authorPhoto);
+
+      if (!authorName) {
+        debugLog(
+          "[action required] empty authorName at liveChatTickerPaidMessageItemRenderer",
+          JSON.stringify(renderer)
+        );
+      }
 
       const parsed: AddSuperChatTickerAction = {
         type: "addSuperChatTickerAction",
@@ -41,7 +49,7 @@ export function parseAddLiveChatTickerItemAction(
         fullDurationSec: renderer.fullDurationSec,
         authorChannelId: renderer.authorExternalChannelId,
         authorName,
-        authorPhoto: pickThumbUrl(renderer.authorPhoto),
+        authorPhoto,
         superchat,
         amountTextColor: parseColorCode(renderer.amountTextColor),
         startBackgroundColor: parseColorCode(renderer.startBackgroundColor)!,
@@ -49,6 +57,7 @@ export function parseAddLiveChatTickerItemAction(
       };
       return parsed;
     }
+
     case "liveChatTickerPaidStickerItemRenderer": {
       // TODO: normalize payload
       // Super Sticker

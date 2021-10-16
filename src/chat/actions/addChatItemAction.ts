@@ -33,6 +33,9 @@ export function parseAddChatItemAction(payload: YTAddChatItemAction) {
 
     const timestamp = tsToDate(timestampUsec);
 
+    const authorName = renderer.authorName
+      ? stringify(renderer.authorName)
+      : undefined;
     const authorPhoto =
       renderer.authorPhoto.thumbnails[
         renderer.authorPhoto.thumbnails.length - 1
@@ -44,13 +47,20 @@ export function parseAddChatItemAction(payload: YTAddChatItemAction) {
     const contextMenuEndpointParams =
       renderer.contextMenuEndpoint!.liveChatItemContextMenuEndpoint.params;
 
+    if (renderer.authorName && !("simpleText" in renderer.authorName)) {
+      debugLog(
+        "[action required] non-simple authorName:",
+        JSON.stringify(renderer.authorName)
+      );
+    }
+
     const parsed: AddChatItemAction = {
       type: "addChatItemAction",
       id,
       timestamp,
       timestampUsec,
       rawMessage: renderer.message.runs,
-      authorName: stringify(renderer.authorName),
+      authorName,
       authorPhoto,
       authorChannelId,
       membership,
@@ -69,7 +79,15 @@ export function parseAddChatItemAction(payload: YTAddChatItemAction) {
 
     const timestamp = tsToDate(timestampUsec);
 
+    const authorName = stringify(renderer.authorName);
     const authorPhoto = pickThumbUrl(renderer.authorPhoto);
+
+    if (!authorName) {
+      debugLog(
+        "[action required] empty authorName at liveChatPaidMessageRenderer",
+        JSON.stringify(renderer)
+      );
+    }
 
     const parsed: AddSuperChatItemAction = {
       type: "addSuperChatItemAction",
@@ -77,7 +95,7 @@ export function parseAddChatItemAction(payload: YTAddChatItemAction) {
       timestamp,
       timestampUsec,
       rawMessage: renderer.message?.runs,
-      authorName: stringify(renderer.authorName),
+      authorName,
       authorPhoto,
       authorChannelId,
       superchat: parseSuperChat(renderer),
@@ -101,7 +119,18 @@ export function parseAddChatItemAction(payload: YTAddChatItemAction) {
     const timestamp = tsToDate(timestampUsec);
     const authorName = stringify(renderer.authorName);
     const authorPhoto = pickThumbUrl(renderer.authorPhoto);
-    const membership = parseMembership(renderer.authorBadges[0]);
+
+    if (!authorName) {
+      debugLog(
+        "[action required] empty authorName at liveChatMembershipItemRenderer",
+        JSON.stringify(renderer)
+      );
+    }
+
+    // observed, MODERATOR
+    const membership = parseMembership(
+      renderer.authorBadges[renderer.authorBadges.length - 1]
+    );
     if (!membership)
       throw new Error(
         `Failed to parse membership while handling liveChatMembershipItemRenderer: ${JSON.stringify(

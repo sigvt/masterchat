@@ -17,6 +17,8 @@ export function parseShowLiveChatActionPanelAction(
   switch (rendererType) {
     case "pollRenderer": {
       const rdr = panelRdr.contents.pollRenderer as YTLiveChatPollRenderer;
+      const authorName =
+        rdr.header.pollHeaderRenderer.metadataText.runs[0].text;
 
       const parsed: ShowPollPanelAction = {
         type: "showPollPanelAction",
@@ -24,7 +26,7 @@ export function parseShowLiveChatActionPanelAction(
         targetId: panelRdr.targetId,
         choices: rdr.choices,
         question: rdr.header.pollHeaderRenderer.pollQuestion.simpleText,
-        authorName: rdr.header.pollHeaderRenderer.metadataText.runs[0].text,
+        authorName,
         authorPhoto: pickThumbUrl(rdr.header.pollHeaderRenderer.thumbnail),
         pollType: rdr.header.pollHeaderRenderer.liveChatPollType,
       };

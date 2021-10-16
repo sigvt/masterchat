@@ -22,11 +22,19 @@ export function parseAddBannerToLiveChatCommand(
   const liveChatRdr = bannerRdr.contents.liveChatTextMessageRenderer;
   const timestampUsec = liveChatRdr.timestampUsec;
   const timestamp = tsToDate(timestampUsec);
+
   const authorName = stringify(liveChatRdr.authorName);
   const authorPhoto = pickThumbUrl(liveChatRdr.authorPhoto);
   const authorChannelId = liveChatRdr.authorExternalChannelId;
   const { isVerified, isOwner, isModerator, membership } =
     parseBadges(liveChatRdr);
+
+  if (!authorName) {
+    debugLog(
+      "[action required] empty authorName at addBannerToLiveChatCommand",
+      JSON.stringify(liveChatRdr)
+    );
+  }
 
   const parsed: AddBannerAction = {
     type: "addBannerAction",
