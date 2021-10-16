@@ -23,6 +23,7 @@
   - `AddSuperChatTickerAction`
   - `ShowLiveChatActionPanelAction`
   - `CloseLiveChatActionPanelAction`
+  - `AddPlaceholderItemAction`
 - BREAKING: `end` event will provide a reason (`'privated' | 'deleted' | 'disabled' | 'aborted' | null`)
   - `streamPool.on('end', (mc) => {})` -> `streamPool.on('end', (reason, mc) => {})`
 - BREAKING: instance will emits `end` instead of `error` in some special cases where the unrecoverable error code is either `private` or `unavailable` and it was not occurred during the first request (this usually happens when a streamer deletes or privates their live stream after the stream ends)

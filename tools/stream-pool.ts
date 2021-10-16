@@ -1,40 +1,38 @@
+import chalk from "chalk";
 import fetch from "cross-fetch";
-import { StreamPool, stringify } from "masterchat";
+import { StreamPool } from "masterchat";
+import { ChatHistory, handleData } from "./common";
 
-async function getStreams() {
+async function getStreams(org: string = "All Vtubers") {
   const res = await fetch(
-    "https://holodex.net/api/v2/live?org=Hololive&max_upcoming_hours=0"
+    `https://holodex.net/api/v2/live?org=${encodeURIComponent(
+      org
+    )}&max_upcoming_hours=2`
   );
   const streams = (await res.json()) as any;
-  return streams.slice(0, 3);
+  return streams;
 }
 
-async function main() {
+async function main(org?: string) {
+  const history = new ChatHistory();
   const streams = new StreamPool({ mode: "live" });
 
-  streams.on(
-    "chats",
-    (chats, { videoId }) =>
-      console.log(
-        videoId,
-        "received",
-        chats.length,
-        "chats",
-        chats[0] ? stringify(chats[0].rawMessage) : ""
-      )
-
-    // if (youWant) streams.unsubscribe(videoId)
+  streams.on("data", (data, { videoId }) =>
+    handleData({ data, history, prefix: videoId })
   );
+
   streams.on("end", (reason, { videoId }) =>
-    console.log(videoId, "ended.", "reason is", reason)
-  );
-  streams.on("error", (err, { videoId }) =>
-    console.error(videoId, err.message)
+    console.log(chalk.bgBlue.black(`[ENDED] ${videoId}: ${reason}`))
   );
 
-  for (const stream of await getStreams()) {
+  streams.on("error", (err, { videoId }) =>
+    console.error(chalk.bgRed.black(`[ERROR] ${videoId}: ${err}`))
+  );
+
+  for (const stream of await getStreams(org)) {
     streams.subscribe(stream.id, stream.channel.id);
   }
 }
 
-main();
+const org = process.argv[2];
+main(org);
