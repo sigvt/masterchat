@@ -19,6 +19,7 @@ import {
   YTRun,
   YTText,
   YTTooltipRenderer,
+  YTType,
 } from "./yt/chat";
 
 /**
@@ -41,10 +42,10 @@ export type Action =
   | AddBannerAction
   | RemoveBannerAction
   | AddViewerEngagementMessageAction
-  | ShowLiveChatActionPanelAction
+  | ShowPanelAction
   | ShowPollPanelAction
-  | CloseLiveChatActionPanelAction
-  | UpdateLiveChatPollAction
+  | ClosePanelAction
+  | UpdatePollAction
   | ShowTooltipAction
   | ModeChangeAction;
 
@@ -248,12 +249,19 @@ export interface AddBannerAction {
   contextMenuEndpointParams?: string;
 }
 
-export interface RemoveBannerAction extends YTRemoveBannerForLiveChatCommand {
+export interface RemoveBannerAction {
   type: "removeBannerAction";
+  targetActionId: string;
 }
 
-export interface ShowTooltipAction extends YTTooltipRenderer {
+export interface ShowTooltipAction {
   type: "showTooltipAction";
+  targetId: string;
+  detailsText: YTText;
+  suggestedPosition: string;
+  dismissStrategy: string;
+  promoConfig: any;
+  dwellTimeMs?: number;
 }
 
 export interface AddViewerEngagementMessageAction {
@@ -266,30 +274,39 @@ export interface AddViewerEngagementMessageAction {
   timestampUsec?: string;
 }
 
-export interface ShowLiveChatActionPanelAction {
-  type: "showLiveChatActionPanelAction";
+// generic action for unknown panel type
+export interface ShowPanelAction {
+  type: "showPanelAction";
   panelToShow: any;
 }
 
-export interface ShowPollPanelAction {
-  type: "showPollPanelAction";
-  id: string;
-  targetId: string;
-  choices: YTLiveChatPollChoice[];
-  question: string;
-  authorName: string;
-  authorPhoto: string;
-  pollType: YTLiveChatPollType;
-}
-
-export interface CloseLiveChatActionPanelAction {
-  type: "closeLiveChatActionPanelAction";
+export interface ClosePanelAction {
+  type: "closePanelAction";
   targetPanelId: string;
   skipOnDismissCommand: boolean;
 }
 
-export interface UpdateLiveChatPollAction extends YTLiveChatPollRenderer {
-  type: "updateLiveChatPollAction";
+export interface ShowPollPanelAction {
+  type: "showPollPanelAction";
+  targetId: string;
+  id: string;
+  pollType: YTLiveChatPollType;
+  question?: string;
+  choices: YTLiveChatPollChoice[];
+  authorName: string;
+  authorPhoto: string;
+}
+
+export interface UpdatePollAction {
+  type: "updatePollAction";
+  id: string;
+  pollType: YTLiveChatPollType;
+  authorName: string;
+  authorPhoto: string;
+  question?: string;
+  choices: YTLiveChatPollChoice[];
+  elapsedText: string;
+  voteCount: number;
 }
 
 export enum LiveChatMode {

@@ -107,13 +107,6 @@ function parseLiveChatTickerPaidStickerItemRenderer(
     );
   }
 
-  if (renderer.tickerThumbnails.length > 1) {
-    debugLog(
-      "[action required] multiple tickerThumbnails found (parseLiveChatTickerPaidStickerItemRenderer):",
-      JSON.stringify(renderer)
-    );
-  }
-
   // NOTE: tickerThumbnails can be more than single entry
   const tickerPackThumbnail = pickThumbUrl(renderer.tickerThumbnails[0]);
   const tickerPackName =

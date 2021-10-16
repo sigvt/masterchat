@@ -3,10 +3,7 @@ import {
   YTLiveChatPollRenderer,
   YTShowLiveChatActionPanelAction,
 } from "../../interfaces/yt/chat";
-import {
-  ShowLiveChatActionPanelAction,
-  ShowPollPanelAction,
-} from "../../interfaces/actions";
+import { ShowPanelAction, ShowPollPanelAction } from "../../interfaces/actions";
 import { pickThumbUrl } from "../utils";
 
 export function parseShowLiveChatActionPanelAction(
@@ -22,10 +19,10 @@ export function parseShowLiveChatActionPanelAction(
 
       const parsed: ShowPollPanelAction = {
         type: "showPollPanelAction",
-        id: panelRdr.id,
         targetId: panelRdr.targetId,
+        id: panelRdr.id,
         choices: rdr.choices,
-        question: rdr.header.pollHeaderRenderer.pollQuestion.simpleText,
+        question: rdr.header.pollHeaderRenderer.pollQuestion?.simpleText,
         authorName,
         authorPhoto: pickThumbUrl(rdr.header.pollHeaderRenderer.thumbnail),
         pollType: rdr.header.pollHeaderRenderer.liveChatPollType,
@@ -35,14 +32,14 @@ export function parseShowLiveChatActionPanelAction(
     }
     default: {
       debugLog(
-        "[action required] unrecognized rendererType (showLiveChatActionPanelAction):",
+        "[action required] unrecognized rendererType (parseShowLiveChatActionPanelAction):",
         JSON.stringify(payload)
       );
     }
   }
 
-  const parsed: ShowLiveChatActionPanelAction = {
-    type: "showLiveChatActionPanelAction",
+  const parsed: ShowPanelAction = {
+    type: "showPanelAction",
     panelToShow: payload.panelToShow,
   };
   return parsed;

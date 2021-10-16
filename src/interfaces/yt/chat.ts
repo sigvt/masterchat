@@ -456,6 +456,7 @@ export interface YTTooltipRenderer {
   suggestedPosition: YTType;
   dismissStrategy: YTType;
   trackingParams: string;
+  dwellTimeMs?: string;
 }
 
 export interface YTPromoConfig {
@@ -467,7 +468,7 @@ export interface YTLiveChatPollRenderer {
   liveChatPollId: string;
   header: {
     pollHeaderRenderer: {
-      pollQuestion: YTSimpleTextContainer;
+      pollQuestion?: YTSimpleTextContainer;
       thumbnail: YTThumbnailList;
       metadataText: YTRunContainer<YTTextRun>;
       liveChatPollType: YTLiveChatPollType;

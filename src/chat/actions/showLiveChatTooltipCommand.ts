@@ -4,10 +4,21 @@ import { ShowTooltipAction } from "../../interfaces/actions";
 export function parseShowLiveChatTooltipCommand(
   payload: YTShowLiveChatTooltipCommand
 ) {
-  // TODO: normalize payload
+  const rdr = payload["tooltip"]["tooltipRenderer"];
+
   const parsed: ShowTooltipAction = {
     type: "showTooltipAction",
-    ...payload["tooltip"]["tooltipRenderer"],
+    // live-chat-banner
+    targetId: rdr.targetId,
+    // { "runs": [{ "text": "Click to show less" }] }
+    detailsText: rdr.detailsText,
+    // TOOLTIP_POSITION_TYPE_BELOW
+    suggestedPosition: rdr.suggestedPosition.type,
+    // TOOLTIP_DISMISS_TYPE_TAP_ANYWHERE
+    dismissStrategy: rdr.dismissStrategy.type,
+    promoConfig: rdr.promoConfig,
+    dwellTimeMs: rdr.dwellTimeMs ? parseInt(rdr.dwellTimeMs, 10) : undefined,
   };
+
   return parsed;
 }

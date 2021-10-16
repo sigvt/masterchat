@@ -165,7 +165,7 @@ export function handleData({
       case "addBannerAction": {
         log(
           chalk.blue(`=================
-[${action.type}] ${stringify(action.title)}
+[banner ${action.id}] ${stringify(action.title)}
 ${action.authorName}: ${stringify(action.message)}
 =================`)
         );
@@ -185,42 +185,40 @@ ${action.authorName}: ${stringify(action.message)}
         );
         break;
       }
+      case "removeBannerAction": {
+        log(chalk.cyan(`[removeBanner ${action.targetActionId}]`));
+        break;
+      }
       case "showPollPanelAction": {
         log(
           chalk.cyan(`=================
-[openPoll ${action.targetId} (${action.pollType})]
-${action.authorName}: ${action.question}
+[openPoll ${action.id} (${action.pollType})] -> ${action.targetId}
+${action.authorName}: ${action.question ? action.question : "<empty question>"}
 ${action.choices
   .map((choice, i) => {
-    return `${i + 1}: ${stringify(choice.text)} ${stringify(
-      choice.votePercentage!
-    )}`;
+    return `${i + 1}: ${stringify(choice.text)}`;
   })
   .join("\n")}
 =================`)
         );
         break;
       }
-      case "updateLiveChatPollAction": {
+      case "updatePollAction": {
         log(
           chalk.cyan(
-            `[updatePoll ${action.liveChatPollId}]: ${stringify(
-              action.header.pollHeaderRenderer.pollQuestion
-            )} - ${stringify(action.header.pollHeaderRenderer.metadataText)}`
+            `[updatePoll ${action.id}] ${action.authorName}: ${
+              action.question ? action.question : "<empty question>"
+            } - ${action.elapsedText} - ${action.voteCount} votes`
           )
         );
         break;
       }
-      case "closeLiveChatActionPanelAction": {
+      case "closePanelAction": {
         log(
           chalk.cyan(
             `[closePanel ${action.targetPanelId}] skipOnDismissCommand=${action.skipOnDismissCommand}`
           )
         );
-        break;
-      }
-      case "removeBannerAction": {
-        log(chalk.cyan(`[removeBanner ${action.targetActionId}]`));
         break;
       }
       case "markChatItemAsDeletedAction": {

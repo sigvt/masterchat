@@ -16,17 +16,21 @@
 
 ### Improvements
 
-- BREAKING: normalized action payload:
-  - `AddSuperStickerItemAction`
-  - `AddMembershipItemAction`
-  - `AddViewerEngagementMessageAction`
+- BREAKING: normalized all interfaces:
   - `AddBannerAction`
-  - `AddSuperChatTickerAction`
-  - `AddSuperStickerTickerAction`
+  - `AddMembershipItemAction`
   - `AddMembershipTickerAction`
-  - `ShowLiveChatActionPanelAction`
-  - `CloseLiveChatActionPanelAction`
   - `AddPlaceholderItemAction`
+  - `AddSuperChatTickerAction`
+  - `AddSuperStickerItemAction`
+  - `AddSuperStickerTickerAction`
+  - `AddViewerEngagementMessageAction`
+  - `ClosePanelAction`
+  - `ShowPanelAction`
+  - `ShowTooltipAction`
+- BREAKING: renamed `ShowLiveChatActionPanelAction` -> `ShowPanelAction`
+- BREAKING: renamed `UpdateLiveChatPollAction` -> `UpdatePollAction`
+- BREAKING: renamed `CloseLiveChatActionPanelAction` -> `ClosePanelAction`
 - DEPRECATED: `AddChatItemAction.rawMessage` -> `AddChatItemAction.message`
 - DEPRECATED: `AddSuperChatItemAction.rawMessage` -> `AddSuperChatItemAction.message`
 - DEPRECATED: props of `AddSuperChatItemAction.superchat` has been flattened into `AddSuperChatItemAction`
