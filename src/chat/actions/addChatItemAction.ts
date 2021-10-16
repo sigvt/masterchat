@@ -188,12 +188,16 @@ export function parseAddChatItemAction(payload: YTAddChatItemAction) {
     };
     return parsed;
   } else if ("liveChatPlaceholderItemRenderer" in item) {
-    // TODO: normalize payload
     // Placeholder chat
     const renderer = item["liveChatPlaceholderItemRenderer"]!;
+    const timestampUsec = renderer.timestampUsec;
+    const timestamp = tsToDate(timestampUsec);
+
     const parsed: AddPlaceholderItemAction = {
       type: "addPlaceholderItemAction",
-      ...renderer,
+      id: renderer.id,
+      timestampUsec,
+      timestamp,
     };
     return parsed;
   } else if ("liveChatViewerEngagementMessageRenderer" in item) {

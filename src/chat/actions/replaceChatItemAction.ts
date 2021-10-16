@@ -8,7 +8,6 @@ const KNOWN_ITEM_TYPES = [
 ];
 
 export function parseReplaceChatItemAction(payload: YTReplaceChatItemAction) {
-  // TODO: normalize payload
   // Replace chat item with placeholder or renderer
   const itemType = Object.keys(payload.replacementItem)[0];
   if (!KNOWN_ITEM_TYPES.includes(itemType)) {
@@ -20,7 +19,8 @@ export function parseReplaceChatItemAction(payload: YTReplaceChatItemAction) {
 
   const parsed: ReplaceChatItemAction = {
     type: "replaceChatItemAction",
-    ...payload,
+    targetItemId: payload.targetItemId,
+    replacementItem: payload.replacementItem,
   };
   return parsed;
 }

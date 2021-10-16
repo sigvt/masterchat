@@ -1,17 +1,16 @@
 import { OmitTrackingParams } from "../utils";
 import { Color, Membership, SuperChat } from "./misc";
 import {
-  YTCloseLiveChatActionPanelAction,
-  YTLiveChatActionPanelRenderer,
+  YTLiveChatPaidMessageRendererContainer,
   YTLiveChatPaidStickerRenderer,
-  YTLiveChatPlaceholderItemRenderer,
+  YTLiveChatPlaceholderItemRendererContainer,
   YTLiveChatPollChoice,
   YTLiveChatPollRenderer,
   YTLiveChatPollType,
+  YTLiveChatTextMessageRendererContainer,
   YTLiveChatTickerPaidStickerItemRenderer,
   YTLiveChatTickerSponsorItemRenderer,
   YTRemoveBannerForLiveChatCommand,
-  YTReplaceChatItemAction,
   YTRun,
   YTText,
   YTTooltipRenderer,
@@ -50,7 +49,7 @@ export interface AddChatItemAction {
   timestamp: Date;
   timestampUsec: string;
   rawMessage: YTRun[];
-  authorName: string;
+  authorName?: string;
   authorChannelId: string;
   authorPhoto: string;
   membership?: Membership;
@@ -120,13 +119,20 @@ export interface AddMembershipMilestoneItemAction {
   message: YTRun[] | null;
 }
 
-export interface AddPlaceholderItemAction
-  extends YTLiveChatPlaceholderItemRenderer {
+export interface AddPlaceholderItemAction {
   type: "addPlaceholderItemAction";
+  id: string;
+  timestamp: Date;
+  timestampUsec: string;
 }
 
-export interface ReplaceChatItemAction extends YTReplaceChatItemAction {
+export interface ReplaceChatItemAction {
   type: "replaceChatItemAction";
+  targetItemId: string;
+  replacementItem:
+    | YTLiveChatPlaceholderItemRendererContainer
+    | YTLiveChatTextMessageRendererContainer
+    | YTLiveChatPaidMessageRendererContainer; // TODO: check if YTLiveChatPaidMessageRendererContainer will appear
 }
 
 export interface MarkChatItemAsDeletedAction {

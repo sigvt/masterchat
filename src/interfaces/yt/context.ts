@@ -347,11 +347,6 @@ export interface NotificationActionRenderer {
   trackingParams: string;
 }
 
-export interface LengthText {
-  simpleText: string;
-  accessibility: YTAccessibilityData;
-}
-
 export interface ShortViewCountText {
   simpleText?: string;
   runs?: YTRun[];
@@ -586,8 +581,8 @@ export interface TopLevelButtonToggleButtonRenderer {
   isToggled: boolean;
   isDisabled: boolean;
   defaultIcon: Icon;
-  defaultText: LengthText;
-  toggledText: LengthText;
+  defaultText: YTSimpleTextContainer;
+  toggledText: YTSimpleTextContainer;
   accessibility: YTAccessibilityLabel;
   trackingParams: string;
   defaultTooltip: string;
@@ -929,11 +924,11 @@ export interface CompactAutoplayRendererContent {
 export interface ContentCompactVideoRenderer {
   videoId: string;
   thumbnail: Background;
-  title: LengthText;
+  title: YTSimpleTextContainer;
   longBylineText: BylineText;
   publishedTimeText: YTSimpleTextContainer;
   viewCountText: YTSimpleTextContainer;
-  lengthText: LengthText;
+  lengthText: YTSimpleTextContainer;
   navigationEndpoint: CompactVideoRendererNavigationEndpoint;
   shortBylineText: BylineText;
   badges: PurpleBadge[];
@@ -1012,7 +1007,7 @@ export interface ThumbnailOverlayNowPlayingRenderer {
 }
 
 export interface PurpleThumbnailOverlayTimeStatusRenderer {
-  text: LengthText;
+  text: YTSimpleTextContainer;
   style: ThumbnailOverlayTimeStatusRendererStyle;
 }
 
@@ -1101,11 +1096,11 @@ export enum UntoggledTooltip {
 export interface ResultCompactVideoRenderer {
   videoId: string;
   thumbnail: Background;
-  title: LengthText;
+  title: YTSimpleTextContainer;
   longBylineText: BylineText;
   publishedTimeText?: YTSimpleTextContainer;
   viewCountText: ShortViewCountText;
-  lengthText?: LengthText;
+  lengthText?: YTSimpleTextContainer;
   navigationEndpoint: CompactVideoRendererNavigationEndpoint;
   shortBylineText: BylineText;
   badges?: PurpleBadge[];
@@ -1278,9 +1273,9 @@ export interface WatchNextEndScreenRendererResult {
 export interface EndScreenVideoRenderer {
   videoId: string;
   thumbnail: Background;
-  title: LengthText;
+  title: YTSimpleTextContainer;
   shortBylineText: BylineText;
-  lengthText?: LengthText;
+  lengthText?: YTSimpleTextContainer;
   lengthInSeconds?: number;
   navigationEndpoint: CurrentVideoEndpointClass;
   trackingParams: string;
