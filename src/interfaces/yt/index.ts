@@ -8,6 +8,6 @@ export {
   YTRunContainer,
   YTTextRun,
   YTThumbnail,
-  YTThumbnailListWithAccessibility,
+  YTThumbnailList,
 } from "./chat";
 export { YTAccessibilityData, YTReloadContinuation } from "./context";

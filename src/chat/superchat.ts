@@ -1,5 +1,5 @@
 import { stringify } from "../utils";
-import { YTLiveChatPaidMessageRenderer } from "../interfaces/yt/chat";
+import { YTLiveChatPaidMessageRenderer, YTText } from "../interfaces/yt/chat";
 import {
   SuperChat,
   SUPERCHAT_COLOR_MAP,
@@ -32,14 +32,22 @@ export function toTLS(symbolOrTls: string): string {
   return SYMBOL_TO_TLS_MAP[symbolOrTls] ?? symbolOrTls;
 }
 
-export function parseSuperChat(
-  renderer: YTLiveChatPaidMessageRenderer
-): SuperChat {
-  const input = stringify(renderer.purchaseAmountText);
+export function parseAmountText(purchaseAmountText: string) {
+  const input = stringify(purchaseAmountText);
   const amountString = AMOUNT_REGEXP.exec(input)![0].replace(/,/g, "");
 
   const amount = parseFloat(amountString);
   const currency = toTLS(input.replace(AMOUNT_REGEXP, "").trim());
+  return { amount, currency };
+}
+
+export function parseSuperChat(
+  renderer: YTLiveChatPaidMessageRenderer
+): SuperChat {
+  const { amount, currency } = parseAmountText(
+    renderer.purchaseAmountText.simpleText
+  );
+
   const color =
     SUPERCHAT_COLOR_MAP[
       renderer.headerBackgroundColor.toString() as keyof typeof SUPERCHAT_COLOR_MAP

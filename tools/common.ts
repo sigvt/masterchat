@@ -1,4 +1,4 @@
-import chalk, { gray } from "chalk";
+import chalk from "chalk";
 import {
   AddChatItemAction,
   ChatResponse,
@@ -73,7 +73,7 @@ export function handleData({
         if (chatCount < maxChats) {
           log(
             chalk.gray(`${action.authorChannelId} ${action.authorName}:`),
-            stringify(action.rawMessage)
+            stringify(action.message)
           );
           chatCount += 1;
         }
@@ -84,10 +84,10 @@ export function handleData({
       case "addSuperChatItemAction": {
         log(
           chalk.yellow(
-            `[sc] ${chalkSc(action.superchat.color)(
-              `${action.superchat.amount} ${action.superchat.currency}`
+            `[sc] ${chalkSc(action.color)(
+              `${action.amount} ${action.currency}`
             )} ${action.authorName}: ${stringify(
-              action.rawMessage ?? "<empty message>"
+              action.message ?? "<empty message>"
             )}`
           )
         );
@@ -97,7 +97,7 @@ export function handleData({
         log(
           chalk.yellow(
             `[super sticker] ${stringify(action.authorName)}: ${
-              action.sticker.accessibility.accessibilityData.label
+              action.stickerText
             }`
           )
         );
@@ -129,6 +129,28 @@ export function handleData({
         );
         break;
       }
+      case "addSuperChatTickerAction": {
+        if (!showTicker) break;
+        log(
+          chalk.yellow(
+            `<sc ${chalkSc(action.contents.color)(
+              formatColor(action.startBackgroundColor, "hex")
+            )} (${action.durationSec}/${action.fullDurationSec}) ${
+              action.contents.authorName
+            }: ${action.amountText}>`
+          )
+        );
+        break;
+      }
+      case "addSuperStickerTickerAction": {
+        // if (!showTicker) break;
+        log(
+          chalk.yellow(
+            `<super sticker (${action.durationSec}/${action.fullDurationSec}) ${action.authorName}: ${action.tickerPackName}>`
+          )
+        );
+        break;
+      }
       case "addMembershipTickerAction": {
         if (!showTicker) break;
         log(
@@ -136,28 +158,6 @@ export function handleData({
             `<membership (${action.durationSec}/${
               action.fullDurationSec
             }) ${stringify(action.detailText)}>`
-          )
-        );
-        break;
-      }
-      case "addSuperChatTickerAction": {
-        if (!showTicker) break;
-        log(
-          chalk.yellow(
-            `<sc ${chalkSc(action.superchat.color)(
-              formatColor(action.startBackgroundColor, "hex")
-            )} (${action.durationSec}/${action.fullDurationSec}) ${
-              action.authorName
-            }: ${action.amountText}>`
-          )
-        );
-        break;
-      }
-      case "addSuperStickerTickerAction": {
-        if (!showTicker) break;
-        log(
-          chalk.yellow(
-            `<super sticker (${action.durationSec}/${action.fullDurationSec}) ${action.authorExternalChannelId}>`
           )
         );
         break;
@@ -186,20 +186,17 @@ ${action.authorName}: ${stringify(action.message)}
         break;
       }
       case "showPollPanelAction": {
-        log(JSON.stringify(action));
         log(
           chalk.cyan(`=================
-[openPoll ${action.targetId}]
+[openPoll ${action.targetId} (${action.pollType})]
+${action.authorName}: ${action.question}
 ${action.choices
   .map((choice, i) => {
     return `${i + 1}: ${stringify(choice.text)} ${stringify(
       choice.votePercentage!
-    )} ${choice.voteRatio} ${choice.selected}`;
+    )}`;
   })
   .join("\n")}
-${action.pollType}
-${action.question}
-${action.authorName}
 =================`)
         );
         break;
@@ -216,11 +213,14 @@ ${action.authorName}
       }
       case "closeLiveChatActionPanelAction": {
         log(
-          chalk.cyan(`=================
-[closePanel ${action.targetPanelId}]
-${action.skipOnDismissCommand}
-=================`)
+          chalk.cyan(
+            `[closePanel ${action.targetPanelId}] skipOnDismissCommand=${action.skipOnDismissCommand}`
+          )
         );
+        break;
+      }
+      case "removeBannerAction": {
+        log(chalk.cyan(`[removeBanner ${action.targetActionId}]`));
         break;
       }
       case "markChatItemAsDeletedAction": {
@@ -288,7 +288,7 @@ export class ChatHistory {
     this.db.splice(0, this.db.length - CHAT_HISTORY_SIZE);
   }
   private transform(action: AddChatItemAction): [string, string, string] {
-    return [action.id, action.authorChannelId, stringify(action.rawMessage)];
+    return [action.id, action.authorChannelId, stringify(action.message)];
   }
   insert(action: AddChatItemAction) {
     this.db.push(this.transform(action));

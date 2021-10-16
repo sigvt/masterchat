@@ -109,8 +109,7 @@ export function parseMetadataFromWatch(html: string) {
   const playabilityStatus = findPlayabilityStatus(html);
   assertPlayability(playabilityStatus);
 
-  // TODO
-  // initialData.contents.twoColumnWatchNextResults.conversationBar.conversationBarRenderer.availabilityMessage.messageRenderer.text.runs[0].text === 'Chat is disabled for this live stream.'
+  // TODO: initialData.contents.twoColumnWatchNextResults.conversationBar.conversationBarRenderer.availabilityMessage.messageRenderer.text.runs[0].text === 'Chat is disabled for this live stream.'
   const results =
     initialData.contents?.twoColumnWatchNextResults?.results.results!;
 

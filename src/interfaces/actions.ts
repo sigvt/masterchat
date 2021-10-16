@@ -1,8 +1,13 @@
 import { OmitTrackingParams } from "../utils";
-import { Color, Membership, SuperChat } from "./misc";
+import {
+  Color,
+  Membership,
+  SuperChat,
+  SuperChatColor,
+  SuperChatSignificance,
+} from "./misc";
 import {
   YTLiveChatPaidMessageRendererContainer,
-  YTLiveChatPaidStickerRenderer,
   YTLiveChatPlaceholderItemRendererContainer,
   YTLiveChatPollChoice,
   YTLiveChatPollRenderer,
@@ -48,7 +53,7 @@ export interface AddChatItemAction {
   id: string;
   timestamp: Date;
   timestampUsec: string;
-  rawMessage: YTRun[];
+  message: YTRun[];
   authorName?: string;
   authorChannelId: string;
   authorPhoto: string;
@@ -57,6 +62,9 @@ export interface AddChatItemAction {
   isModerator: boolean;
   isVerified: boolean;
   contextMenuEndpointParams: string;
+
+  /** @deprecated use `message` */
+  rawMessage: YTRun[];
 }
 
 export interface AddSuperChatItemAction {
@@ -64,16 +72,46 @@ export interface AddSuperChatItemAction {
   id: string;
   timestamp: Date;
   timestampUsec: string;
-  rawMessage: YTRun[] | undefined;
   authorName: string;
   authorChannelId: string;
   authorPhoto: string;
+  message: YTRun[] | null;
+  amount: number;
+  currency: string;
+  color: SuperChatColor;
+  significance: SuperChatSignificance;
+  authorNameTextColor: Color;
+  timestampColor: Color;
+  headerBackgroundColor: Color;
+  headerTextColor: Color;
+  bodyBackgroundColor: Color;
+  bodyTextColor: Color;
+
+  /** @deprecated use `message` */
+  rawMessage: YTRun[] | undefined;
+
+  /** @deprecated flattened */
   superchat: SuperChat;
 }
 
-export interface AddSuperStickerItemAction
-  extends YTLiveChatPaidStickerRenderer {
+export interface AddSuperStickerItemAction {
   type: "addSuperStickerItemAction";
+  id: string;
+  timestamp: Date;
+  timestampUsec: string;
+  authorName: string;
+  authorChannelId: string;
+  authorPhoto: string;
+  stickerUrl: string;
+  stickerText: string;
+  amount: number;
+  currency: string;
+  stickerDisplayWidth: number;
+  stickerDisplayHeight: number;
+  moneyChipBackgroundColor: Color;
+  moneyChipTextColor: Color;
+  backgroundColor: Color;
+  authorNameTextColor: Color;
 }
 
 export interface AddMembershipItemAction {
@@ -87,6 +125,7 @@ export interface AddMembershipItemAction {
 
   membership: Membership;
   authorName: string;
+  authorChannelId: string;
   authorPhoto: string;
 }
 
@@ -101,6 +140,7 @@ export interface AddMembershipMilestoneItemAction {
 
   membership: Membership;
   authorName: string;
+  authorChannelId: string;
   authorPhoto: string;
 
   /**
@@ -151,26 +191,44 @@ export interface MarkChatItemsByAuthorAsDeletedAction {
 export interface AddSuperChatTickerAction {
   type: "addSuperChatTickerAction";
   id: string;
-  amountText: string;
   authorChannelId: string;
-  authorName: string;
   authorPhoto: string;
+  amountText: string;
   durationSec: number;
   fullDurationSec: number;
-  superchat: SuperChat;
+  contents: AddSuperChatItemAction;
   amountTextColor: Color;
   startBackgroundColor: Color;
   endBackgroundColor: Color;
 }
 
-export interface AddSuperStickerTickerAction
-  extends OmitTrackingParams<YTLiveChatTickerPaidStickerItemRenderer> {
+export interface AddSuperStickerTickerAction {
   type: "addSuperStickerTickerAction";
+  id: string;
+  authorName: string;
+  authorChannelId: string;
+  authorPhoto: string;
+  durationSec: number;
+  fullDurationSec: number;
+  tickerPackName: string;
+  tickerPackThumbnail: string;
+  contents: AddSuperStickerItemAction;
+  startBackgroundColor: Color;
+  endBackgroundColor: Color;
 }
 
-export interface AddMembershipTickerAction
-  extends OmitTrackingParams<YTLiveChatTickerSponsorItemRenderer> {
+export interface AddMembershipTickerAction {
   type: "addMembershipTickerAction";
+  id: string;
+  authorChannelId: string;
+  authorPhoto: string;
+  durationSec: number;
+  fullDurationSec: number;
+  detailText: YTText;
+  contents: AddMembershipItemAction | AddMembershipMilestoneItemAction; // TODO: check if AddMembershipMilestoneItemAction is available
+  detailTextColor: Color;
+  startBackgroundColor: Color;
+  endBackgroundColor: Color;
 }
 
 export interface AddBannerAction {

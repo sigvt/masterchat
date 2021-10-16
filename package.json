@@ -4,7 +4,7 @@
   "version": "0.12.0",
   "author": "Yasuaki Uechi <y@uechi.io> (https://uechi.io/)",
   "scripts": {
-    "build": "cross-env NODE_ENV=production rollup -c && shx rm -rf lib/{modules,protobuf} lib/{auth,errors,constants,index,pool,utils}.d.ts",
+    "build": "rollup -c && shx rm -rf lib/{modules,protobuf} lib/{auth,errors,constants,index,pool,utils}.d.ts",
     "clean": "shx rm -rf lib",
     "dev": "tsc -w",
     "docs": "shx rm -rf docs && typedoc --out ./docs --excludeExternals --excludePrivate --excludeProtected --exclude '**/__tests__/*,**/*.test.ts' src && shx touch docs/.nojekyll",
