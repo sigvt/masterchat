@@ -14,6 +14,7 @@ export type YTText = YTSimpleTextContainer | YTRunContainer;
 
 export interface YTSimpleTextContainer {
   simpleText: string;
+  accessibility?: YTAccessibilityData;
 }
 
 export interface YTRunContainer<T = YTRun> {

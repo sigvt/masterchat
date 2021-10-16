@@ -8,6 +8,7 @@ import {
   YTContinuationContents,
   YTEmojiRun,
   YTRun,
+  YTSimpleTextContainer,
   YTText,
   YTTextRun,
 } from "./interfaces/yt/chat";
@@ -16,7 +17,7 @@ import { FluffyBrowseEndpoint } from "./interfaces/yt/context";
 export type ColorFormat = "rgb" | "hex";
 
 export interface RunsToStringOptions {
-  // add space between text and emoji tokens
+  // add space between runs
   spaces?: boolean;
 
   // function to process text token
@@ -172,12 +173,33 @@ export function stringify(
   payload: YTText | YTRun[] | string | undefined,
   runsToStringOptions?: RunsToStringOptions
 ): string | undefined {
-  if (payload === undefined) return undefined;
+  // undefined
+  if (payload == undefined) return undefined;
+
+  // string
   if (typeof payload === "string") return payload;
+
+  // Run[]
   if (Array.isArray(payload)) return runsToString(payload, runsToStringOptions);
+
+  // YTRunContainer
   if ("runs" in payload) return runsToString(payload.runs, runsToStringOptions);
-  if ("simpleText" in payload) return payload.simpleText;
+
+  // YTSimpleTextContainer
+  // TODO: add option for expanding accessibility label
+  if ("simpleText" in payload) return simpleTextToString(payload, false);
+
   throw new Error(`Invalid payload format: ${payload}`);
+}
+
+export function simpleTextToString(
+  payload: YTSimpleTextContainer,
+  expand: boolean = false
+) {
+  if (payload.accessibility && expand) {
+    return payload.accessibility.accessibilityData.label;
+  }
+  return payload.simpleText;
 }
 
 export function runsToString(
