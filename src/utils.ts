@@ -35,7 +35,7 @@ export function tsToDate(timestampUsec: string): Date {
 }
 
 /**
- * Convert timestampUsec into number
+ * Convert timestampUsec into number (in seconds)
  */
 export function tsToNumber(timestampUsec: string): number {
   return Number(BigInt(timestampUsec) / BigInt(1000));
