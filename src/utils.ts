@@ -66,6 +66,7 @@ export function ytFetch(input: string, init?: RequestInit) {
       ...init?.headers,
     },
   };
+
   return crossFetch(requestUrl, requestInit);
 }
 

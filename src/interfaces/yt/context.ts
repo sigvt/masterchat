@@ -1,7 +1,9 @@
 import {
   UIActions,
+  YTApiEndpointMetadataContainer,
   YTClientMessages,
   YTIcon,
+  YTIgnoreWebCommandMetadata,
   YTOverflowMenu,
   YTRun,
   YTRunContainer,
@@ -252,11 +254,7 @@ export interface MenuNavigationItemRendererNavigationEndpoint {
 }
 
 export interface DefaultNavigationEndpointCommandMetadata {
-  webCommandMetadata: FluffyWebCommandMetadata;
-}
-
-export interface FluffyWebCommandMetadata {
-  ignoreNavigation: boolean;
+  webCommandMetadata: YTIgnoreWebCommandMetadata;
 }
 
 export interface UserFeedbackEndpoint {
@@ -315,17 +313,8 @@ export enum ListType {
 
 export interface YTOnCreateListCommand {
   clickTrackingParams: string;
-  commandMetadata: YTOnCreateListCommandCommandMetadata;
+  commandMetadata: YTApiEndpointMetadataContainer;
   createPlaylistServiceEndpoint: YTCreatePlaylistServiceEndpoint;
-}
-
-export interface YTOnCreateListCommandCommandMetadata {
-  webCommandMetadata: StickyWebCommandMetadata;
-}
-
-export interface StickyWebCommandMetadata {
-  sendPost: boolean;
-  apiUrl?: string;
 }
 
 export interface YTCreatePlaylistServiceEndpoint {
@@ -458,7 +447,7 @@ export interface PurpleURLEndpoint {
 
 export interface UpdatedMetadataEndpoint {
   clickTrackingParams: string;
-  commandMetadata: YTOnCreateListCommandCommandMetadata;
+  commandMetadata: YTApiEndpointMetadataContainer;
   updatedMetadataEndpoint: WatchEndpointClass;
 }
 
@@ -547,7 +536,7 @@ export interface CurrentVideoEndpointClass {
 
 export interface ButtonRendererServiceEndpoint {
   clickTrackingParams: string;
-  commandMetadata: YTOnCreateListCommandCommandMetadata;
+  commandMetadata: YTApiEndpointMetadataContainer;
   shareEntityServiceEndpoint: ShareEntityServiceEndpoint;
 }
 
@@ -639,7 +628,12 @@ export interface FluffySignInEndpoint {
 }
 
 export interface StyleClass {
-  styleType: string;
+  styleType: StyleTypeEnum;
+}
+
+export enum StyleTypeEnum {
+  StyleDefaultActive = "STYLE_DEFAULT_ACTIVE",
+  StyleText = "STYLE_TEXT",
 }
 
 export interface ToggleButtonSupportedData {
@@ -748,16 +742,12 @@ export interface OwnerBadgeMetadataBadgeRenderer {
   icon: Icon;
   style: PurpleStyle;
   label?: string;
-  tooltip: Tooltip;
+  tooltip: string;
   trackingParams: string;
 }
 
 export enum PurpleStyle {
   BadgeStyleTypeVerified = "BADGE_STYLE_TYPE_VERIFIED",
-}
-
-export enum Tooltip {
-  確認済み = "確認済み",
 }
 
 export interface MembershipButton {
@@ -1020,8 +1010,8 @@ export interface ThumbnailOverlayToggleButtonRenderer {
   isToggled?: boolean;
   untoggledIcon: Icon;
   toggledIcon: Icon;
-  untoggledTooltip: UntoggledTooltip;
-  toggledTooltip: ToggledTooltip;
+  untoggledTooltip: string;
+  toggledTooltip: string;
   untoggledServiceEndpoint: UntoggledServiceEndpoint;
   toggledServiceEndpoint?: ToggledServiceEndpoint;
   untoggledAccessibility: YTAccessibilityData;
@@ -1031,7 +1021,7 @@ export interface ThumbnailOverlayToggleButtonRenderer {
 
 export interface ToggledServiceEndpoint {
   clickTrackingParams: string;
-  commandMetadata: YTOnCreateListCommandCommandMetadata;
+  commandMetadata: YTApiEndpointMetadataContainer;
   playlistEditEndpoint: ToggledServiceEndpointPlaylistEditEndpoint;
 }
 
@@ -1053,13 +1043,9 @@ export enum PlaylistID {
   Wl = "WL",
 }
 
-export enum ToggledTooltip {
-  追加済み = "追加済み",
-}
-
 export interface UntoggledServiceEndpoint {
   clickTrackingParams: string;
-  commandMetadata: YTOnCreateListCommandCommandMetadata;
+  commandMetadata: YTApiEndpointMetadataContainer;
   playlistEditEndpoint?: UntoggledServiceEndpointPlaylistEditEndpoint;
   signalServiceEndpoint?: UntoggledServiceEndpointSignalServiceEndpoint;
 }
@@ -1088,11 +1074,6 @@ export interface StickyAction {
   addToPlaylistCommand: AddToPlaylistCommand;
 }
 
-export enum UntoggledTooltip {
-  キューに追加 = "キューに追加",
-  後で見る = "後で見る",
-}
-
 export interface ResultCompactVideoRenderer {
   videoId: string;
   thumbnail: Background;
@@ -1115,7 +1096,7 @@ export interface ResultCompactVideoRenderer {
 
 export interface ContinuationItemRenderer {
   trigger: string;
-  continuationEndpoint: ContinuationEndpoint;
+  continuationEndpoint: YTContinuationEndpoint;
   button: ContinuationItemRendererButton;
 }
 
@@ -1129,12 +1110,12 @@ export interface IndigoButtonRenderer {
   isDisabled: boolean;
   text: YTRunContainer;
   trackingParams: string;
-  command: ContinuationEndpoint;
+  command: YTContinuationEndpoint;
 }
 
-export interface ContinuationEndpoint {
+export interface YTContinuationEndpoint {
   clickTrackingParams: string;
-  commandMetadata: YTOnCreateListCommandCommandMetadata;
+  commandMetadata: YTApiEndpointMetadataContainer;
   continuationCommand: ContinuationCommand;
 }
 
@@ -1194,7 +1175,7 @@ export interface IndecentButtonRenderer {
 
 export interface AcceptCommand {
   clickTrackingParams: string;
-  commandMetadata: YTOnCreateListCommandCommandMetadata;
+  commandMetadata: YTApiEndpointMetadataContainer;
   feedbackEndpoint: FeedbackEndpoint;
 }
 
@@ -1539,7 +1520,7 @@ export interface FluffyURLEndpoint {
 
 export interface MenuRequest {
   clickTrackingParams: string;
-  commandMetadata: YTOnCreateListCommandCommandMetadata;
+  commandMetadata: YTApiEndpointMetadataContainer;
   signalServiceEndpoint: MenuRequestSignalServiceEndpoint;
 }
 

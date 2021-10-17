@@ -1,6 +1,6 @@
-import { setupRecorder } from "nock-record";
 import fetch from "cross-fetch";
-import { Masterchat, delay } from "../../src";
+import { setupRecorder } from "nock-record";
+import { Masterchat } from "../../src";
 
 const mode = (process.env.NOCK_BACK_MODE as any) || "lockdown";
 const record = setupRecorder({ mode });

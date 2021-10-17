@@ -10,4 +10,7 @@ export {
   YTThumbnail,
   YTThumbnailList,
 } from "./chat";
+// export * from "./chat";
 export { YTAccessibilityData, YTReloadContinuation } from "./context";
+// export * from "./context";
+export * from "./comments";
