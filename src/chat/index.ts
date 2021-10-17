@@ -1,5 +1,6 @@
-import { debugLog } from "../utils";
+import { Action, UnknownAction } from "../interfaces/actions";
 import { YTAction } from "../interfaces/yt/chat";
+import { debugLog, omitTrackingParams } from "../utils";
 import { parseAddBannerToLiveChatCommand } from "./actions/addBannerToLiveChatCommand";
 import { parseAddChatItemAction } from "./actions/addChatItemAction";
 import { parseAddLiveChatTickerItemAction } from "./actions/addLiveChatTickerItemAction";
@@ -11,8 +12,6 @@ import { parseReplaceChatItemAction } from "./actions/replaceChatItemAction";
 import { parseShowLiveChatActionPanelAction } from "./actions/showLiveChatActionPanelAction";
 import { parseShowLiveChatTooltipCommand } from "./actions/showLiveChatTooltipCommand";
 import { parseUpdateLiveChatPollAction } from "./actions/updateLiveChatPollAction";
-import { Action, UnknownAction } from "../interfaces/actions";
-import { omitTrackingParams } from "../utils";
 
 /**
  * Parse raw action object and returns Action

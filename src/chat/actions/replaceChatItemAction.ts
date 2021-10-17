@@ -1,5 +1,5 @@
-import { YTReplaceChatItemAction } from "../../interfaces/yt/chat";
 import { ReplaceChatItemAction } from "../../interfaces/actions";
+import { YTReplaceChatItemAction } from "../../interfaces/yt/chat";
 import { debugLog } from "../../utils";
 
 const KNOWN_ITEM_TYPES = [

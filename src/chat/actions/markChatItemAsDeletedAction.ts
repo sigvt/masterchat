@@ -1,6 +1,6 @@
-import { debugLog } from "../../utils";
-import { YTMarkChatItemAsDeletedAction } from "../../interfaces/yt/chat";
 import { MarkChatItemAsDeletedAction } from "../../interfaces/actions";
+import { YTMarkChatItemAsDeletedAction } from "../../interfaces/yt/chat";
+import { debugLog } from "../../utils";
 
 export function parseMarkChatItemAsDeletedAction(
   payload: YTMarkChatItemAsDeletedAction

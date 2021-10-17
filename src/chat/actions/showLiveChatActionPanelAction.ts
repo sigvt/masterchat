@@ -1,9 +1,9 @@
-import { debugLog } from "../../utils";
+import { ShowPanelAction, ShowPollPanelAction } from "../../interfaces/actions";
 import {
   YTLiveChatPollRenderer,
   YTShowLiveChatActionPanelAction,
 } from "../../interfaces/yt/chat";
-import { ShowPanelAction, ShowPollPanelAction } from "../../interfaces/actions";
+import { debugLog } from "../../utils";
 import { pickThumbUrl } from "../utils";
 
 export function parseShowLiveChatActionPanelAction(

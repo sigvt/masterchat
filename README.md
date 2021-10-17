@@ -17,7 +17,7 @@ See [MANUAL](https://github.com/holodata/masterchat/tree/master/MANUAL.md) for u
 
 ## CLI
 
-See YouTube Live Chat through flexible filtering engine.
+> See YouTube Live Chat through flexible filtering engine.
 
 ```
 npm i -g masterchat-cli
@@ -27,30 +27,21 @@ See [masterchat-cli](https://github.com/holodata/masterchat-cli) for usage.
 
 ## Desktop
 
-For a desktop app, see [Komet](https://github.com/holodata/komet).
-
-## Roadmap
-
-- [x] Release `masterchat`
-- [x] Release `masterchat-cli`
-- [x] Auth support
-- [x] Ability to send chat
-- [x] Moderation functionality
-
-## Show case
-
-- [Holodex](https://holodex.net) (TLDex backend)
-- [Luna's Translation](https://github.com/luna-translations-bot/luna-translations-bot)
-- [Honeybee](https://github.com/holodata/honeybee)
-- [Komet](https://github.com/holodata/Komet)
-
-## Contribute
-
-- Use masterchat with your product and [report bugs](https://github.com/holodata/masterchat/issues/new)
-- Squash [TODOs](https://github.com/holodata/masterchat/search?l=TypeScript&q=TODO)
-
-See [Contribution Guide](./CONTRIBUTING.md) for more information.
+For a desktop app, see [☄️Komet](https://github.com/holodata/komet).
 
 ## Community
 
+### Contribute
+
+- Use masterchat with `DEBUG=masterchat` and [report](https://github.com/holodata/masterchat/issues/new) logs prefixed with `[action required]`
+- Squash [TODOs](https://github.com/holodata/masterchat/search?l=TypeScript&q=TODO)
+
+See [Contribution Guide](./CONTRIBUTING.md) for more information.
 Ask questions in `#masterchat` channel on [holodata Discord server](https://holodata.org/discord).
+
+### Users
+
+- [Holodex](https://holodex.net)
+- [Luna's Translation](https://github.com/luna-translations-bot/luna-translations-bot)
+- [Honeybee](https://github.com/holodata/honeybee)
+- [Komet](https://github.com/holodata/Komet)

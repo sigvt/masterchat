@@ -1,5 +1,5 @@
-import { YTShowLiveChatTooltipCommand } from "../../interfaces/yt/chat";
 import { ShowTooltipAction } from "../../interfaces/actions";
+import { YTShowLiveChatTooltipCommand } from "../../interfaces/yt/chat";
 
 export function parseShowLiveChatTooltipCommand(
   payload: YTShowLiveChatTooltipCommand

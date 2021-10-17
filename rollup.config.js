@@ -12,12 +12,12 @@ export default [
     output: [
       {
         file: "./lib/masterchat.js",
-        sourcemap: false,
+        sourcemap: !isProd,
         format: "cjs",
       },
       {
         file: "./lib/masterchat.mjs",
-        sourcemap: false,
+        sourcemap: !isProd,
         format: "es",
       },
     ],

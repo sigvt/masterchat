@@ -1,5 +1,5 @@
-import { YTMarkChatItemsByAuthorAsDeletedAction } from "../../interfaces/yt/chat";
 import { MarkChatItemsByAuthorAsDeletedAction } from "../../interfaces/actions";
+import { YTMarkChatItemsByAuthorAsDeletedAction } from "../../interfaces/yt/chat";
 
 export function parseMarkChatItemsByAuthorAsDeletedAction(
   payload: YTMarkChatItemsByAuthorAsDeletedAction

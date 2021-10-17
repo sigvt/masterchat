@@ -4,7 +4,7 @@
 
 ```bash
 git checkout dev
-npm install
+yarn install
 yarn build
 ```
 
@@ -18,10 +18,11 @@ yarn dev
 yarn build
 yarn link
 
-cd tools/
+cd tools
 yarn install
 yarn link masterchat
 DEBUG=masterchat ts-node ./inspector.ts <videoId>
+DEBUG=masterchat ts-node ./stream-pool.ts
 ```
 
 ## Testing

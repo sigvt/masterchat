@@ -1,5 +1,5 @@
-import { YTRemoveBannerForLiveChatCommand } from "../../interfaces/yt/chat";
 import { RemoveBannerAction } from "../../interfaces/actions";
+import { YTRemoveBannerForLiveChatCommand } from "../../interfaces/yt/chat";
 
 export function parseRemoveBannerForLiveChatCommand(
   payload: YTRemoveBannerForLiveChatCommand

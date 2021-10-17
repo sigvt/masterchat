@@ -224,7 +224,7 @@ ${action.choices
       case "markChatItemAsDeletedAction": {
         const chat = history.findOne(action.targetId);
         log(
-          chalk.red(
+          (action.retracted ? chalk.gray : chalk.red)(
             `[${action.retracted ? "retracted" : "deleted"}]${
               chat ? " " + `${chat[2]} (${chat[1]})` : ""
             } ${chalk.gray(action.targetId)}`
