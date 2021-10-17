@@ -16,7 +16,7 @@
 
 ### Improvements
 
-- BREAKING: normalized all interfaces:
+- BREAKING: normalized all the raw interfaces:
   - `AddBannerAction`
   - `AddMembershipItemAction`
   - `AddMembershipTickerAction`

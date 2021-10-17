@@ -9,17 +9,16 @@ import {
   Masterchat,
   MasterchatError,
   MasterchatOptions,
-  Metadata,
 } from ".";
 
 type VideoId = string;
 
 interface StreamPoolEvents {
-  data: (data: ChatResponse, metadata: Metadata) => void;
-  actions: (actions: Action[], metadata: Metadata) => void;
-  chats: (chats: AddChatItemAction[], metadata: Metadata) => void;
-  end: (reason: EndReason, metadata: Metadata) => void;
-  error: (error: MasterchatError | Error, metadata: Metadata) => void;
+  data: (data: ChatResponse, mc: Masterchat) => void;
+  actions: (actions: Action[], mc: Masterchat) => void;
+  chats: (chats: AddChatItemAction[], mc: Masterchat) => void;
+  end: (reason: EndReason, mc: Masterchat) => void;
+  error: (error: MasterchatError | Error, mc: Masterchat) => void;
 }
 
 export interface StreamPool {
@@ -153,24 +152,24 @@ export class StreamPool extends EventEmitter {
   }
 
   private _handleData(mc: Masterchat, data: ChatResponse) {
-    this.emit("data", data, mc.metadata);
+    this.emit("data", data, mc);
   }
 
   private _handleActions(mc: Masterchat, actions: Action[]) {
-    this.emit("actions", actions, mc.metadata);
+    this.emit("actions", actions, mc);
   }
 
   private _handleChats(mc: Masterchat, chats: AddChatItemAction[]) {
-    this.emit("chats", chats, mc.metadata);
+    this.emit("chats", chats, mc);
   }
 
   private _handleEnd(mc: Masterchat, reason: EndReason) {
     this.pool.delete(mc.videoId);
-    this.emit("end", reason, mc.metadata);
+    this.emit("end", reason, mc);
   }
 
   private _handleError(mc: Masterchat, err: MasterchatError | Error) {
     this.pool.delete(mc.videoId);
-    this.emit("error", err, mc.metadata);
+    this.emit("error", err, mc);
   }
 }
