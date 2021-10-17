@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import fetch from "cross-fetch";
 import { StreamPool } from "masterchat";
-import { ChatHistory, handleData } from "./common";
+import { ChatHistory, printData } from "./common";
 
 async function getStreams(
   org: string = "All Vtubers",
@@ -20,8 +20,8 @@ async function main(org?: string) {
   const history = new ChatHistory();
   const streams = new StreamPool({ mode: "live" });
 
-  streams.on("data", (data, { videoId }) =>
-    handleData({ data, history, prefix: videoId })
+  streams.on("data", (data, mc) =>
+    printData({ data, history, prefix: mc.videoId, mc })
   );
 
   streams.on("end", (reason, { videoId }) =>

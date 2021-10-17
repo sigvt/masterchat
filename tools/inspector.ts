@@ -10,7 +10,7 @@ import {
   stringify,
   SuperChat,
 } from "masterchat";
-import { ChatHistory, handleData } from "./common";
+import { ChatHistory, printData } from "./common";
 
 async function main({ videoIdOrUrl }: { videoIdOrUrl: string }) {
   const history = new ChatHistory();
@@ -23,7 +23,7 @@ async function main({ videoIdOrUrl }: { videoIdOrUrl: string }) {
   console.log(url);
   console.log("-----------------");
 
-  mc.on("data", (data) => handleData({ data, history }));
+  mc.on("data", (data) => printData({ data, history, mc }));
   mc.on("error", (err) => console.log("[ERROR]", err, url));
   mc.on("end", (reason) => console.log("[END]", `reason=${reason}`, url));
 
