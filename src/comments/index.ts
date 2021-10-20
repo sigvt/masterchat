@@ -6,6 +6,8 @@ import {
 import { csc, CscOptions } from "../protobuf/assembler";
 import { withContext, ytFetch } from "../utils";
 
+// Comment
+
 export async function getComments(
   videoId: string,
   continuation: string | CscOptions = {}

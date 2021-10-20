@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- New fn `getComments` for fetching video comments
+
 ## v0.13.0
 
 ### New

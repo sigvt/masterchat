@@ -44,4 +44,5 @@ Ask questions in `#masterchat` channel on [holodata Discord server](https://holo
 - [Holodex](https://holodex.net)
 - [Luna's Translation](https://github.com/luna-translations-bot/luna-translations-bot)
 - [Honeybee](https://github.com/holodata/honeybee)
+- [ShipID](https://github.com/holodata/ShipID)
 - [Komet](https://github.com/holodata/Komet)

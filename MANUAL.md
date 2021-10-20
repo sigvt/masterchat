@@ -15,7 +15,7 @@ async function main() {
   // listen for chats
   mc.on("chats", (chats) => {
     for (const chat of chats) {
-      console.log(chat.authorName, stringify(chat.rawMessage));
+      console.log(chat.authorName, stringify(chat.message));
     }
   });
 
@@ -28,7 +28,7 @@ async function main() {
       (action) => action.type === "addSuperChatItemAction"
     );
     const placeholderEvents = actions.filter(
-      (action) => action.type === "AddPlaceholderItemAction"
+      (action) => action.type === "addPlaceholderItemAction"
     );
   });
 
@@ -41,7 +41,6 @@ async function main() {
     // "unarchived" => Live stream recording is not available
     // "denied" => Access denied
     // "invalid" => Invalid request
-    // "unknown" => Unknown error
   });
 
   mc.on("end", () => {
@@ -101,7 +100,7 @@ async function main() {
 
   mc.on("chats", async (chats) => {
     for (const chat of chats) {
-      const message = stringify(chat.rawMessage, {
+      const message = stringify(chat.message, {
         emojiHandler: (emoji) => "",
       });
 
