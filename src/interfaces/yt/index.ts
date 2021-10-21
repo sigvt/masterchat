@@ -9,6 +9,7 @@ export {
   YTTextRun,
   YTThumbnail,
   YTThumbnailList,
+  YTMarkChatItemAsDeletedAction,
 } from "./chat";
 // export * from "./chat";
 export { YTAccessibilityData, YTReloadContinuation } from "./context";
