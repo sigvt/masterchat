@@ -140,7 +140,7 @@ export interface AddMembershipMilestoneItemAction {
   level?: string;
 
   membership: Membership;
-  authorName: string;
+  authorName?: string;
   authorChannelId: string;
   authorPhoto: string;
 
