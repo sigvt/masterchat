@@ -45,7 +45,7 @@ Ask questions in `#masterchat` channel on [holodata Discord server](https://holo
 - [ShipID](https://github.com/holodata/ShipID)
 - [Komet](https://github.com/holodata/Komet)
 
-## Contributors ✨
+### Contributors ✨
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
@@ -55,6 +55,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <table>
   <tr>
     <td align="center"><a href="https://github.com/uetchy"><img src="https://avatars.githubusercontent.com/u/431808?v=4?s=50" width="50px;" alt=""/><br /><sub><b>uetchy</b></sub></a><br /><a href="https://github.com/holodata/masterchat/commits?author=uetchy" title="Code">💻</a></td>
+    <td align="center"><a href="https://jan-prochazka.eu/"><img src="https://avatars.githubusercontent.com/u/1665677?v=4?s=50" width="50px;" alt=""/><br /><sub><b>Jan Procházka</b></sub></a><br /><a href="https://github.com/holodata/masterchat/commits?author=jprochazk" title="Code">💻</a></td>
   </tr>
 </table>
 
