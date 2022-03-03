@@ -4,17 +4,17 @@
 
 [API Documentation](https://holodata.github.io/masterchat)
 
-### Just grab metadata
+### Just grab some metadata
 
 ```js
 import { Masterchat, stringify } from "masterchat";
 
 const { title, channelId, channelName } = await Masterchat.init("<videoId>");
 
-console.log(`title=${title} @ ${channelName} (${channelId})`);
+console.log(`info: ${title} @ ${channelName} (${channelId})`);
 ```
 
-### Iterate live chats
+### Iterate over live chats
 
 ```js
 import { Masterchat, stringify } from "masterchat";
@@ -22,14 +22,14 @@ import { Masterchat, stringify } from "masterchat";
 async function main() {
   const mc = await Masterchat.init("<videoId>");
 
-  // listen for chat events
+  // listen for live chat
   mc.on("chats", (chats) => {
     for (const chat of chats) {
       console.log(chat.authorName, stringify(chat.message));
     }
   });
 
-  // listen for every event
+  // listen for any events
   mc.on("actions", (actions) => {
     const chats = actions.filter(
       (action) => action.type === "addChatItemAction"
@@ -54,6 +54,7 @@ async function main() {
     // "invalid" => Invalid request
   });
 
+  // handle end event
   mc.on("end", () => {
     console.log("Live stream has ended");
   }
@@ -64,7 +65,7 @@ async function main() {
 main();
 ```
 
-### Save replay chats in JSONLines format
+### Save replay chats in .jsonl
 
 ```js
 import { Masterchat } from "masterchat";
@@ -91,7 +92,7 @@ async function main() {
 main();
 ```
 
-### Moderation bot
+### Tailor-made moderation bot
 
 ```js
 import { Masterchat, stringify } from "masterchat";
@@ -126,7 +127,7 @@ async function main() {
 main();
 ```
 
-## Advanced Usage
+## Advanced usage
 
 ### Faster instantiation
 
