@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- New params for `AddBannerAction`: `viewerIsCreator`, `targetId`
+- BREAKING: incompatible name changes
+  - `AddBannerAction.id` is renamed to `AddBannerAction.actionId` as actionId
+  - `AddBannerAction.id` is now become liveChatId
 - New fn `getComments` for fetching video comments
 - Moved cli tools (`tools/`) to [`masterchat-cli`](https://github.com/holodata/masterchat-cli)
 
@@ -41,7 +45,7 @@
 - DEPRECATED: props of `AddSuperChatItemAction.superchat` has been flattened into `AddSuperChatItemAction`
 - BREAKING: `end` event will provide a reason (`'privated' | 'deleted' | 'disabled' | 'aborted' | null`)
   - `streamPool.on('end', (mc) => {})` -> `streamPool.on('end', (reason, mc) => {})`
-- BREAKING: instance will emits `end` instead of `error` in some special cases where the unrecoverable error code is either `private` or `unavailable` and it was not occurred during the first request (this usually happens when a streamer deletes or privates their live stream after the stream ends)
+- BREAKING: instance will emit `end` instead of `error` in some special cases where the unrecoverable error code is either `private` or `unavailable`, and it did not occur during the first request (this usually happens when a streamer deletes or privates their live stream after the stream ends)
 - BREAKING: `runsToPlainText` will expand `watchEndpoint` when `text` is a fragment of URL
 - use Uint8Array instead of Buffer in protobuf lib (by @jprochazk)
 
@@ -122,7 +126,7 @@ mc.listen()
 
 ### chat
 
-- `.fetch` will attempt to switch an API endpoint to the replay chat if failed to fetch chats from the live chat. Explicitly set `isLive` option `true` or `false` when instiantiating Masterchat to disable this behavior.
+- `.fetch` will attempt to switch an API endpoint to the replay chat if failed to fetch chats from the live chat. Explicitly set `isLive` option `true` or `false` when instantiating Masterchat to disable this behavior.
   - if unset,
     - live -> OK
     - archive -> first request fails, then try fetching replay chat -> OK

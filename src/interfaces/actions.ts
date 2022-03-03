@@ -234,6 +234,8 @@ export interface AddMembershipTickerAction {
 
 export interface AddBannerAction {
   type: "addBannerAction";
+  actionId: string;
+  targetId: string;
   id: string;
   title: YTRun[];
   message: YTRun[];
@@ -246,6 +248,7 @@ export interface AddBannerAction {
   isOwner: boolean;
   isModerator: boolean;
   isVerified: boolean;
+  viewerIsCreator: boolean;
   contextMenuEndpointParams?: string;
 }
 
