@@ -5,7 +5,7 @@
 [![npm: publish size](https://badgen.net/packagephobia/publish/masterchat)](https://npmjs.org/package/masterchat)
 [![typedoc](https://badgen.net/badge/docs/typedoc/purple)](https://holodata.github.io/masterchat/)
 
-> Node.js library for YouTube Live Chat
+Battle-tested Node.js library for handling YouTube Live Chat.
 
 ## Install
 
@@ -13,7 +13,7 @@
 npm i masterchat
 ```
 
-See [MANUAL](https://github.com/holodata/masterchat/tree/master/MANUAL.md) for usage.
+See [MANUAL](https://github.com/holodata/masterchat/tree/master/MANUAL.md) for the manual.
 
 ## CLI
 
@@ -21,11 +21,11 @@ See [MANUAL](https://github.com/holodata/masterchat/tree/master/MANUAL.md) for u
 npm i -g masterchat-cli
 ```
 
-See [masterchat-cli](https://github.com/holodata/masterchat-cli) for usage.
+See [masterchat-cli](https://github.com/holodata/masterchat-cli) for the manual.
 
 ## Desktop
 
-See [☄️Komet](https://github.com/holodata/komet).
+See [☄️Komet](https://github.com/holodata/komet) for further information.
 
 ## Community
 

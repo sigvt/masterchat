@@ -3,6 +3,7 @@
 ## Unreleased
 
 - New fn `getComments` for fetching video comments
+- Moved cli tools (`tools/`) to [`masterchat-cli`](https://github.com/holodata/masterchat-cli)
 
 ## v0.13.0
 

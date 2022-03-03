@@ -4,6 +4,16 @@
 
 [API Documentation](https://holodata.github.io/masterchat)
 
+### Just grab metadata
+
+```js
+import { Masterchat, stringify } from "masterchat";
+
+const { title, channelId, channelName } = await Masterchat.init("<videoId>");
+
+console.log(`title=${title} @ ${channelName} (${channelId})`);
+```
+
 ### Iterate live chats
 
 ```js
@@ -12,7 +22,7 @@ import { Masterchat, stringify } from "masterchat";
 async function main() {
   const mc = await Masterchat.init("<videoId>");
 
-  // listen for chats
+  // listen for chat events
   mc.on("chats", (chats) => {
     for (const chat of chats) {
       console.log(chat.authorName, stringify(chat.message));
@@ -24,14 +34,15 @@ async function main() {
     const chats = actions.filter(
       (action) => action.type === "addChatItemAction"
     );
-    const superchats = actions.filter(
+    const superChats = actions.filter(
       (action) => action.type === "addSuperChatItemAction"
     );
-    const placeholderEvents = actions.filter(
-      (action) => action.type === "addPlaceholderItemAction"
+    const superStickers = actions.filter(
+      (action) => action.type === "addSuperStickerItemAction"
     );
   });
 
+  // handle errors
   mc.on("error", (err) => {
     console.log(err.code);
     // "disabled" => Live chat is disabled
@@ -53,7 +64,7 @@ async function main() {
 main();
 ```
 
-### Download replay chat as JSONLines
+### Save replay chats in JSONLines format
 
 ```js
 import { Masterchat } from "masterchat";
@@ -80,7 +91,7 @@ async function main() {
 main();
 ```
 
-### Auto-moderator
+### Moderation bot
 
 ```js
 import { Masterchat, stringify } from "masterchat";
@@ -101,12 +112,11 @@ async function main() {
   mc.on("chats", async (chats) => {
     for (const chat of chats) {
       const message = stringify(chat.message, {
+        // omit emojis
         emojiHandler: (emoji) => "",
       });
 
-      if (isSpam(message)) {
-        await mc.remove(action.id);
-      }
+      if (isSpam(message)) await mc.remove(action.id);
     }
   });
 
