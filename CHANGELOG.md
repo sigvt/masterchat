@@ -4,10 +4,12 @@
 
 ### New
 
+- New action: `MembershipGiftPurchaseAction` and `MembershipGiftRedemptionAction`
 - New action: `AddPollResultAction` (separated from `AddViewerEngagementMessageAction`)
-- New: `getComment` for fetching video comment by id
 - New params for `AddBannerAction`: `viewerIsCreator`, `targetId`
-- New API `getComments` for fetching video comments
+- Support for Video Comment API:
+  - `getComments` for fetching video comments
+  - `getComment` for fetching video comment by id
 
 ### Improvements
 

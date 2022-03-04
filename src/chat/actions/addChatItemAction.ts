@@ -9,6 +9,8 @@ import {
   LiveChatMode,
   ModeChangeAction,
   AddPollResultAction,
+  MembershipGiftPurchaseAction,
+  MembershipGiftRedemptionAction,
 } from "../../interfaces/actions";
 import {
   YTAddChatItemAction,
@@ -17,6 +19,8 @@ import {
   YTLiveChatPaidMessageRenderer,
   YTLiveChatPaidStickerRenderer,
   YTLiveChatPlaceholderItemRenderer,
+  YTLiveChatSponsorshipsGiftPurchaseAnnouncementRenderer,
+  YTLiveChatSponsorshipsGiftRedemptionAnnouncementRenderer,
   YTLiveChatTextMessageRenderer,
   YTLiveChatViewerEngagementMessageRenderer,
   YTRunContainer,
@@ -58,6 +62,18 @@ export function parseAddChatItemAction(payload: YTAddChatItemAction) {
     // Mode change message (e.g. toggle members-only)
     const renderer = item["liveChatModeChangeMessageRenderer"]!;
     return parseLiveChatModeChangeMessageRenderer(renderer);
+  } else if ("liveChatSponsorshipsGiftPurchaseAnnouncementRenderer" in item) {
+    // Sponsorships gift purchase announcement
+    const renderer =
+      item["liveChatSponsorshipsGiftPurchaseAnnouncementRenderer"];
+    return parseLiveChatSponsorshipsGiftPurchaseAnnouncementRenderer(renderer);
+  } else if ("liveChatSponsorshipsGiftRedemptionAnnouncementRenderer" in item) {
+    // Sponsorships gift purchase announcement
+    const renderer =
+      item["liveChatSponsorshipsGiftRedemptionAnnouncementRenderer"];
+    return parseLiveChatSponsorshipsGiftRedemptionAnnouncementRenderer(
+      renderer
+    );
   }
 
   debugLog(
@@ -394,6 +410,89 @@ export function parseLiveChatModeChangeMessageRenderer(
     mode,
     enabled,
     description,
+  };
+  return parsed;
+}
+
+// Sponsorships gift purchase announcement
+export function parseLiveChatSponsorshipsGiftPurchaseAnnouncementRenderer(
+  renderer: YTLiveChatSponsorshipsGiftPurchaseAnnouncementRenderer
+) {
+  const id = renderer.id;
+  const timestampUsec = renderer.timestampUsec;
+  const timestamp = tsToDate(timestampUsec);
+  const authorChannelId = renderer.authorExternalChannelId;
+
+  const header = renderer.header.liveChatSponsorshipsHeaderRenderer;
+  const authorName = stringify(header.authorName);
+  const authorPhoto = pickThumbUrl(header.authorPhoto);
+  const channelName = header.primaryText.runs[3].text;
+  const amount = parseInt(header.primaryText.runs[1].text, 10);
+  const image = header.image.thumbnails[0].url;
+
+  if (!authorName) {
+    debugLog(
+      "[action required] empty authorName while parsing membershipGiftPurchaseAction",
+      JSON.stringify(renderer)
+    );
+  }
+
+  const membership = parseMembership(
+    header.authorBadges[header.authorBadges.length - 1]
+  )!;
+
+  if (!membership) {
+    debugLog(
+      "[action required] empty membership while parsing membershipGiftPurchaseAction",
+      JSON.stringify(renderer)
+    );
+  }
+
+  const parsed: MembershipGiftPurchaseAction = {
+    type: "membershipGiftPurchaseAction",
+    id,
+    timestamp,
+    timestampUsec,
+    channelName,
+    amount,
+    membership,
+    authorName,
+    authorChannelId,
+    authorPhoto,
+    image,
+  };
+  return parsed;
+}
+
+// Sponsorships gift redemption announcement
+export function parseLiveChatSponsorshipsGiftRedemptionAnnouncementRenderer(
+  renderer: YTLiveChatSponsorshipsGiftRedemptionAnnouncementRenderer
+) {
+  const id = renderer.id;
+  const timestampUsec = renderer.timestampUsec;
+  const timestamp = tsToDate(timestampUsec);
+  const authorChannelId = renderer.authorExternalChannelId;
+
+  const authorName = stringify(renderer.authorName);
+  const authorPhoto = pickThumbUrl(renderer.authorPhoto);
+  const senderName = renderer.message.runs[1].text;
+
+  if (!authorName) {
+    debugLog(
+      "[action required] empty authorName while parsing membershipGiftPurchaseAction",
+      JSON.stringify(renderer)
+    );
+  }
+
+  const parsed: MembershipGiftRedemptionAction = {
+    type: "membershipGiftRedemptionAction",
+    id,
+    timestamp,
+    timestampUsec,
+    senderName,
+    authorName,
+    authorChannelId,
+    authorPhoto,
   };
   return parsed;
 }

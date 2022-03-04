@@ -38,7 +38,9 @@ export type Action =
   | UpdatePollAction
   | AddPollResultAction
   | ShowTooltipAction
-  | ModeChangeAction;
+  | ModeChangeAction
+  | MembershipGiftPurchaseAction
+  | MembershipGiftRedemptionAction;
 
 export interface AddChatItemAction {
   type: "addChatItemAction";
@@ -327,6 +329,31 @@ export interface ModeChangeAction {
   mode: LiveChatMode;
   enabled: boolean;
   description: string;
+}
+
+export interface MembershipGiftPurchaseAction {
+  type: "membershipGiftPurchaseAction";
+  id: string;
+  timestamp: Date;
+  timestampUsec: string;
+  channelName: string; // MEMO: is it limited for ¥500 membership?
+  amount: number; // 5, 10, 20
+  membership: Membership;
+  authorName: string;
+  authorChannelId: string;
+  authorPhoto: string;
+  image: string; // always https://www.gstatic.com/youtube/img/sponsorships/sponsorships_gift_purchase_announcement_artwork.png
+}
+
+export interface MembershipGiftRedemptionAction {
+  type: "membershipGiftRedemptionAction";
+  id: string;
+  timestamp: Date;
+  timestampUsec: string;
+  senderName: string; // author was gifted a membership by sender
+  authorName: string;
+  authorChannelId: string;
+  authorPhoto: string;
 }
 
 export interface UnknownAction {
