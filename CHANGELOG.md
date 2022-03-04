@@ -2,13 +2,20 @@
 
 ## Unreleased
 
+### New
+
+- New action: `AddPollResultAction` (separated from `AddViewerEngagementMessageAction`)
 - New: `getComment` for fetching video comment by id
-- BREAKING: normalize `ReplaceChatItemAction.replacementItem` interfaces
 - New params for `AddBannerAction`: `viewerIsCreator`, `targetId`
+- New API `getComments` for fetching video comments
+
+### Improvements
+
+- BREAKING: remove `messageType` from `AddViewerEngagementMessageAction`
+- BREAKING: normalize `ReplaceChatItemAction.replacementItem` interfaces
 - BREAKING: incompatible property name changes
   - `AddBannerAction.id` which is actually action id has been renamed to `AddBannerAction.actionId`
   - `AddBannerAction.id` now refer to chat id
-- New API `getComments` for fetching video comments
 - Move cli tools (`tools/`) to [`masterchat-cli`](https://github.com/holodata/masterchat-cli)
 
 ## v0.13.0

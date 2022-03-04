@@ -1,4 +1,3 @@
-import { OmitTrackingParams } from "../utils";
 import {
   Color,
   Membership,
@@ -7,19 +6,10 @@ import {
   SuperChatSignificance,
 } from "./misc";
 import {
-  YTLiveChatPaidMessageRendererContainer,
-  YTLiveChatPlaceholderItemRendererContainer,
   YTLiveChatPollChoice,
-  YTLiveChatPollRenderer,
   YTLiveChatPollType,
-  YTLiveChatTextMessageRendererContainer,
-  YTLiveChatTickerPaidStickerItemRenderer,
-  YTLiveChatTickerSponsorItemRenderer,
-  YTRemoveBannerForLiveChatCommand,
   YTRun,
   YTText,
-  YTTooltipRenderer,
-  YTType,
 } from "./yt/chat";
 
 /**
@@ -46,6 +36,7 @@ export type Action =
   | ShowPollPanelAction
   | ClosePanelAction
   | UpdatePollAction
+  | AddPollResultAction
   | ShowTooltipAction
   | ModeChangeAction;
 
@@ -270,11 +261,10 @@ export interface ShowTooltipAction {
 export interface AddViewerEngagementMessageAction {
   type: "addViewerEngagementMessageAction";
   id: string;
-  messageType: "engagement" | "poll" | string;
   message: YTText;
   actionUrl?: string;
-  timestamp?: Date;
-  timestampUsec?: string;
+  timestamp: Date;
+  timestampUsec: string;
 }
 
 // generic action for unknown panel type
@@ -310,6 +300,19 @@ export interface UpdatePollAction {
   choices: YTLiveChatPollChoice[];
   elapsedText: string;
   voteCount: number;
+}
+
+export interface AddPollResultAction {
+  type: "addPollResultAction";
+  id: string;
+  question?: string;
+  total: string;
+  choices: PollChoice[];
+}
+
+export interface PollChoice {
+  text: string;
+  votePercentage: string;
 }
 
 export enum LiveChatMode {

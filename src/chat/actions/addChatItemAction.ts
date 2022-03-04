@@ -8,6 +8,7 @@ import {
   AddViewerEngagementMessageAction,
   LiveChatMode,
   ModeChangeAction,
+  AddPollResultAction,
 } from "../../interfaces/actions";
 import {
   YTAddChatItemAction,
@@ -283,40 +284,69 @@ export function parseLiveChatViewerEngagementMessageRenderer(
    * YOUTUBE_ROUND: engagement message
    * POLL: poll result message
    */
-  const { iconType } = renderer.icon;
 
-  let messageType = iconType;
+  const {
+    id,
+    timestampUsec,
+    icon: { iconType },
+  } = renderer;
+  if ("simpleText" in renderer.message) {
+    debugLog(
+      "[action required] simpleText found on parseLiveChatViewerEngagementMessageRenderer:",
+      JSON.stringify(renderer)
+    );
+  }
+
   switch (iconType) {
-    case "YOUTUBE_ROUND":
-      messageType = "engagement";
-      break;
-    case "POLL":
-      messageType = "poll";
-      break;
+    case "YOUTUBE_ROUND": {
+      const timestamp = tsToDate(timestampUsec!);
+      const actionUrl =
+        renderer.actionButton?.buttonRenderer.navigationEndpoint.urlEndpoint
+          .url;
+      const parsed: AddViewerEngagementMessageAction = {
+        type: "addViewerEngagementMessageAction",
+        id,
+        message: renderer.message,
+        actionUrl,
+        timestamp,
+        timestampUsec: timestampUsec!,
+      };
+      return parsed;
+    }
+    case "POLL": {
+      // [{"id":"ChkKF1hTbnRZYzNTQk91R2k5WVA1cDJqd0FV","message":{"runs":[{"text":"生まれは？","bold":true},{"text":"\n"},{"text":"平成 (80%)"},{"text":"\n"},{"text":"昭和 (19%)"},{"text":"\n"},{"text":"\n"},{"text":"Poll complete: 84 votes"}]},"messageType":"poll","type":"addViewerEngagementMessageAction","originVideoId":"1SzuFU7t450","originChannelId":"UC3Z7UaEe_vMoKRz9ABQrI5g"}]
+      //  <!> addViewerEngagementMessageAction [{"id":"ChkKF3VDX3RZWS1PQl95QWk5WVBrUGFENkFz","message":{"runs":[{"text":"2 (73%)"},{"text":"\n"},{"text":"4 (26%)"},{"text":"\n"},{"text":"\n"},{"text":"Poll complete: 637 votes"}]},"messageType":"poll","type":"addViewerEngagementMessageAction","originVideoId":"8sne4hKHNeo","originChannelId":"UC2hc-00y-MSR6eYA4eQ4tjQ"}]
+      // Poll complete: 637 votes
+      // Poll complete: 1.9K votes
+      const runs = (renderer.message as YTRunContainer<YTTextRun>).runs;
+      const hasQuestion = "bold" in runs[0];
+      const question = hasQuestion ? runs[0].text : undefined;
+      const total = /: (.+?) vote/.exec(runs[runs.length - 1].text)![1];
+      const choices = (hasQuestion ? runs.slice(2, -3) : runs.slice(0, -3))
+        .map((s) => s.text)
+        .filter((s) => s !== "\n")
+        .map((c) => {
+          const [text, votePercentage] = /^(.+?) \((\d+%)\)$/
+            .exec(c)!
+            .slice(1, 3);
+          return { text, votePercentage };
+        });
+
+      const parsed: AddPollResultAction = {
+        type: "addPollResultAction",
+        id,
+        question,
+        total,
+        choices,
+      };
+      return parsed;
+    }
     default:
       debugLog(
         "[action required] unknown icon type (EngagementMessage):",
         JSON.stringify(renderer)
       );
   }
-
-  const id = renderer.id;
-  const timestampUsec = renderer.timestampUsec;
-  const timestamp = timestampUsec ? tsToDate(timestampUsec) : undefined;
-  const message = renderer.message;
-  const actionUrl =
-    renderer.actionButton?.buttonRenderer.navigationEndpoint.urlEndpoint.url;
-
-  const parsed: AddViewerEngagementMessageAction = {
-    type: "addViewerEngagementMessageAction",
-    id,
-    messageType,
-    message,
-    actionUrl,
-    timestamp,
-    timestampUsec,
-  };
-  return parsed;
 }
 
 // Placeholder chat
