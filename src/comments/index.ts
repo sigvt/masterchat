@@ -1,5 +1,6 @@
 import { EP_NXT } from "../constants";
 import {
+  RenderingPriority,
   YTCommentThreadRenderer,
   YTContinuationItem,
 } from "../interfaces/yt/comments";
@@ -7,6 +8,17 @@ import { csc, CscOptions } from "../protobuf/assembler";
 import { withContext, ytFetch } from "../utils";
 
 // Comment
+
+export async function getComment(videoId: string, commentId: string) {
+  const comments = await getComments(videoId, {
+    highlightedCommentId: commentId,
+  });
+  const first = comments.comments?.[0];
+  if (first.renderingPriority !== RenderingPriority.LinkedComment)
+    return undefined;
+
+  return first;
+}
 
 export async function getComments(
   videoId: string,

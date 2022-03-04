@@ -50,7 +50,7 @@ async function main() {
     // "private" => No permission (private video)
     // "unavailable" => Deleted OR wrong video id
     // "unarchived" => Live stream recording is not available
-    // "denied" => Access denied
+    // "denied" => Access denied (429)
     // "invalid" => Invalid request
   });
 
@@ -59,6 +59,7 @@ async function main() {
     console.log("Live stream has ended");
   }
 
+  // start polling live chat API
   mc.listen();
 }
 
@@ -79,8 +80,8 @@ async function main() {
   );
 
   mc.on("chats", async (chats) => {
-    const jsonl = chats.map((chat) => JSON.stringify(chat)).join("\n");
-    await appendFile("./chats.jsonl", jsonl + "\n");
+    const jsonl = chats.map((chat) => JSON.stringify(chat)).join("\n") + "\n";
+    await appendFile("./chats.jsonl", jsonl);
 
     // save checkpoint
     await writeFile("./checkpoint", continuation.token);
@@ -92,7 +93,7 @@ async function main() {
 main();
 ```
 
-### Tailor-made moderation bot
+### Chat moderation bot
 
 ```js
 import { Masterchat, stringify } from "masterchat";
@@ -117,11 +118,39 @@ async function main() {
         emojiHandler: (emoji) => "",
       });
 
-      if (isSpam(message)) await mc.remove(action.id);
+      if (isSpam(message) || /UGLY/.test(message)) {
+        // delete chat
+        // if flagged as spam by Spamreaper
+        // or contains "UGLY"
+        await mc.remove(action.id);
+      }
     }
   });
 
   mc.listen();
+}
+
+main();
+```
+
+### Get video comments (≠ live chats)
+
+```js
+import { getComments, getComment } from "masterchat";
+
+async function main() {
+  // Iterate over all comments
+  let res = getComments("<videoId>", { top: true });
+  while (true) {
+    console.log(res.comments);
+
+    if (!res.next) break;
+    res = await res.next();
+  }
+
+  // Get comment by id
+  const comment = await getComment("<videoId>", "<commentId>");
+  console.log(comment);
 }
 
 main();

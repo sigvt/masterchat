@@ -2,11 +2,12 @@
 
 ## Unreleased
 
-- BREAKING: normalize `replacementItem` in `ReplaceChatItemAction`
+- New: `getComment` for fetching video comment by id
+- BREAKING: normalize `ReplaceChatItemAction.replacementItem` interfaces
 - New params for `AddBannerAction`: `viewerIsCreator`, `targetId`
-- BREAKING: incompatible name changes
-  - `AddBannerAction.id` is renamed to `AddBannerAction.actionId` as actionId
-  - `AddBannerAction.id` is now become liveChatId
+- BREAKING: incompatible property name changes
+  - `AddBannerAction.id` which is actually action id has been renamed to `AddBannerAction.actionId`
+  - `AddBannerAction.id` now refer to chat id
 - New API `getComments` for fetching video comments
 - Move cli tools (`tools/`) to [`masterchat-cli`](https://github.com/holodata/masterchat-cli)
 

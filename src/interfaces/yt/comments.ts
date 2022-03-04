@@ -195,7 +195,8 @@ export enum VoteStatus {
 }
 
 export enum RenderingPriority {
-  RenderingPriorityUnknown = "RENDERING_PRIORITY_UNKNOWN",
+  Unknown = "RENDERING_PRIORITY_UNKNOWN",
+  LinkedComment = "RENDERING_PRIORITY_LINKED_COMMENT",
 }
 
 export interface Replies {
