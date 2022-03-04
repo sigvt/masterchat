@@ -171,9 +171,9 @@ export interface ReplaceChatItemAction {
   type: "replaceChatItemAction";
   targetItemId: string;
   replacementItem:
-    | YTLiveChatPlaceholderItemRendererContainer
-    | YTLiveChatTextMessageRendererContainer
-    | YTLiveChatPaidMessageRendererContainer; // TODO: check if YTLiveChatPaidMessageRendererContainer will appear
+    | AddChatItemAction
+    | AddPlaceholderItemAction
+    | AddSuperChatItemAction;
 }
 
 export interface MarkChatItemAsDeletedAction {

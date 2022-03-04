@@ -66,7 +66,7 @@ export function parseAddChatItemAction(payload: YTAddChatItemAction) {
 }
 
 // Chat
-function parseLiveChatTextMessageRenderer(
+export function parseLiveChatTextMessageRenderer(
   renderer: YTLiveChatTextMessageRenderer
 ) {
   const {
@@ -276,7 +276,7 @@ export function parseLiveChatMembershipItemRenderer(
 }
 
 // Engagement message
-function parseLiveChatViewerEngagementMessageRenderer(
+export function parseLiveChatViewerEngagementMessageRenderer(
   renderer: YTLiveChatViewerEngagementMessageRenderer
 ) {
   /**
@@ -320,7 +320,7 @@ function parseLiveChatViewerEngagementMessageRenderer(
 }
 
 // Placeholder chat
-function parseLiveChatPlaceholderItemRenderer(
+export function parseLiveChatPlaceholderItemRenderer(
   renderer: YTLiveChatPlaceholderItemRenderer
 ) {
   const id = renderer.id;
@@ -337,7 +337,7 @@ function parseLiveChatPlaceholderItemRenderer(
 }
 
 // Mode change message
-function parseLiveChatModeChangeMessageRenderer(
+export function parseLiveChatModeChangeMessageRenderer(
   renderer: YTLiveChatModeChangeMessageRenderer
 ) {
   const text = stringify(renderer.text);
