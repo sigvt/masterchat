@@ -18,6 +18,10 @@
   - `AddBannerAction.id` now refer to chat id
 - Move cli tools (`tools/`) to [`masterchat-cli`](https://github.com/holodata/masterchat-cli)
 
+### Fixes
+
+- Special handling for anomalous emoji entities
+
 ## v0.13.0
 
 ### New

@@ -151,10 +151,29 @@ export function textRunToPlainText(run: YTTextRun): string {
 
 export function emojiRunToPlainText(run: YTEmojiRun): string {
   const { emoji } = run;
-  const term = emoji.isCustomEmoji
-    ? emoji.shortcuts[emoji.shortcuts.length - 1]
-    : emoji.emojiId;
-
+  /**
+   * Anomalous emoji pattern
+   * 1. Missing `isCustomEmoji` and `emojiId`
+   * {
+      emoji: {
+        emojiId: "",
+        shortcuts: [":smilisageReng_face_with_tear:"],
+        searchTerms: ["smiling", "face", "with", "tear"],
+        image: {
+          thumbnails: [
+            {
+              url: "https://www.youtube.com/s/gaming/emoji/828cb648/emoji_u1f972.svg",
+            },
+          ],
+          accessibility: { accessibilityData: { label: "" } },
+        },
+      },
+    },
+   */
+  const term =
+    emoji.isCustomEmoji || emoji.emojiId === ""
+      ? emoji.shortcuts[emoji.shortcuts.length - 1]
+      : emoji.emojiId;
   return term;
 }
 
