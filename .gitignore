@@ -1,3 +1,4 @@
+*.code-workspace
 .vscode
 .envrc
 *.jsonl
@@ -5,7 +6,8 @@
 .venv
 TODO.md
 res.json
-/*/**/yarn.lock
+yarn.lock
+pnpm-lock.yaml
 
 /lib
 __nock-fixtures__

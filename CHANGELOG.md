@@ -1,5 +1,33 @@
 # Changelog
 
+## Unreleased
+
+### New
+
+- New: Support for Video Comment API (see MANUAL):
+  - `getComments` for fetching video comments
+  - `getComment` for fetching video comment by id
+- New action: `MembershipGiftPurchaseAction` and `MembershipGiftRedemptionAction`
+- New action: `AddPollResultAction` (separated from `AddViewerEngagementMessageAction`)
+- New params for `AddBannerAction`: `viewerIsCreator`, `targetId`
+
+### Improvements
+
+- BREAKING: remove `messageType` from `AddViewerEngagementMessageAction`
+- BREAKING: normalize `ReplaceChatItemAction.replacementItem` interfaces
+- BREAKING: incompatible property name changes
+  - `AddBannerAction.id` which is actually action id has been renamed to `AddBannerAction.actionId`
+  - `AddBannerAction.id` now refer to chat id
+- Move cli tools (`tools/`) to [`masterchat-cli`](https://github.com/holodata/masterchat-cli)
+
+### Fixes
+
+- Properly handle membership tickers where its content are gift purchase actions
+- `AddSuperChatItemAction.authorName` becomes optional (as we've observed such events)
+- Special handling for cases where addLiveChatItemAction is missing `message`
+  - AddLiveChatItemAction.message now becomes optional (you can just ignore those anomalous events)
+- Special handling for anomalous emoji entities
+
 ## v0.13.0
 
 ### New
@@ -36,7 +64,7 @@
 - DEPRECATED: props of `AddSuperChatItemAction.superchat` has been flattened into `AddSuperChatItemAction`
 - BREAKING: `end` event will provide a reason (`'privated' | 'deleted' | 'disabled' | 'aborted' | null`)
   - `streamPool.on('end', (mc) => {})` -> `streamPool.on('end', (reason, mc) => {})`
-- BREAKING: instance will emits `end` instead of `error` in some special cases where the unrecoverable error code is either `private` or `unavailable` and it was not occurred during the first request (this usually happens when a streamer deletes or privates their live stream after the stream ends)
+- BREAKING: instance will emit `end` instead of `error` in some special cases where the unrecoverable error code is either `private` or `unavailable`, and it did not occur during the first request (this usually happens when a streamer deletes or privates their live stream after the stream ends)
 - BREAKING: `runsToPlainText` will expand `watchEndpoint` when `text` is a fragment of URL
 - use Uint8Array instead of Buffer in protobuf lib (by @jprochazk)
 
@@ -117,7 +145,7 @@ mc.listen()
 
 ### chat
 
-- `.fetch` will attempt to switch an API endpoint to the replay chat if failed to fetch chats from the live chat. Explicitly set `isLive` option `true` or `false` when instiantiating Masterchat to disable this behavior.
+- `.fetch` will attempt to switch an API endpoint to the replay chat if failed to fetch chats from the live chat. Explicitly set `isLive` option `true` or `false` when instantiating Masterchat to disable this behavior.
   - if unset,
     - live -> OK
     - archive -> first request fails, then try fetching replay chat -> OK

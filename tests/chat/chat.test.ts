@@ -1,6 +1,6 @@
-import { setupRecorder } from "nock-record";
 import fetch from "cross-fetch";
-import { Masterchat, delay } from "../../src";
+import { setupRecorder } from "nock-record";
+import { Masterchat } from "../../src";
 
 const mode = (process.env.NOCK_BACK_MODE as any) || "lockdown";
 const record = setupRecorder({ mode });
@@ -45,7 +45,7 @@ describe("normal live chat", () => {
     await mc
       .on("chats", (chats) => {
         const textChat = chats.find(
-          (chat) => chat.membership && "text" in chat.rawMessage[0]
+          (chat) => chat.membership && "text" in chat.message![0]
         );
         expect(textChat).toEqual(
           expect.objectContaining({

@@ -1,5 +1,5 @@
 import { setupRecorder } from "nock-record";
-import { AddChatItemAction, Masterchat, delay } from "../../src";
+import { AddChatItemAction, delay, Masterchat } from "../../src";
 
 const id = process.env.MC_MSG_TEST_ID;
 const channelId = process.env.MC_MSG_TEST_CHANNEL_ID;

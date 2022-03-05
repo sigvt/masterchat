@@ -1,0 +1,42 @@
+{
+  "projectName": "masterchat",
+  "projectOwner": "holodata",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 50,
+  "commit": true,
+  "commitConvention": "none",
+  "contributors": [
+    {
+      "login": "uetchy",
+      "name": "uetchy",
+      "avatar_url": "https://avatars.githubusercontent.com/u/431808?v=4",
+      "profile": "https://github.com/uetchy",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "stu43005",
+      "name": "Shiaupiau",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1288549?v=4",
+      "profile": "http://www.plurk.com/stu43005",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "jprochazk",
+      "name": "Jan Procházka",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1665677?v=4",
+      "profile": "https://jan-prochazka.eu/",
+      "contributions": [
+        "code"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7
+}

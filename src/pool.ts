@@ -1,17 +1,12 @@
 import { EventEmitter } from "events";
+import { EndReason, MasterchatError } from "./errors";
+import { ChatResponse, Credentials } from "./interfaces";
+import { Action, AddChatItemAction } from "./interfaces/actions";
 import {
-  Action,
-  AddChatItemAction,
-  ChatResponse,
-  Credentials,
-  EndReason,
   IterateChatOptions,
   Masterchat,
-  MasterchatError,
   MasterchatOptions,
-} from ".";
-
-type VideoId = string;
+} from "./masterchat";
 
 interface StreamPoolEvents {
   data: (data: ChatResponse, mc: Masterchat) => void;
@@ -45,7 +40,7 @@ export interface StreamPool {
 }
 
 export class StreamPool extends EventEmitter {
-  private pool: Map<VideoId, Masterchat> = new Map();
+  private pool: Map<string, Masterchat> = new Map();
   private options?: MasterchatOptions;
   private started: boolean = false;
 

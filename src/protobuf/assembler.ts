@@ -6,6 +6,35 @@ export type CVPair = {
   videoId: string;
 };
 
+export interface CscOptions {
+  top?: boolean;
+  highlightedCommentId?: string;
+}
+
+export function csc(
+  videoId: string,
+  { top = false, highlightedCommentId }: CscOptions = {}
+) {
+  const sortType = top ? 0 : 1;
+  return b64e(
+    cc([
+      ld(2, ld(2, videoId)),
+      vt(3, 6),
+      ld(6, [
+        ld(4, [
+          ld(4, videoId),
+          vt(6, sortType),
+          vt(15, 2),
+          ...(highlightedCommentId ? [ld(16, highlightedCommentId)] : []),
+        ]),
+        // vt(5, 50),
+        ld(8, "comments-section"),
+      ]),
+    ]),
+    B64Type.B1
+  );
+}
+
 export function lrc(
   origin: CVPair,
   { top = false }: { top?: boolean } = {}
