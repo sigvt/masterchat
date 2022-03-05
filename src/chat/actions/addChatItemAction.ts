@@ -11,6 +11,7 @@ import {
   AddPollResultAction,
   MembershipGiftPurchaseAction,
   MembershipGiftRedemptionAction,
+  MembershipGiftPurchaseTickerContent,
 } from "../../interfaces/actions";
 import {
   YTAddChatItemAction,
@@ -73,7 +74,9 @@ export function parseAddChatItemAction(payload: YTAddChatItemAction) {
     // Sponsorships gift purchase announcement
     const renderer =
       item["liveChatSponsorshipsGiftPurchaseAnnouncementRenderer"];
-    return parseLiveChatSponsorshipsGiftPurchaseAnnouncementRenderer(renderer);
+    return parseLiveChatSponsorshipsGiftPurchaseAnnouncementRenderer(
+      renderer
+    ) as MembershipGiftPurchaseAction;
   } else if ("liveChatSponsorshipsGiftRedemptionAnnouncementRenderer" in item) {
     // Sponsorships gift purchase announcement
     const renderer =
@@ -450,10 +453,11 @@ export function parseLiveChatModeChangeMessageRenderer(
 // Sponsorships gift purchase announcement
 export function parseLiveChatSponsorshipsGiftPurchaseAnnouncementRenderer(
   renderer: YTLiveChatSponsorshipsGiftPurchaseAnnouncementRenderer
-) {
+): MembershipGiftPurchaseAction | MembershipGiftPurchaseTickerContent {
   const id = renderer.id;
+  /** timestampUsec can be undefined when passed from ticker action */
   const timestampUsec = renderer.timestampUsec;
-  const timestamp = tsToDate(timestampUsec);
+  const timestamp = timestampUsec ? tsToDate(timestampUsec) : undefined;
   const authorChannelId = renderer.authorExternalChannelId;
 
   const header = renderer.header.liveChatSponsorshipsHeaderRenderer;
@@ -479,6 +483,20 @@ export function parseLiveChatSponsorshipsGiftPurchaseAnnouncementRenderer(
       "[action required] empty membership (gift purchase)",
       JSON.stringify(renderer)
     );
+  }
+
+  if (!timestampUsec || !timestamp) {
+    const tickerContent: MembershipGiftPurchaseTickerContent = {
+      id,
+      channelName,
+      amount,
+      membership,
+      authorName,
+      authorChannelId,
+      authorPhoto,
+      image,
+    };
+    return tickerContent;
   }
 
   const parsed: MembershipGiftPurchaseAction = {

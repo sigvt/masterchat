@@ -16,6 +16,7 @@ import {
   parseLiveChatMembershipItemRenderer,
   parseLiveChatPaidMessageRenderer,
   parseLiveChatPaidStickerRenderer,
+  parseLiveChatSponsorshipsGiftPurchaseAnnouncementRenderer,
 } from "./addChatItemAction";
 
 export function parseAddLiveChatTickerItemAction(
@@ -132,12 +133,42 @@ function parseLiveChatTickerSponsorItemRenderer(
   renderer: YTLiveChatTickerSponsorItemRenderer,
   durationSec: string
 ): AddMembershipTickerAction {
-  const contents = parseLiveChatMembershipItemRenderer(
-    renderer.showItemEndpoint.showLiveChatItemEndpoint.renderer
-      .liveChatMembershipItemRenderer
-  );
   const authorChannelId = renderer.authorExternalChannelId;
   const authorPhoto = pickThumbUrl(renderer.sponsorPhoto);
+
+  /**
+   * - membership / membership milestone
+   * detailIcon -> undefined
+   * detailText -> {simpleText: "20"} // amount
+   * showItemEndpoint.showLiveChatItemEndpoint.renderer -> liveChatMembershipItemRenderer
+   *
+   * - membership gift
+   * detailIcon -> {iconType: "GIFT"}
+   * detailText -> {runs: [{text: "Member"}]}
+   * showItemEndpoint.showLiveChatItemEndpoint.renderer -> liveChatSponsorshipsGiftPurchaseAnnouncementRenderer
+   * also liveChatSponsorshipsGiftPurchaseAnnouncementRenderer missing timestampUsec
+   */
+  // const iconType = renderer.detailIcon?.iconType;
+  const rdr = renderer.showItemEndpoint.showLiveChatItemEndpoint.renderer;
+  let contents;
+  if ("liveChatMembershipItemRenderer" in rdr) {
+    contents = parseLiveChatMembershipItemRenderer(
+      rdr.liveChatMembershipItemRenderer
+    );
+  } else if ("liveChatSponsorshipsGiftPurchaseAnnouncementRenderer" in rdr) {
+    contents = parseLiveChatSponsorshipsGiftPurchaseAnnouncementRenderer(
+      rdr.liveChatSponsorshipsGiftPurchaseAnnouncementRenderer
+    );
+  } else {
+    const key = Object.keys(rdr)[0];
+    debugLog(
+      `[action required] Unrecognized renderer '${key}' (parseLiveChatTickerSponsorItemRenderer):`,
+      JSON.stringify(renderer)
+    );
+    throw new Error(
+      `Unrecognized renderer (parseLiveChatTickerSponsorItemRenderer): ${key}`
+    );
+  }
 
   return {
     type: "addMembershipTickerAction",

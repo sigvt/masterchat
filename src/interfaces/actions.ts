@@ -49,7 +49,8 @@ export interface AddChatItemAction {
   timestampUsec: string;
   /**
    * message can somehow be a blank (in quite rare occasion though).
-   * We've observed `message: {}` in RL.
+   * We've observed `message: {}` three or four times.
+   * In most cases just `action.message!` would works.
    */
   message?: YTRun[];
   /** rare but can be undefined */
@@ -225,7 +226,12 @@ export interface AddMembershipTickerAction {
   durationSec: number;
   fullDurationSec: number;
   detailText: YTText;
-  contents: AddMembershipItemAction | AddMembershipMilestoneItemAction; // TODO: check if AddMembershipMilestoneItemAction is available
+  // TODO: check if AddMembershipMilestoneItemAction is actually appeared
+  // TODO: wrap normal actions with TickerContent type
+  contents:
+    | AddMembershipItemAction
+    | AddMembershipMilestoneItemAction
+    | MembershipGiftPurchaseTickerContent;
   detailTextColor: Color;
   startBackgroundColor: Color;
   endBackgroundColor: Color;
@@ -350,6 +356,11 @@ export interface MembershipGiftPurchaseAction {
   authorPhoto: string;
   image: string; // always https://www.gstatic.com/youtube/img/sponsorships/sponsorships_gift_purchase_announcement_artwork.png
 }
+
+export type MembershipGiftPurchaseTickerContent = Omit<
+  MembershipGiftPurchaseAction,
+  "timestamp" | "timestampUsec" | "type"
+>;
 
 export interface MembershipGiftRedemptionAction {
   type: "membershipGiftRedemptionAction";

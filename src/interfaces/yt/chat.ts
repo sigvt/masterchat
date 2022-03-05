@@ -548,7 +548,8 @@ export interface YTLiveChatModeChangeMessageRenderer {
 // Sponsorships gift purchase announcement
 export interface YTLiveChatSponsorshipsGiftPurchaseAnnouncementRenderer {
   id: string;
-  timestampUsec: string;
+  /** will be undefined if its container is a ticker */
+  timestampUsec?: string;
   authorExternalChannelId: string;
   header: {
     liveChatSponsorshipsHeaderRenderer: YTLiveChatSponsorshipsHeaderRenderer;
@@ -628,13 +629,17 @@ export interface YTLiveChatTickerPaidStickerItemRenderer {
 
 export interface YTLiveChatTickerSponsorItemRenderer {
   id: string;
+  detailIcon?: { iconType: "GIFT" };
   detailText: YTText;
   detailTextColor: number;
   startBackgroundColor: number;
   endBackgroundColor: number;
   sponsorPhoto: YTThumbnailList;
   durationSec: number;
-  showItemEndpoint: YTShowLiveChatItemEndpointContainer<YTLiveChatMembershipItemRendererContainer>;
+  showItemEndpoint: YTShowLiveChatItemEndpointContainer<
+    | YTLiveChatMembershipItemRendererContainer
+    | YTLiveChatSponsorshipsGiftPurchaseAnnouncementRendererContainer
+  >;
   authorExternalChannelId: string;
   fullDurationSec: number;
 }

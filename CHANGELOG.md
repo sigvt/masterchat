@@ -22,6 +22,7 @@
 
 ### Fixes
 
+- Properly handle membership tickers where its content are gift purchase actions
 - `AddSuperChatItemAction.authorName` becomes optional (as we've observed such events)
 - Special handling for cases where addLiveChatItemAction is missing `message`
   - AddLiveChatItemAction.message now becomes optional (you can just ignore those anomalous events)
