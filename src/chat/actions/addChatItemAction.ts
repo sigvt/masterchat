@@ -84,7 +84,7 @@ export function parseAddChatItemAction(payload: YTAddChatItemAction) {
   }
 
   debugLog(
-    "[action required] Unrecognized renderer type (addChatItemAction):",
+    "[action required] Unrecognized chat item renderer type:",
     JSON.stringify(item)
   );
 }
@@ -116,10 +116,13 @@ export function parseLiveChatTextMessageRenderer(
 
   if (renderer.authorName && !("simpleText" in renderer.authorName)) {
     debugLog(
-      "[action required] non-simple authorName:",
+      "[action required] non-simple authorName (live chat):",
       JSON.stringify(renderer.authorName)
     );
   }
+
+  // message can somehow be a blank object (in quite rare occasion though)
+  const message = renderer.message.runs as YTRun[] | undefined;
 
   const parsed: AddChatItemAction = {
     type: "addChatItemAction",
@@ -129,13 +132,13 @@ export function parseLiveChatTextMessageRenderer(
     authorName,
     authorChannelId,
     authorPhoto,
-    message: renderer.message.runs,
+    message,
     membership,
     isVerified,
     isOwner,
     isModerator,
     contextMenuEndpointParams,
-    rawMessage: renderer.message.runs, // deprecated
+    rawMessage: message, // deprecated
   };
 
   return parsed;
@@ -152,13 +155,14 @@ export function parseLiveChatPaidMessageRenderer(
   const authorName = stringify(renderer.authorName);
   const authorPhoto = pickThumbUrl(renderer.authorPhoto);
 
-  if (!authorName) {
+  if (renderer.authorName && !("simpleText" in renderer.authorName)) {
     debugLog(
-      "[action required] empty authorName at liveChatPaidMessageRenderer",
-      JSON.stringify(renderer)
+      "[action required] non-simple authorName (super chat):",
+      JSON.stringify(renderer.authorName)
     );
   }
 
+  const message = renderer.message?.runs ?? null;
   const superchat = parseSuperChat(renderer);
 
   const parsed: AddSuperChatItemAction = {
@@ -169,10 +173,10 @@ export function parseLiveChatPaidMessageRenderer(
     authorName,
     authorChannelId,
     authorPhoto,
-    message: renderer.message?.runs ?? null,
+    message,
     ...superchat,
-    rawMessage: renderer.message?.runs, // deprecated
     superchat, // deprecated
+    rawMessage: renderer.message?.runs, // deprecated
   };
   return parsed;
 }
@@ -187,6 +191,13 @@ export function parseLiveChatPaidStickerRenderer(
 
   const authorName = stringify(rdr.authorName);
   const authorPhoto = pickThumbUrl(rdr.authorPhoto);
+
+  if (!authorName) {
+    debugLog(
+      "[action required] empty authorName (super sticker)",
+      JSON.stringify(rdr)
+    );
+  }
 
   const stickerUrl = "https:" + pickThumbUrl(rdr.sticker);
   const stickerText = rdr.sticker.accessibility!.accessibilityData.label;
@@ -230,7 +241,7 @@ export function parseLiveChatMembershipItemRenderer(
 
   if (!authorName) {
     debugLog(
-      "[action required] empty authorName at liveChatMembershipItemRenderer",
+      "[action required] empty authorName (membership)",
       JSON.stringify(renderer)
     );
   }
@@ -239,12 +250,14 @@ export function parseLiveChatMembershipItemRenderer(
   const membership = parseMembership(
     renderer.authorBadges[renderer.authorBadges.length - 1]
   );
-  if (!membership)
+  if (!membership) {
     throw new Error(
-      `Failed to parse membership while handling liveChatMembershipItemRenderer: ${JSON.stringify(
+      `Failed to parse membership (membership): ${JSON.stringify(
         renderer.authorBadges
       )}`
     );
+  }
+
   const isMilestoneMessage = "empty" in renderer || "message" in renderer;
 
   if (isMilestoneMessage) {
@@ -276,27 +289,27 @@ export function parseLiveChatMembershipItemRenderer(
       durationText,
     };
     return parsed;
+  } else {
+    /**
+     * no level -> ["New Member"]
+     * multiple levels -> ["Welcome", "<level>", "!"]
+     */
+    const subRuns = (renderer.headerSubtext as YTRunContainer<YTTextRun>).runs;
+    const level = subRuns.length > 1 ? subRuns[1].text : undefined;
+
+    const parsed: AddMembershipItemAction = {
+      type: "addMembershipItemAction",
+      id,
+      timestamp,
+      timestampUsec,
+      authorName,
+      authorChannelId,
+      authorPhoto,
+      membership,
+      level,
+    };
+    return parsed;
   }
-
-  /**
-   * no level -> ["New Member"]
-   * multiple levels -> ["Welcome", "<level>", "!"]
-   */
-  const subRuns = (renderer.headerSubtext as YTRunContainer<YTTextRun>).runs;
-  const level = subRuns.length > 1 ? subRuns[1].text : undefined;
-
-  const parsed: AddMembershipItemAction = {
-    type: "addMembershipItemAction",
-    id,
-    timestamp,
-    timestampUsec,
-    authorName,
-    authorChannelId,
-    authorPhoto,
-    membership,
-    level,
-  };
-  return parsed;
 }
 
 // Engagement message
@@ -315,7 +328,7 @@ export function parseLiveChatViewerEngagementMessageRenderer(
   } = renderer;
   if ("simpleText" in renderer.message) {
     debugLog(
-      "[action required] simpleText found on parseLiveChatViewerEngagementMessageRenderer:",
+      "[action required] message is simpleText (engagement):",
       JSON.stringify(renderer)
     );
   }
@@ -379,7 +392,7 @@ export function parseLiveChatViewerEngagementMessageRenderer(
     }
     default:
       debugLog(
-        "[action required] unknown icon type (EngagementMessage):",
+        "[action required] unknown icon type (engagement message):",
         JSON.stringify(renderer)
       );
   }
@@ -452,7 +465,7 @@ export function parseLiveChatSponsorshipsGiftPurchaseAnnouncementRenderer(
 
   if (!authorName) {
     debugLog(
-      "[action required] empty authorName while parsing membershipGiftPurchaseAction",
+      "[action required] empty authorName (gift purchase)",
       JSON.stringify(renderer)
     );
   }
@@ -463,7 +476,7 @@ export function parseLiveChatSponsorshipsGiftPurchaseAnnouncementRenderer(
 
   if (!membership) {
     debugLog(
-      "[action required] empty membership while parsing membershipGiftPurchaseAction",
+      "[action required] empty membership (gift purchase)",
       JSON.stringify(renderer)
     );
   }
@@ -499,7 +512,7 @@ export function parseLiveChatSponsorshipsGiftRedemptionAnnouncementRenderer(
 
   if (!authorName) {
     debugLog(
-      "[action required] empty authorName while parsing membershipGiftPurchaseAction",
+      "[action required] empty authorName (gift redemption)",
       JSON.stringify(renderer)
     );
   }

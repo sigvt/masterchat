@@ -47,7 +47,12 @@ export interface AddChatItemAction {
   id: string;
   timestamp: Date;
   timestampUsec: string;
-  message: YTRun[];
+  /**
+   * message can somehow be a blank (in quite rare occasion though).
+   * We've observed `message: {}` in RL.
+   */
+  message?: YTRun[];
+  /** rare but can be undefined */
   authorName?: string;
   authorChannelId: string;
   authorPhoto: string;
@@ -58,7 +63,7 @@ export interface AddChatItemAction {
   contextMenuEndpointParams: string;
 
   /** @deprecated use `message` */
-  rawMessage: YTRun[];
+  rawMessage?: YTRun[];
 }
 
 export interface AddSuperChatItemAction {
@@ -66,7 +71,8 @@ export interface AddSuperChatItemAction {
   id: string;
   timestamp: Date;
   timestampUsec: string;
-  authorName: string;
+  /** rare but can be undefined */
+  authorName?: string;
   authorChannelId: string;
   authorPhoto: string;
   message: YTRun[] | null;

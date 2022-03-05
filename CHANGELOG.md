@@ -4,12 +4,12 @@
 
 ### New
 
+- New: Support for Video Comment API (see MANUAL):
+  - `getComments` for fetching video comments
+  - `getComment` for fetching video comment by id
 - New action: `MembershipGiftPurchaseAction` and `MembershipGiftRedemptionAction`
 - New action: `AddPollResultAction` (separated from `AddViewerEngagementMessageAction`)
 - New params for `AddBannerAction`: `viewerIsCreator`, `targetId`
-- Support for Video Comment API:
-  - `getComments` for fetching video comments
-  - `getComment` for fetching video comment by id
 
 ### Improvements
 
@@ -22,6 +22,9 @@
 
 ### Fixes
 
+- `AddSuperChatItemAction.authorName` becomes optional (as we've observed such events)
+- Special handling for cases where addLiveChatItemAction is missing `message`
+  - AddLiveChatItemAction.message now becomes optional (you can just ignore those anomalous events)
 - Special handling for anomalous emoji entities
 
 ## v0.13.0

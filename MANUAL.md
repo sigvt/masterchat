@@ -1,8 +1,10 @@
-# Manual
+# Masterchat Manual
+
+- [Documentation](https://holodata.github.io/masterchat)
+- [Usage](#usage)
+- [Reference](#reference)
 
 ## Usage
-
-[API Documentation](https://holodata.github.io/masterchat)
 
 ### Just grab some metadata
 
@@ -22,14 +24,15 @@ import { Masterchat, stringify } from "masterchat";
 async function main() {
   const mc = await Masterchat.init("<videoId>");
 
-  // listen for live chat
+  // Listen for live chat
   mc.on("chats", (chats) => {
     for (const chat of chats) {
       console.log(chat.authorName, stringify(chat.message));
     }
   });
 
-  // listen for any events
+  // Listen for any events
+  //   See below for a list of available action types
   mc.on("actions", (actions) => {
     const chats = actions.filter(
       (action) => action.type === "addChatItemAction"
@@ -42,7 +45,7 @@ async function main() {
     );
   });
 
-  // handle errors
+  // Handle errors
   mc.on("error", (err) => {
     console.log(err.code);
     // "disabled" => Live chat is disabled
@@ -54,12 +57,12 @@ async function main() {
     // "invalid" => Invalid request
   });
 
-  // handle end event
+  // Handle end event
   mc.on("end", () => {
     console.log("Live stream has ended");
   }
 
-  // start polling live chat API
+  // Start polling live chat API
   mc.listen();
 }
 
@@ -188,7 +191,40 @@ npm i
 npm start
 ```
 
-## Stream type
+## Reference
+
+[API Documentation](https://holodata.github.io/masterchat)
+
+### Action type
+
+| `type`                                                                                                                             | description                                                        |
+| ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| [addChatItemAction](https://holodata.github.io/masterchat/interfaces/AddChatItemAction.html)                                       | Live chat message                                                  |
+| [addSuperChatItemAction](https://holodata.github.io/masterchat/interfaces/AddSuperChatItemAction.html)                             | Super chat message                                                 |
+| [addSuperStickerItemAction](https://holodata.github.io/masterchat/interfaces/AddSuperStickerItemAction.html)                       | Super sticker message                                              |
+| [addMembershipItemAction](https://holodata.github.io/masterchat/interfaces/AddMembershipItemAction.html)                           | Membership joining message                                         |
+| [addMembershipMilestoneItemAction](https://holodata.github.io/masterchat/interfaces/AddMembershipMilestoneItemAction.html)         | Membership milestone message                                       |
+| [addPlaceholderItemAction](https://holodata.github.io/masterchat/interfaces/AddPlaceholderItemAction.html)                         | Add a placeholder for later usage (invisible)                      |
+| [replaceChatItemAction](https://holodata.github.io/masterchat/interfaces/ReplaceChatItemAction.html)                               | Replace a live chat or placeholder with a placeholder or live chat |
+| [markChatItemAsDeletedAction](https://holodata.github.io/masterchat/interfaces/MarkChatItemAsDeletedAction.html)                   | Delete live chat by id                                             |
+| [markChatItemsByAuthorAsDeletedAction](https://holodata.github.io/masterchat/interfaces/MarkChatItemsByAuthorAsDeletedAction.html) | Delete live chats by authorChannelId                               |
+| [addSuperChatTickerAction](https://holodata.github.io/masterchat/interfaces/AddSuperChatTickerAction.html)                         | Ticker for super chat                                              |
+| [addSuperStickerTickerAction](https://holodata.github.io/masterchat/interfaces/AddSuperStickerTickerAction.html)                   | Ticker for super sticker                                           |
+| [addMembershipTickerAction](https://holodata.github.io/masterchat/interfaces/AddMembershipTickerAction.html)                       | Ticker for membership joining event                                |
+| [addBannerAction](https://holodata.github.io/masterchat/interfaces/AddBannerAction.html)                                           | Pin a message                                                      |
+| [removeBannerAction](https://holodata.github.io/masterchat/interfaces/RemoveBannerAction.html)                                     | Remove a pinned message                                            |
+| [addViewerEngagementMessageAction](https://holodata.github.io/masterchat/interfaces/AddViewerEngagementMessageAction.html)         | Viewer engagement message                                          |
+| [showPanelAction](https://holodata.github.io/masterchat/interfaces/ShowPanelAction.html)                                           | Show a panel (generic)                                             |
+| [showPollPanelAction](https://holodata.github.io/masterchat/interfaces/ShowPollPanelAction.html)                                   | Show a poll panel                                                  |
+| [updatePollAction](https://holodata.github.io/masterchat/interfaces/UpdatePollAction.html)                                         | Update a poll panel content                                        |
+| [closePanelAction](https://holodata.github.io/masterchat/interfaces/ClosePanelAction.html)                                         | Close a panel                                                      |
+| [addPollResultAction](https://holodata.github.io/masterchat/interfaces/AddPollResultAction.html)                                   | Poll result                                                        |
+| [showTooltipAction](https://holodata.github.io/masterchat/interfaces/ShowTooltipAction.html)                                       | Tooltip                                                            |
+| [modeChangeAction](https://holodata.github.io/masterchat/interfaces/ModeChangeAction.html)                                         | Notify mode changes (slow mode, members-only, subscribers-only)    |
+| [membershipGiftPurchaseAction](https://holodata.github.io/masterchat/interfaces/MembershipGiftPurchaseAction.html)                 | Membership gift purchase notification                              |
+| [membershipGiftRedemptionAction](https://holodata.github.io/masterchat/interfaces/MembershipGiftRedemptionAction.html)             | Membership gift redemption notification                            |
+
+### Stream type
 
 | type                                            | metadata.isLive | Masterchat.init()            | mode: undefined        | mode: "live"           | mode: "replay"         |
 | ----------------------------------------------- | --------------- | ---------------------------- | ---------------------- | ---------------------- | ---------------------- |

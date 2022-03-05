@@ -45,7 +45,7 @@ describe("normal live chat", () => {
     await mc
       .on("chats", (chats) => {
         const textChat = chats.find(
-          (chat) => chat.membership && "text" in chat.rawMessage[0]
+          (chat) => chat.membership && "text" in chat.message![0]
         );
         expect(textChat).toEqual(
           expect.objectContaining({

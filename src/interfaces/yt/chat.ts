@@ -42,7 +42,7 @@ export interface YTEmoji {
   shortcuts: string[];
   searchTerms: string[];
   image: YTThumbnailList; // with accessibility
-  isCustomEmoji: boolean;
+  isCustomEmoji?: boolean;
 }
 
 export interface YTUrlEndpointContainer {
@@ -570,7 +570,7 @@ export interface YTLiveChatSponsorshipsHeaderRenderer {
   authorBadges: YTLiveChatAuthorBadgeRendererContainer[];
   contextMenuEndpoint: YTLiveChatItemContextMenuEndpointContainer;
   contextMenuAccessibility: YTAccessibilityData;
-  image: YTThumbnailListWithoutSize; // https://www.gstatic.com/youtube/img/sponsorships/sponsorships_gift_purchase_announcement_artwork.png
+  image: YTThumbnailList; // https://www.gstatic.com/youtube/img/sponsorships/sponsorships_gift_purchase_announcement_artwork.png
 }
 
 // Sponsorships gift redemption announcement
@@ -692,7 +692,7 @@ export interface YTInteractionMessage {
 
 export interface YTAuthorBadge {
   liveChatAuthorBadgeRenderer: {
-    customThumbnail?: YTThumbnailListWithoutSize;
+    customThumbnail?: YTThumbnailList;
     icon?: YTIcon;
     tooltip: string;
     accessibility: YTAccessibilityData;
@@ -828,14 +828,10 @@ export interface YTThumbnailList {
   accessibility?: YTAccessibilityData;
 }
 
-export interface YTThumbnailListWithoutSize {
-  thumbnails: YTThumbnailWithoutSize[];
-}
-
 export interface YTThumbnail {
   url: string;
-  width: number;
-  height: number;
+  width?: number;
+  height?: number;
 }
 
 export interface YTThumbnailWithoutSize {
