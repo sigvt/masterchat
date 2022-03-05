@@ -307,13 +307,13 @@ export interface UpdatePollAction {
 export interface AddPollResultAction {
   type: "addPollResultAction";
   id: string;
-  question?: string;
+  question?: YTRun[];
   total: string;
   choices: PollChoice[];
 }
 
 export interface PollChoice {
-  text: string;
+  text: YTRun[];
   votePercentage: string;
 }
 

@@ -27,6 +27,16 @@ export interface RunsToStringOptions {
   emojiHandler?: (emoji: YTEmojiRun) => string;
 }
 
+export function splitRunsByNewLines(runs: YTRun[]): YTRun[][] {
+  return runs.reduce(
+    (s, i) =>
+      "text" in i && i.text === "\n"
+        ? [...s, []]
+        : (s[s.length - 1].push(i), s),
+    [[]] as YTRun[][]
+  );
+}
+
 /**
  * Convert timestampUsec into Date
  */

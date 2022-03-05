@@ -23,10 +23,17 @@ import {
   YTLiveChatSponsorshipsGiftRedemptionAnnouncementRenderer,
   YTLiveChatTextMessageRenderer,
   YTLiveChatViewerEngagementMessageRenderer,
+  YTRun,
   YTRunContainer,
   YTTextRun,
 } from "../../interfaces/yt/chat";
-import { debugLog, durationToSeconds, stringify, tsToDate } from "../../utils";
+import {
+  debugLog,
+  durationToSeconds,
+  splitRunsByNewLines,
+  stringify,
+  tsToDate,
+} from "../../utils";
 import { parseBadges, parseMembership } from "../badge";
 import { parseAmountText, parseSuperChat } from "../superchat";
 import { parseColorCode, pickThumbUrl } from "../utils";
@@ -334,19 +341,32 @@ export function parseLiveChatViewerEngagementMessageRenderer(
       //  <!> addViewerEngagementMessageAction [{"id":"ChkKF3VDX3RZWS1PQl95QWk5WVBrUGFENkFz","message":{"runs":[{"text":"2 (73%)"},{"text":"\n"},{"text":"4 (26%)"},{"text":"\n"},{"text":"\n"},{"text":"Poll complete: 637 votes"}]},"messageType":"poll","type":"addViewerEngagementMessageAction","originVideoId":"8sne4hKHNeo","originChannelId":"UC2hc-00y-MSR6eYA4eQ4tjQ"}]
       // Poll complete: 637 votes
       // Poll complete: 1.9K votes
+      // split runs by {"text": "\n"}
+      // has question: {text: "...", "bold": true}, {emoji: ...}
+      //               {emoji: ...}, {text: "...", "bold": true}
+      // otherwise:    {emoji: ...}, {text: " (\d%)"}
+
       const runs = (renderer.message as YTRunContainer<YTTextRun>).runs;
-      const hasQuestion = "bold" in runs[0];
-      const question = hasQuestion ? runs[0].text : undefined;
+      const runsNL = splitRunsByNewLines(runs);
+      const hasQuestion = runsNL[0].some(
+        (run) => "bold" in run && run.bold == true
+      );
+      const question = hasQuestion ? runsNL[0] : undefined;
       const total = /: (.+?) vote/.exec(runs[runs.length - 1].text)![1];
-      const choices = (hasQuestion ? runs.slice(2, -3) : runs.slice(0, -3))
-        .map((s) => s.text)
-        .filter((s) => s !== "\n")
-        .map((c) => {
-          const [text, votePercentage] = /^(.+?) \((\d+%)\)$/
-            .exec(c)!
-            .slice(1, 3);
-          return { text, votePercentage };
-        });
+      const choiceStart = hasQuestion ? 1 : 0;
+      const choices = runsNL.slice(choiceStart, -2).map((choiceRuns) => {
+        const last = choiceRuns[choiceRuns.length - 1] as YTTextRun;
+        const [lastTextFragment, votePercentage] = /(?:^(.+?))? \((\d+%)\)$/
+          .exec(last.text)!
+          .slice(1);
+        let text = choiceRuns;
+        if (lastTextFragment) {
+          (text[text.length - 1] as YTTextRun).text = lastTextFragment;
+        } else {
+          text.pop();
+        }
+        return { text, votePercentage };
+      });
 
       const parsed: AddPollResultAction = {
         type: "addPollResultAction",
