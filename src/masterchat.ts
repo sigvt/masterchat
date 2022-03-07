@@ -287,7 +287,6 @@ export class Masterchat extends EventEmitter {
     // continuously fetch chat fragments
     while (true) {
       const res = await this.fetch(token);
-      const startMs = Date.now();
 
       // handle chats
       if (!(ignoreFirstResponse && !treatedFirstResponse)) {
@@ -307,11 +306,8 @@ export class Masterchat extends EventEmitter {
       token = continuation.token;
 
       if (this.isLive ?? true) {
-        const driftMs = Date.now() - startMs;
-        const timeoutMs = continuation.timeoutMs - driftMs;
-        if (timeoutMs > 500) {
-          await delay(timeoutMs, signal);
-        }
+        const timeoutMs = continuation.timeoutMs;
+        await delay(timeoutMs, signal);
       }
     }
   }
