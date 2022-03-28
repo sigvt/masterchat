@@ -371,7 +371,6 @@ export class Masterchat extends EventEmitter {
 
           switch (status) {
             // stream went privated or deleted
-            // TODO: should we break loop normally as if the stream ended or throw errors to tell users?
             case YTChatErrorStatus.PermissionDenied:
               retryRemaining = 0;
               throw new NoPermissionError(message);

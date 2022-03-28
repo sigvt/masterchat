@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- `authorName` in `addMembershipItemAction` now becomes optional as we've got a report about such events (thanks @sphinxrave)
+
 ## v0.14.0
 
 ### New

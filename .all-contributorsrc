@@ -36,6 +36,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "sphinxrave",
+      "name": "sphinxrave",
+      "avatar_url": "https://avatars.githubusercontent.com/u/62570796?v=4",
+      "profile": "https://github.com/sphinxrave",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7

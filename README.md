@@ -49,6 +49,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/uetchy"><img src="https://avatars.githubusercontent.com/u/431808?v=4?s=50" width="50px;" alt=""/><br /><sub><b>uetchy</b></sub></a><br /><a href="https://github.com/holodata/masterchat/commits?author=uetchy" title="Code">💻</a></td>
     <td align="center"><a href="http://www.plurk.com/stu43005"><img src="https://avatars.githubusercontent.com/u/1288549?v=4?s=50" width="50px;" alt=""/><br /><sub><b>Shiaupiau</b></sub></a><br /><a href="https://github.com/holodata/masterchat/commits?author=stu43005" title="Code">💻</a></td>
     <td align="center"><a href="https://jan-prochazka.eu/"><img src="https://avatars.githubusercontent.com/u/1665677?v=4?s=50" width="50px;" alt=""/><br /><sub><b>Jan Procházka</b></sub></a><br /><a href="https://github.com/holodata/masterchat/commits?author=jprochazk" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/sphinxrave"><img src="https://avatars.githubusercontent.com/u/62570796?v=4?s=50" width="50px;" alt=""/><br /><sub><b>sphinxrave</b></sub></a><br /><a href="https://github.com/holodata/masterchat/issues?q=author%3Asphinxrave" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

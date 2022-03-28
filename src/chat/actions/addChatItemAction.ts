@@ -238,16 +238,11 @@ export function parseLiveChatMembershipItemRenderer(
   const id = renderer.id;
   const timestampUsec = renderer.timestampUsec;
   const timestamp = tsToDate(timestampUsec);
-  const authorName = stringify(renderer.authorName);
+  const authorName = renderer.authorName
+    ? stringify(renderer.authorName)
+    : undefined;
   const authorChannelId = renderer.authorExternalChannelId;
   const authorPhoto = pickThumbUrl(renderer.authorPhoto);
-
-  if (!authorName) {
-    debugLog(
-      "[action required] empty authorName (membership)",
-      JSON.stringify(renderer)
-    );
-  }
 
   // observed, MODERATOR
   const membership = parseMembership(

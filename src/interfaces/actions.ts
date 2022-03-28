@@ -125,7 +125,8 @@ export interface AddMembershipItemAction {
   level?: string;
 
   membership: Membership;
-  authorName: string;
+  /** rare but can be undefined */
+  authorName?: string;
   authorChannelId: string;
   authorPhoto: string;
 }

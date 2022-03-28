@@ -430,7 +430,7 @@ export interface YTLiveChatMembershipItemRenderer {
   headerSubtext: YTText;
   message?: YTRunContainer; // milestone with message
   empty?: true; // milestone without message
-  authorName: YTText;
+  authorName?: YTText;
   authorPhoto: YTThumbnailList;
   authorBadges: YTLiveChatAuthorBadgeRendererContainer[];
   contextMenuEndpoint: YTLiveChatItemContextMenuEndpointContainer;
