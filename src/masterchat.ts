@@ -410,8 +410,8 @@ export class Masterchat extends EventEmitter {
           retryRemaining -= 1;
           this.log(
             `fetch`,
-            `Retrying remaining=${retryRemaining} interval=${retryInterval} source=${
-              (err as any).name
+            `Retrying remaining=${retryRemaining} interval=${retryInterval} cause=${
+              (err as any)?.message
             }`
           );
           await delay(retryInterval);
