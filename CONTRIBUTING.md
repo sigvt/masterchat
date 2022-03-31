@@ -3,6 +3,8 @@
 ## Build
 
 ```bash
+git clone https://github.com/holodata/masterchat
+cd masterchat
 git switch dev
 yarn install
 yarn build
@@ -19,9 +21,11 @@ yarn build
 yarn link
 
 cd ..
+
 git clone https://github.com/holodata/masterchat-cli
 cd masterchat-cli
 yarn install
+yarn build
 yarn link
 yarn link masterchat
 DEBUG=masterchat mc live <videoId>

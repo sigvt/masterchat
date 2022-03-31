@@ -1,9 +1,9 @@
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from "axios";
 import { EventEmitter } from "events";
+import https from "https";
 import { buildMeta } from "./api";
 import { buildAuthHeaders } from "./auth";
 import { parseAction } from "./chat";
-import https from "https";
 import * as constants from "./constants";
 import { parseMetadataFromEmbed, parseMetadataFromWatch } from "./context";
 import {
@@ -155,7 +155,7 @@ export class Masterchat extends EventEmitter {
     this.axiosInstance =
       axiosInstance ??
       axios.create({
-        timeout: 5000,
+        timeout: 4000,
         httpsAgent: new https.Agent({ keepAlive: true }),
       });
 
@@ -335,8 +335,8 @@ export class Masterchat extends EventEmitter {
     const topChat = options.topChat ?? false;
     const target = this.cvPair();
 
-    let retryRemaining = 3;
-    const retryInterval = 3000;
+    let retryRemaining = 5;
+    const retryInterval = 1000;
 
     let requestUrl: string = "";
     let requestBody;
@@ -368,9 +368,26 @@ export class Masterchat extends EventEmitter {
 
         // handle server errors
         if ((err as any)?.isAxiosError) {
-          const { response } = err as AxiosError;
+          const { code: axiosErrorCode, response } = err as AxiosError;
+
+          // handle axios timeout
+          if (axiosErrorCode === "ECONNABORTED") {
+            this.log("timeout", "Got ECONNABORTED from axios");
+            if (retryRemaining > 0) {
+              retryRemaining -= 1;
+              this.log(
+                `axios`,
+                `Retrying remaining=${retryRemaining} interval=${retryInterval} axiosStatus=${axiosErrorCode}`
+              );
+              await delay(retryInterval);
+              continue loop;
+            }
+          }
+
           if (!response) {
-            throw new Error(`Axios got empty error response: ${err}`);
+            throw new Error(
+              `Axios got invalid error response: ${err} (${axiosErrorCode})`
+            );
           }
 
           this.log("axiosError", response.status);
