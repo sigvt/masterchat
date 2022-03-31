@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Improvements
+
+- Replace cross-fetch with axios
+- Ditch timeout adjustment for performance reasons
+
 ### Fixes
 
 - `authorName` in `addMembershipItemAction` now becomes optional as we've got a report about such events (thanks @sphinxrave)

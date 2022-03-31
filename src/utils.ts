@@ -62,24 +62,6 @@ export function formatColor(color: Color, format: ColorFormat = "hex"): string {
   }
 }
 
-export function ytFetch(input: string, init?: RequestInit) {
-  if (!input.startsWith("http")) {
-    input = DO + input;
-  }
-  const parsedUrl = new URL(input);
-
-  const requestUrl = parsedUrl.toString();
-  const requestInit = {
-    ...init,
-    headers: {
-      ...DH,
-      ...init?.headers,
-    },
-  };
-
-  return crossFetch(requestUrl, requestInit);
-}
-
 export const debugLog = debug("masterchat");
 
 export function toVideoId(idOrUrl: string) {

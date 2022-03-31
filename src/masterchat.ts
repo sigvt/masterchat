@@ -1,7 +1,9 @@
+import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from "axios";
 import { EventEmitter } from "events";
 import { buildMeta } from "./api";
 import { buildAuthHeaders } from "./auth";
 import { parseAction } from "./chat";
+import https from "https";
 import * as constants from "./constants";
 import { parseMetadataFromEmbed, parseMetadataFromWatch } from "./context";
 import {
@@ -35,7 +37,6 @@ import {
   toVideoId,
   unwrapReplayActions,
   withContext,
-  ytFetch,
 } from "./utils";
 
 export type RetryOptions = {
@@ -103,6 +104,8 @@ export interface MasterchatOptions {
    * ```
    */
   mode?: "live" | "replay";
+
+  axiosInstance?: AxiosInstance;
 }
 
 export class Masterchat extends EventEmitter {
@@ -112,6 +115,7 @@ export class Masterchat extends EventEmitter {
   public channelName?: string;
   public title?: string;
 
+  private axiosInstance: AxiosInstance;
   private credentials?: Credentials;
   private listener: ChatListener | null = null;
   private listenerAbortion: AbortController = new AbortController();
@@ -140,13 +144,20 @@ export class Masterchat extends EventEmitter {
   constructor(
     videoId: string,
     channelId: string,
-    { mode, credentials }: MasterchatOptions = {}
+    { mode, credentials, axiosInstance }: MasterchatOptions = {}
   ) {
     super();
     this.videoId = videoId;
     this.channelId = channelId;
     this.isLive =
       mode === "live" ? true : mode === "replay" ? false : undefined;
+
+    this.axiosInstance =
+      axiosInstance ??
+      axios.create({
+        timeout: 5000,
+        httpsAgent: new https.Agent({ keepAlive: true }),
+      });
 
     this.setCredentials(credentials);
   }
@@ -321,14 +332,15 @@ export class Masterchat extends EventEmitter {
     const options =
       (typeof tokenOrOptions === "string" ? maybeOptions : tokenOrOptions) ??
       {};
-
     const topChat = options.topChat ?? false;
     const target = this.cvPair();
+
     let retryRemaining = 3;
     const retryInterval = 3000;
+
     let requestUrl: string = "";
     let requestBody;
-    let response: YTChatResponse;
+    let payload: YTChatResponse;
 
     function applyNewLiveStatus(isLive: boolean) {
       requestUrl = isLive ? constants.EP_GLC : constants.EP_GLCR;
@@ -349,10 +361,20 @@ export class Masterchat extends EventEmitter {
 
     loop: while (true) {
       try {
-        const res = await this.post(requestUrl, requestBody);
-        response = await res.json();
+        payload = (await this.post(requestUrl, requestBody)).data;
+      } catch (err) {
+        // handle abortion
+        if ((err as any)?.message === "canceled") throw new AbortError();
 
-        if (response.error) {
+        // handle server errors
+        if ((err as any)?.isAxiosError) {
+          const { response } = err as AxiosError;
+          if (!response) {
+            throw new Error(`Axios got empty error response: ${err}`);
+          }
+
+          this.log("axiosError", response.status);
+
           /** error.code ->
            * 400: request contains an invalid argument
            *   - when attempting to access livechat while it is already in replay mode
@@ -366,74 +388,57 @@ export class Masterchat extends EventEmitter {
            * 503: The service is currently unavailable
            *   - temporary server-side failure
            */
-          const { status, message } = response.error;
-          this.log(`fetch`, `Error: ${status}`);
+          const { code, status, message } = response.data.error;
+          this.log(
+            `youtube`,
+            `API Error: code=${code} status=${status} - ${message}`
+          );
 
           switch (status) {
-            // stream went privated or deleted
+            // stream got privated
             case YTChatErrorStatus.PermissionDenied:
-              retryRemaining = 0;
               throw new NoPermissionError(message);
+
+            // stream got deleted
             case YTChatErrorStatus.NotFound:
-              retryRemaining = 0;
               throw new UnavailableError(message);
 
-            // stream already turned to archive OR completely malformed token
+            // stream already turned into archive OR received completely malformed token
             case YTChatErrorStatus.Invalid:
-              retryRemaining = 0;
               throw new InvalidArgumentError(message);
 
-            // it might be temporary issue so should retry immediately
+            // it might be a temporary issue so you should retry immediately
             case YTChatErrorStatus.Unavailable:
             case YTChatErrorStatus.Internal:
-              throw new Error(message);
+              if (retryRemaining > 0) {
+                retryRemaining -= 1;
+                this.log(
+                  `axios`,
+                  `Retrying remaining=${retryRemaining} interval=${retryInterval} status=${status} msg=${message}`
+                );
+                await delay(retryInterval);
+                continue loop;
+              }
 
             default:
               this.log(
-                `[action required] fetch`,
-                `Unrecognized error code`,
+                `[action required] axios`,
+                `Unrecognized server error:`,
                 status,
                 message,
-                JSON.stringify(response)
+                JSON.stringify(response.data)
               );
               throw new Error(message);
           }
         }
-      } catch (err) {
-        // handle fetch abortion
-        if ((err as any).type === "aborted") {
-          throw new AbortError();
-        }
 
-        if (retryRemaining > 0) {
-          retryRemaining -= 1;
-          this.log(
-            `fetch`,
-            `Retrying remaining=${retryRemaining} interval=${retryInterval} cause=${
-              (err as any)?.message
-            }`
-          );
-          await delay(retryInterval);
-          continue loop;
-        }
-
-        /**
-         *
-         * "invalid-json" (429)
-         * "system" => ECONNRESET, ETIMEOUT, etc (Service outage)
-         */
-        this.log(
-          `fetch`,
-          `Unrecoverable Error:`,
-          `${(err as any).message} (${(err as any).code ?? ""}|${
-            (err as any).type ?? ""
-          })`
-        );
-
+        // handle client errors
+        // ECONNRESET, ETIMEOUT, etc
+        this.log(`client`, `Unrecoverable error:`, err);
         throw err;
       }
 
-      const { continuationContents } = response;
+      const { continuationContents } = payload;
 
       if (!continuationContents) {
         /** there's several possibilities lied here:
@@ -442,7 +447,7 @@ export class Masterchat extends EventEmitter {
          * 3. given video is neither a live stream nor an archived stream
          * 4. chat got disabled
          */
-        const obj = Object.assign({}, response) as any;
+        const obj = Object.assign({}, payload) as any;
         delete obj["responseContext"];
 
         if ("contents" in obj) {
@@ -491,7 +496,7 @@ export class Masterchat extends EventEmitter {
         };
       }
 
-      // unwrap replay actions into YTActions
+      // unwrap replay actions
       if (!(this.isLive ?? true)) {
         rawActions = unwrapReplayActions(rawActions);
       }
@@ -530,7 +535,7 @@ export class Masterchat extends EventEmitter {
       throw new AccessDeniedError("Rate limit exceeded: " + this.videoId);
     }
 
-    const html = await res.text();
+    const html = res.data;
     return parseMetadataFromWatch(html);
   }
 
@@ -540,7 +545,7 @@ export class Masterchat extends EventEmitter {
     if (res.status === 429)
       throw new AccessDeniedError("Rate limit exceeded: " + id);
 
-    const html = await res.text();
+    const html = res.data;
     return parseMetadataFromEmbed(html);
   }
 
@@ -674,16 +679,14 @@ export class Masterchat extends EventEmitter {
     let res;
     if (actionInfo.isPost) {
       res = await this.post(url, {
-        body: JSON.stringify(
-          withContext({
-            params: actionInfo.params,
-          })
-        ),
+        body: withContext({
+          params: actionInfo.params,
+        }),
       });
     } else {
       res = await this.get(url);
     }
-    const json = await res.json();
+    const json = res.data;
     if (!json.success) {
       throw new Error(`Failed to perform action: ` + JSON.stringify(json));
     }
@@ -806,6 +809,7 @@ export class Masterchat extends EventEmitter {
     body: any,
     options?: RetryOptions
   ): Promise<T> {
+    this.log("postWithRetry", input);
     const errors = [];
 
     let remaining = options?.retry ?? 0;
@@ -814,10 +818,10 @@ export class Masterchat extends EventEmitter {
     while (true) {
       try {
         const res = await this.post(input, body);
-        return await res.json();
+        return res.data;
       } catch (err) {
         if (err instanceof Error) {
-          if (err.name === "AbortError") throw err;
+          if (err.message === "canceled") throw new AbortError();
 
           errors.push(err);
 
@@ -837,27 +841,45 @@ export class Masterchat extends EventEmitter {
     }
   }
 
-  private async post(input: string, body: any): Promise<Response> {
-    const init = {
+  private async post(
+    input: string,
+    body: any,
+    config: AxiosRequestConfig = {}
+  ) {
+    if (!input.startsWith("http")) {
+      input = constants.DO + input;
+    }
+
+    return this.axiosInstance.request({
+      ...config,
+      url: input,
       signal: this.listenerAbortion.signal,
       method: "POST",
       headers: {
+        ...config.headers,
         "Content-Type": "application/json",
         ...(this.credentials && buildAuthHeaders(this.credentials)),
+        ...constants.DH,
       },
-      body: JSON.stringify(body),
-    };
-    return ytFetch(input, init);
+      data: body,
+    });
   }
 
-  private get(input: string) {
-    const init = {
+  private get(input: string, config: AxiosRequestConfig = {}) {
+    if (!input.startsWith("http")) {
+      input = constants.DO + input;
+    }
+
+    return this.axiosInstance.request({
+      ...config,
+      url: input,
       signal: this.listenerAbortion.signal,
       headers: {
+        ...config.headers,
         ...(this.credentials && buildAuthHeaders(this.credentials)),
+        ...constants.DH,
       },
-    };
-    return ytFetch(input, init);
+    });
   }
 
   private log(label: string, ...obj: any) {

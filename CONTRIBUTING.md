@@ -1,9 +1,9 @@
 # Contribution Guide
 
-## Setup
+## Build
 
 ```bash
-git checkout dev
+git switch dev
 yarn install
 yarn build
 ```
@@ -18,11 +18,14 @@ yarn dev
 yarn build
 yarn link
 
-cd tools
+cd ..
+git clone https://github.com/holodata/masterchat-cli
+cd masterchat-cli
 yarn install
+yarn link
 yarn link masterchat
-DEBUG=masterchat ts-node ./inspector.ts <videoId>
-DEBUG=masterchat ts-node ./stream-pool.ts
+DEBUG=masterchat mc live <videoId>
+DEBUG=masterchat mc events
 ```
 
 ## Testing
