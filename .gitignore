@@ -5,9 +5,6 @@
 *.schema.json
 .venv
 TODO.md
-res.json
-yarn.lock
-pnpm-lock.yaml
 
 /lib
 __nock-fixtures__

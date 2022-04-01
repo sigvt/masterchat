@@ -363,7 +363,7 @@ export class Masterchat extends EventEmitter {
       try {
         payload = (await this.post(requestUrl, requestBody)).data;
       } catch (err) {
-        // handle abortion
+        // handle user cancallation
         if ((err as any)?.message === "canceled") throw new AbortError();
 
         // handle server errors
