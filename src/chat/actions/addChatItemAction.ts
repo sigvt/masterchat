@@ -245,14 +245,13 @@ export function parseLiveChatMembershipItemRenderer(
   const authorPhoto = pickThumbUrl(renderer.authorPhoto);
 
   // observed, MODERATOR
-  const membership = parseMembership(
-    renderer.authorBadges[renderer.authorBadges.length - 1]
-  );
+  // observed, undefined renderer.authorBadges
+  const membership = renderer.authorBadges
+    ? parseMembership(renderer.authorBadges[renderer.authorBadges.length - 1])
+    : undefined;
   if (!membership) {
     throw new Error(
-      `Failed to parse membership (membership): ${JSON.stringify(
-        renderer.authorBadges
-      )}`
+      `Failed to parse membership (membership): ${JSON.stringify(renderer)}`
     );
   }
 

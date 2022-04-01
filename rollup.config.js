@@ -2,7 +2,7 @@ import commonjs from "@rollup/plugin-commonjs";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
 import typescript from "@rollup/plugin-typescript";
 import dts from "rollup-plugin-dts";
-import { terser } from "rollup-plugin-terser";
+// import { terser } from "rollup-plugin-terser";
 
 const isProd = process.env.NODE_ENV === "production";
 
@@ -29,10 +29,10 @@ export default [
         preferBuiltins: false, // required for `events` polyfill
       }),
       commonjs(),
-      isProd &&
-        terser({
-          keep_classnames: true, // avoid Error class mangling
-        }),
+      // isProd &&
+      //   terser({
+      //     keep_classnames: true, // avoid Error class mangling
+      //   }),
     ],
     external: ["cross-fetch", "debug"],
   },

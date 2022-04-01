@@ -364,20 +364,22 @@ export class Masterchat extends EventEmitter {
         payload = (await this.post(requestUrl, requestBody)).data;
       } catch (err) {
         // handle user cancallation
-        if ((err as any)?.message === "canceled") throw new AbortError();
+        if ((err as any)?.message === "canceled") {
+          this.log(`fetch`, `Request canceled`);
+          throw new AbortError();
+        }
 
         // handle server errors
         if ((err as any)?.isAxiosError) {
           const { code: axiosErrorCode, response } = err as AxiosError;
 
-          // handle axios timeout
+          // handle early timeout
           if (axiosErrorCode === "ECONNABORTED") {
-            this.log("timeout", "Got ECONNABORTED from axios");
             if (retryRemaining > 0) {
               retryRemaining -= 1;
               this.log(
-                `axios`,
-                `Retrying remaining=${retryRemaining} interval=${retryInterval} axiosStatus=${axiosErrorCode}`
+                `fetch`,
+                `Retrying ${retryRemaining} / ${retryInterval}ms cause=EARLY_TIMEOUT`
               );
               await delay(retryInterval);
               continue loop;
@@ -385,12 +387,14 @@ export class Masterchat extends EventEmitter {
           }
 
           if (!response) {
+            this.log(
+              "fetch",
+              `Empty error response ${err} (${axiosErrorCode})`
+            );
             throw new Error(
-              `Axios got invalid error response: ${err} (${axiosErrorCode})`
+              `Axios got empty error response: ${err} (${axiosErrorCode})`
             );
           }
-
-          this.log("axiosError", response.status);
 
           /** error.code ->
            * 400: request contains an invalid argument
@@ -406,10 +410,7 @@ export class Masterchat extends EventEmitter {
            *   - temporary server-side failure
            */
           const { code, status, message } = response.data.error;
-          this.log(
-            `youtube`,
-            `API Error: code=${code} status=${status} - ${message}`
-          );
+          this.log(`fetch`, `API error: ${code} (${status}): ${message}`);
 
           switch (status) {
             // stream got privated
@@ -430,8 +431,8 @@ export class Masterchat extends EventEmitter {
               if (retryRemaining > 0) {
                 retryRemaining -= 1;
                 this.log(
-                  `axios`,
-                  `Retrying remaining=${retryRemaining} interval=${retryInterval} status=${status} msg=${message}`
+                  `fetch`,
+                  `Retrying ${retryRemaining} / ${retryInterval}ms cause=${status}`
                 );
                 await delay(retryInterval);
                 continue loop;
@@ -439,8 +440,8 @@ export class Masterchat extends EventEmitter {
 
             default:
               this.log(
-                `[action required] axios`,
-                `Unrecognized server error:`,
+                `fetch`,
+                `[action required] Got unrecognized error from the API:`,
                 status,
                 message,
                 JSON.stringify(response.data)
@@ -449,9 +450,9 @@ export class Masterchat extends EventEmitter {
           }
         }
 
-        // handle client errors
+        // handle client-side errors
         // ECONNRESET, ETIMEOUT, etc
-        this.log(`client`, `Unrecoverable error:`, err);
+        this.log(`fetch`, `Unrecoverable error:`, err);
         throw err;
       }
 
@@ -474,7 +475,7 @@ export class Masterchat extends EventEmitter {
             // or accessing replay chat with live chat token
             // retry with replay endpoint if isLive is unknown
             if (this.isLive === undefined) {
-              this.log("fetch", "switched to replay endpoint");
+              this.log("fetch", "Switched to replay endpoint");
               this.isLive = false;
               applyNewLiveStatus(false);
               continue loop;
