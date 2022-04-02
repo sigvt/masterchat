@@ -45,6 +45,16 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "RiceCakess",
+      "name": "David Chen",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3145205?v=4",
+      "profile": "https://github.com/RiceCakess",
+      "contributions": [
+        "bug",
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7
