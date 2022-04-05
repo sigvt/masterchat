@@ -1,10 +1,10 @@
 # Changelog
 
-## Unreleased
+## v0.15.0
 
 ### Improvements
 
-- Replace cross-fetch with axios
+- Replace cross-fetch with axios (thanks for the review, @ricecakess)
 - Ditch timeout adjustment for performance reasons
 
 ### Fixes
