@@ -1,6 +1,5 @@
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from "axios";
 import { EventEmitter } from "events";
-import https from "https";
 import { buildMeta } from "./api";
 import { buildAuthHeaders } from "./auth";
 import { parseAction } from "./chat";
@@ -156,7 +155,6 @@ export class Masterchat extends EventEmitter {
       axiosInstance ??
       axios.create({
         timeout: 4000,
-        httpsAgent: new https.Agent({ keepAlive: true }),
       });
 
     this.setCredentials(credentials);

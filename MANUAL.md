@@ -191,6 +191,20 @@ npm i
 npm start
 ```
 
+### Custom axios client
+
+```js
+import axios from "axios";
+import https from "https";
+import { Masterchat } from "masterchat";
+
+const axiosInstance = axios.create({
+  timeout: 4000,
+  httpsAgent: new https.Agent({ keepAlive: true }),
+});
+const mc = await Masterchat.init("<videoId>", { axiosInstance });
+```
+
 ## Reference
 
 [API Documentation](https://holodata.github.io/masterchat)

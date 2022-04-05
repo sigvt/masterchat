@@ -1,4 +1,4 @@
-import fetch from "cross-fetch";
+import axios from "axios";
 import { setupRecorder } from "nock-record";
 import { buildAuthHeaders } from "../auth";
 import { DH } from "../constants";
@@ -24,13 +24,13 @@ describeif("watch", () => {
 
   beforeAll(async () => {
     const { completeRecording } = await record("watch");
-    const res = await fetch("https://www.youtube.com", {
+    const res = await axios.get("https://www.youtube.com", {
       headers: {
         ...DH,
         ...buildAuthHeaders(credentials),
       },
     });
-    watchHtml = await res.text();
+    watchHtml = res.data;
     completeRecording();
   });
 

@@ -1,4 +1,4 @@
-import fetch from "cross-fetch";
+import axios from "axios";
 import { setupRecorder } from "nock-record";
 import { Masterchat } from "../../src";
 
@@ -6,10 +6,10 @@ const mode = (process.env.NOCK_BACK_MODE as any) || "lockdown";
 const record = setupRecorder({ mode });
 
 async function fetchUpcomingStreams() {
-  const data = await fetch(
+  const data = await axios.get(
     "https://holodex.net/api/v2/live?status=live&org=Hololive"
-  ).then((res) => res.json());
-  return data;
+  );
+  return data.data;
 }
 
 describe("normal live chat", () => {

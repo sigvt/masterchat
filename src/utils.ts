@@ -1,6 +1,5 @@
-import crossFetch from "cross-fetch";
 import debug from "debug";
-import { DC, DH, DO } from "./constants";
+import { DC, DO } from "./constants";
 import { AbortError } from "./errors";
 import { Color, TimedContinuation } from "./interfaces/misc";
 import {
