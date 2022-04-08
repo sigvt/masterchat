@@ -1,5 +1,6 @@
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from "axios";
 import { EventEmitter } from "events";
+import { AsyncIterator } from "iterator-helpers-polyfill";
 import { buildMeta } from "./api";
 import { buildAuthHeaders } from "./auth";
 import { parseAction } from "./chat";
@@ -279,9 +280,22 @@ export class Masterchat extends EventEmitter {
   }
 
   /**
-   * Iterate chat until live stream ends
+   * (AsyncIterator API)
+   * Iterate until live stream ends
    */
-  async *iterate({
+  public iter(
+    options: IterateChatOptions = {}
+  ): AsyncGenerator<Action, void, undefined> {
+    return AsyncIterator.from<ChatResponse>(
+      this.iterate(options)
+    ).flatMap<Action>((r) => r.actions);
+  }
+
+  /**
+   * (AsyncGenerator API)
+   * Iterate until live stream ends
+   */
+  public async *iterate({
     topChat = false,
     ignoreFirstResponse = false,
     continuation,
