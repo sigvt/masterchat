@@ -130,9 +130,7 @@ export class Masterchat extends EventEmitter {
       );
     }
     // set channelId "" as populateMetadata will fill out it anyways
-    const mc = new Masterchat(videoId, "", {
-      ...options,
-    });
+    const mc = new Masterchat(videoId, "", options);
     await mc.populateMetadata();
     return mc;
   }
@@ -188,7 +186,8 @@ export class Masterchat extends EventEmitter {
   }
 
   /**
-   * Chat API
+   * (EventEmitter API)
+   * start listening live stream
    */
   public listen(iterateOptions?: IterateChatOptions) {
     if (this.listener) return this.listener;
@@ -269,6 +268,10 @@ export class Masterchat extends EventEmitter {
     return this.listener;
   }
 
+  /**
+   * (EventEmitter API)
+   * stop listening live stream
+   */
   public stop(): void {
     if (!this.listener) return;
     this.listenerAbortion.abort();
@@ -540,7 +543,7 @@ export class Masterchat extends EventEmitter {
     this.title = metadata.title;
     this.channelId = metadata.channelId;
     this.channelName = metadata.channelName;
-    this.isLive = metadata.isLive;
+    this.isLive ??= metadata.isLive;
   }
 
   async fetchMetadataFromWatch(id: string) {
