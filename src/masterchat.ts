@@ -393,7 +393,10 @@ export class Masterchat extends EventEmitter {
           const { code: axiosErrorCode, response } = err as AxiosError;
 
           // handle early timeout
-          if (axiosErrorCode === "ECONNABORTED") {
+          if (
+            axiosErrorCode === "ECONNABORTED" ||
+            axiosErrorCode === "ERR_REQUEST_ABORTED"
+          ) {
             if (retryRemaining > 0) {
               retryRemaining -= 1;
               this.log(
