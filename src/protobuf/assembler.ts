@@ -178,6 +178,19 @@ export function cmp(
   );
 }
 
+export function gts(videoId: string) {
+  return b64e(
+    cc([
+      ld(1, videoId),
+      ld(2, "CgNhc3ISAmlkGgA%3D"),
+      vt(3, 1),
+      ld(5, "engagement-panel-searchable-transcript-search-panel"),
+      vt(6, 1),
+    ]),
+    B64Type.B1
+  );
+}
+
 /**
  * Utils
  */

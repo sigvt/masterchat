@@ -6,6 +6,7 @@
 
 - New: Async Iterator API
   - `(await Masterchat.init("<videoId>")).iter()`
+- New: Transcript API
 
 ### Improvements
 

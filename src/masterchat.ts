@@ -34,7 +34,8 @@ import {
   YTGetItemContextMenuResponse,
   YTLiveChatTextMessageRenderer,
 } from "./interfaces/yt/chat";
-import { b64tou8, csc, CscOptions, lrc, rmp, rtc, smp } from "./protobuf";
+import { GetTranscriptResponse } from "./interfaces/yt/transcript";
+import { b64tou8, csc, CscOptions, gts, lrc, rmp, rtc, smp } from "./protobuf";
 import {
   debugLog,
   delay,
@@ -145,7 +146,7 @@ export class Masterchat extends EventEmitter {
 
     while (true) {
       try {
-        const res = await this.post(input, body);
+        const res = await this.post<T>(input, body);
         return res.data;
       } catch (err) {
         if (err instanceof Error) {
@@ -169,7 +170,7 @@ export class Masterchat extends EventEmitter {
     }
   }
 
-  private async post(
+  private async post<T>(
     input: string,
     body: any,
     config: AxiosRequestConfig = {}
@@ -178,7 +179,7 @@ export class Masterchat extends EventEmitter {
       input = constants.DO + input;
     }
 
-    return this.axiosInstance.request({
+    return this.axiosInstance.request<T>({
       ...config,
       url: input,
       signal: this.listenerAbortion.signal,
@@ -394,8 +395,38 @@ export class Masterchat extends EventEmitter {
     this.setCredentials(credentials);
   }
 
-  public get stopped() {
-    return this.listener === null;
+  /**
+   * Context API
+   */
+  public async populateMetadata(): Promise<void> {
+    const metadata = await this.fetchMetadataFromWatch(this.videoId);
+
+    this.title = metadata.title;
+    this.channelId = metadata.channelId;
+    this.channelName = metadata.channelName;
+    this.isLive ??= metadata.isLive;
+  }
+
+  public async fetchMetadataFromWatch(id: string) {
+    const res = await this.get("/watch?v=" + this.videoId);
+
+    // Check ban status
+    if (res.status === 429) {
+      throw new AccessDeniedError("Rate limit exceeded: " + this.videoId);
+    }
+
+    const html = res.data;
+    return parseMetadataFromWatch(html);
+  }
+
+  public async fetchMetadataFromEmbed(id: string) {
+    const res = await this.get(`/embed/${id}`);
+
+    if (res.status === 429)
+      throw new AccessDeniedError("Rate limit exceeded: " + id);
+
+    const html = res.data;
+    return parseMetadataFromEmbed(html);
   }
 
   public get metadata() {
@@ -515,6 +546,14 @@ export class Masterchat extends EventEmitter {
   }
 
   /**
+   * (EventEmitter API)
+   * returns listener status
+   */
+  public get stopped() {
+    return this.listener === null;
+  }
+
+  /**
    * (AsyncIterator API)
    * Iterate until live stream ends
    */
@@ -618,7 +657,8 @@ export class Masterchat extends EventEmitter {
 
     loop: while (true) {
       try {
-        payload = (await this.post(requestUrl, requestBody)).data;
+        payload = (await this.post<YTChatResponse>(requestUrl, requestBody))
+          .data;
       } catch (err) {
         // handle user cancallation
         if ((err as any)?.message === "canceled") {
@@ -794,40 +834,6 @@ export class Masterchat extends EventEmitter {
   }
 
   /**
-   * Context API
-   */
-  public async populateMetadata(): Promise<void> {
-    const metadata = await this.fetchMetadataFromWatch(this.videoId);
-
-    this.title = metadata.title;
-    this.channelId = metadata.channelId;
-    this.channelName = metadata.channelName;
-    this.isLive ??= metadata.isLive;
-  }
-
-  public async fetchMetadataFromWatch(id: string) {
-    const res = await this.get("/watch?v=" + this.videoId);
-
-    // Check ban status
-    if (res.status === 429) {
-      throw new AccessDeniedError("Rate limit exceeded: " + this.videoId);
-    }
-
-    const html = res.data;
-    return parseMetadataFromWatch(html);
-  }
-
-  public async fetchMetadataFromEmbed(id: string) {
-    const res = await this.get(`/embed/${id}`);
-
-    if (res.status === 429)
-      throw new AccessDeniedError("Rate limit exceeded: " + id);
-
-    const html = res.data;
-    return parseMetadataFromEmbed(html);
-  }
-
-  /**
    * Message
    */
   public async sendMessage(
@@ -982,7 +988,7 @@ export class Masterchat extends EventEmitter {
     });
 
     try {
-      const res = await this.post(constants.EP_NXT, body);
+      const res = await this.post<any>(constants.EP_NXT, body);
 
       const payload = res.data;
 
@@ -1015,5 +1021,30 @@ export class Masterchat extends EventEmitter {
       }
       throw err;
     }
+  }
+
+  /*
+   * Transcript API
+   */
+
+  /**
+   * Fetch transcript
+   */
+  public async getTranscript() {
+    const res = await this.post<GetTranscriptResponse>(constants.EP_GTS, {
+      context: {
+        client: { clientName: "WEB", clientVersion: "2.20220411.09.00" },
+      },
+      params: gts(this.videoId),
+    });
+
+    return res.data.actions[0].updateEngagementPanelAction.content.transcriptRenderer.content.transcriptSearchPanelRenderer.body.transcriptSegmentListRenderer.initialSegments
+      .map((seg) => seg.transcriptSegmentRenderer)
+      .map((rdr) => ({
+        startMs: Number(rdr.startMs),
+        endMs: Number(rdr.endMs),
+        snippet: rdr.snippet.runs,
+        startTimeText: rdr.startTimeText.simpleText,
+      }));
   }
 }

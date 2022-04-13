@@ -176,9 +176,9 @@ main();
 import { Masterchat } from "masterchat";
 
 async function main() {
-  // Iterate over all comments
   const mc = new Masterchat("<videoId>", "");
 
+  // Iterate over all comments
   let res = await mc.getComments({ top: true });
   while (true) {
     console.log(res.comments);
@@ -190,6 +190,24 @@ async function main() {
   // Get comment by id
   const comment = await mc.getComment("<commentId>");
   console.log(comment);
+}
+
+main();
+```
+
+### Get transcript
+
+```js
+import { Masterchat, stringify } from "masterchat";
+
+async function main() {
+  const mc = new Masterchat("<videoId>", "");
+
+  const transcript = await mc.getTranscript();
+
+  for (const item of transcript) {
+    console.log(item.startMs, stringify(item.snippet));
+  }
 }
 
 main();
