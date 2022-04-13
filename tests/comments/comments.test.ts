@@ -1,12 +1,12 @@
 import assert from "assert";
-import { getComment, getComments } from ".";
-import { YTCommentThreadRenderer } from "..";
-import { stringify } from "../utils";
+import { Masterchat, YTCommentThreadRenderer } from "../../src";
+import { stringify } from "../../src/utils";
 
 it("can fetch comments", async () => {
   const videoId = "q5ctC_sWU4g";
 
-  const res = await getComments(videoId, { top: true });
+  const mc = new Masterchat(videoId, "");
+  const res = await mc.getComments({ top: true });
   const first = res.comments[0];
   prettyPrint(first);
 });
@@ -15,7 +15,8 @@ it("can fetch comment by id", async () => {
   const videoId = "q5ctC_sWU4g";
   const commentId = "UgzNuL5flAW9vygeE9V4AaABAg";
 
-  const comment = await getComment(videoId, commentId);
+  const mc = new Masterchat(videoId, "");
+  const comment = await mc.getComment(commentId);
   assert(comment);
 
   prettyPrint(comment);
@@ -28,7 +29,8 @@ it("return undefined if wrong id specified", async () => {
   const videoId = "q5ctC_sWU4g";
   const commentId = "UgzNuL5flAW9vygeE9V4AaABAgwrong";
 
-  const comment = await getComment(videoId, commentId);
+  const mc = new Masterchat(videoId, "");
+  const comment = await mc.getComment(commentId);
   expect(comment).toBeUndefined();
 });
 

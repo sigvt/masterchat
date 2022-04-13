@@ -173,11 +173,13 @@ main();
 ### Get video comments (≠ live chats)
 
 ```js
-import { getComments, getComment } from "masterchat";
+import { Masterchat } from "masterchat";
 
 async function main() {
   // Iterate over all comments
-  let res = getComments("<videoId>", { top: true });
+  const mc = new Masterchat("<videoId>", "");
+
+  let res = await mc.getComments({ top: true });
   while (true) {
     console.log(res.comments);
 
@@ -186,7 +188,7 @@ async function main() {
   }
 
   // Get comment by id
-  const comment = await getComment("<videoId>", "<commentId>");
+  const comment = await mc.getComment("<commentId>");
   console.log(comment);
 }
 

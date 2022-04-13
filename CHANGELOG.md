@@ -1,5 +1,22 @@
 # Changelog
 
+## Unreleased
+
+### New
+
+- New: Async Iterator API
+  - `(await Masterchat.init("<videoId>")).iter()`
+
+### Improvements
+
+- Move video comments API to Masterchat class
+
+### Fixes
+
+- Don't overwrite `isLive` unless it is undefined
+- Reintroduce timeout drift adjustment
+- Treat `ERR_REQUEST_ABORTED` as aborted
+
 ## v0.15.0
 
 ### Improvements
