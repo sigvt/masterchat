@@ -1,3 +1,6 @@
+import { YTRunContainer, YTSimpleTextContainer } from "./chat";
+import { YTAccessibilityData } from "./context";
+
 export interface GetTranscriptResponse {
   responseContext: ResponseContext;
   actions: Action[];
@@ -40,8 +43,8 @@ export interface Body {
 
 export interface TranscriptSegmentListRenderer {
   initialSegments: InitialSegment[];
-  noResultLabel: NoResultLabel;
-  retryLabel: NoResultLabel;
+  noResultLabel: YTRunContainer;
+  retryLabel: YTRunContainer;
 }
 
 export interface InitialSegment {
@@ -51,30 +54,10 @@ export interface InitialSegment {
 export interface TranscriptSegmentRenderer {
   startMs: string;
   endMs: string;
-  snippet: NoResultLabel;
-  startTimeText: StartTimeText;
+  snippet: YTRunContainer;
+  startTimeText: YTSimpleTextContainer;
   trackingParams: string;
-  accessibility: Accessibility;
-}
-
-export interface Accessibility {
-  accessibilityData: AccessibilityData;
-}
-
-export interface AccessibilityData {
-  label: string;
-}
-
-export interface NoResultLabel {
-  runs: Run[];
-}
-
-export interface Run {
-  text: string;
-}
-
-export interface StartTimeText {
-  simpleText: string;
+  accessibility: YTAccessibilityData;
 }
 
 export interface Footer {

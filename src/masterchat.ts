@@ -26,6 +26,7 @@ import {
 } from "./interfaces";
 import { Action, AddChatItemAction } from "./interfaces/actions";
 import { ActionCatalog, ActionInfo } from "./interfaces/contextActions";
+import { TranscriptSegment } from "./interfaces/transcript";
 import {
   YTAction,
   YTActionResponse,
@@ -1030,7 +1031,7 @@ export class Masterchat extends EventEmitter {
   /**
    * Fetch transcript
    */
-  public async getTranscript() {
+  public async getTranscript(): Promise<TranscriptSegment[]> {
     const res = await this.post<GetTranscriptResponse>(constants.EP_GTS, {
       context: {
         client: { clientName: "WEB", clientVersion: "2.20220411.09.00" },

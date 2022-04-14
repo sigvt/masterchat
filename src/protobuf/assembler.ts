@@ -139,7 +139,7 @@ export function rmp(chatId: string, origin: CVPair, retract: boolean = true) {
 }
 
 export function pnp(chatId: string, origin: CVPair, undo: boolean = false) {
-  // TODO: undo
+  // TODO: support undo op
   return b64e(
     ld(1, [
       ld(1, cvt(origin)),
@@ -157,7 +157,7 @@ export function smp(to: CVPair): string {
 }
 
 export function mdp(tgt: string, origin: CVPair, undo: boolean = false) {
-  // TODO: undo
+  // TODO: support undo op
   b64e(cc([ld(1, cvt(origin)), ld(2, ld(1, truc(tgt)))]), B64Type.B2);
 }
 
