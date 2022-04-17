@@ -5,7 +5,7 @@
 [![npm: publish size](https://badgen.net/packagephobia/publish/masterchat)](https://npmjs.org/package/masterchat)
 [![typedoc](https://badgen.net/badge/docs/typedoc/purple)](https://holodata.github.io/masterchat/)
 
-Battle-tested Node.js library for handling YouTube Live Chat.
+Battle-tested JavaScript library for handling YouTube Live Chat events, supporting parsing 20+ live chat actions, video comments, transcription, as well as sending messages and moderating chats.
 
 ## Install
 
@@ -68,3 +68,7 @@ This project follows the [all-contributors](https://github.com/all-contributors/
 - [Honeybee](https://github.com/holodata/honeybee)
 - [ShipID](https://github.com/holodata/ShipID)
 - [Komet](https://github.com/holodata/Komet)
+
+## Related projects
+
+- [YouTube.js](https://github.com/LuanRT/YouTube.js)
