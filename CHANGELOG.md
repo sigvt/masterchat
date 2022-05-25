@@ -4,13 +4,17 @@
 
 ### New
 
-- New: Async Iterator API
+- Async Iterator API
   - `(await Masterchat.init("<videoId>")).iter()`
-- New: Transcript API
+- Transcript API
+  - `mc.getTranscript()`
+- Playlist API
+  - `mc.getPlaylist()`
 
 ### Improvements
 
 - Move video comments API to Masterchat class
+  - `mc.getComments()`
 
 ### Fixes
 

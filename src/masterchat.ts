@@ -4,6 +4,7 @@ import { AsyncIterator } from "iterator-helpers-polyfill";
 import { buildMeta } from "./api";
 import { buildAuthHeaders } from "./auth";
 import { parseAction } from "./chat";
+import { pickThumbUrl } from "./chat/utils";
 import * as constants from "./constants";
 import { parseMetadataFromEmbed, parseMetadataFromWatch } from "./context";
 import {
@@ -558,9 +559,7 @@ export class Masterchat extends EventEmitter {
    * (AsyncIterator API)
    * Iterate until live stream ends
    */
-  public iter(
-    options: IterateChatOptions = {}
-  ): AsyncGenerator<Action, void, undefined> {
+  public iter(options: IterateChatOptions = {}) {
     return AsyncIterator.from<ChatResponse>(
       this.iterate(options)
     ).flatMap<Action>((r) => r.actions);
@@ -1031,15 +1030,34 @@ export class Masterchat extends EventEmitter {
   /**
    * Fetch transcript
    */
-  public async getTranscript(): Promise<TranscriptSegment[]> {
+  public async getTranscript(
+    language: string
+  ): Promise<TranscriptSegment[] | null> {
     const res = await this.post<GetTranscriptResponse>(constants.EP_GTS, {
       context: {
-        client: { clientName: "WEB", clientVersion: "2.20220411.09.00" },
+        client: { clientName: "WEB", clientVersion: "2.20220502.01.00" },
       },
-      params: gts(this.videoId),
+      params: gts(this.videoId, language),
     });
 
-    return res.data.actions[0].updateEngagementPanelAction.content.transcriptRenderer.content.transcriptSearchPanelRenderer.body.transcriptSegmentListRenderer.initialSegments
+    const rdr =
+      res.data.actions[0].updateEngagementPanelAction.content.transcriptRenderer
+        .content.transcriptSearchPanelRenderer;
+
+    console.log(rdr);
+
+    const title =
+      rdr.footer?.transcriptFooterRenderer.languageMenu
+        ?.sortFilterSubMenuRenderer.subMenuItems[0].title;
+    console.log(title);
+
+    const segments = rdr.body.transcriptSegmentListRenderer.initialSegments;
+
+    if (!segments) {
+      return null;
+    }
+
+    return segments
       .map((seg) => seg.transcriptSegmentRenderer)
       .map((rdr) => ({
         startMs: Number(rdr.startMs),
@@ -1047,5 +1065,54 @@ export class Masterchat extends EventEmitter {
         snippet: rdr.snippet.runs,
         startTimeText: rdr.startTimeText.simpleText,
       }));
+  }
+
+  /*
+   * Playlist API
+   */
+
+  public async getPlaylist() {
+    const res = await this.post<any>(
+      "https://www.youtube.com/youtubei/v1/browse",
+      {
+        context: {
+          client: { clientName: "WEB", clientVersion: "2.20220411.09.00" },
+        },
+        browseId: "VLUUMO" + this.channelId.replace(/^UC/, ""),
+      }
+    );
+
+    const metadata = res.data.metadata.playlistMetadataRenderer;
+    const title = metadata.title;
+    const description = metadata.description;
+
+    const contents =
+      res.data.contents.twoColumnBrowseResultsRenderer.tabs[0].tabRenderer
+        .content.sectionListRenderer.contents[0].itemSectionRenderer.contents[0]
+        .playlistVideoListRenderer.contents;
+
+    const videos = contents.map((content: any) => {
+      const rdr = content.playlistVideoRenderer;
+      const videoId = rdr.videoId;
+      const title = rdr.title.runs;
+      const lengthText = rdr.lengthText.simpleText; // "2:12:01"
+      const length = Number(rdr.lengthSeconds); // "7921"
+      const thumbnailUrl = pickThumbUrl(rdr.thumbnails);
+      return {
+        videoId,
+        title,
+        thumbnailUrl,
+        length,
+        lengthText,
+      };
+    });
+
+    console.log(title, description, videos);
+
+    return {
+      title,
+      description,
+      videos,
+    };
   }
 }

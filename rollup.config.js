@@ -34,7 +34,7 @@ export default [
       //     keep_classnames: true, // avoid Error class mangling
       //   }),
     ],
-    external: ["cross-fetch", "debug"],
+    external: ["debug"],
   },
   {
     input: "./lib/lib/index.d.ts",
