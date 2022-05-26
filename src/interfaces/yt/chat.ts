@@ -446,7 +446,7 @@ export interface YTLiveChatBannerRenderer {
   actionId: string;
   targetId: string; // live-chat-banner
   contents: YTLiveChatTextMessageRendererContainer;
-  header: YTLiveChatBannerRendererHeader;
+  header?: YTLiveChatBannerRendererHeader;
   viewerIsCreator: boolean;
 }
 

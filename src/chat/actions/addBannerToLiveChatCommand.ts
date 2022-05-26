@@ -10,9 +10,15 @@ export function parseAddBannerToLiveChatCommand(
   // add pinned item
   const bannerRdr = payload["bannerRenderer"]["liveChatBannerRenderer"];
 
+  if (!bannerRdr.header) {
+    throw new Error(
+      "[action required] Invalid banner header: " + JSON.stringify(bannerRdr)
+    );
+  }
+
   if (bannerRdr.header.liveChatBannerHeaderRenderer.icon.iconType !== "KEEP") {
     debugLog(
-      "[action required] unknown icon type (addBannerToLiveChatCommand)",
+      "[action required] Unknown icon type (addBannerToLiveChatCommand)",
       JSON.stringify(bannerRdr.header.liveChatBannerHeaderRenderer.icon)
     );
   }
@@ -40,7 +46,7 @@ export function parseAddBannerToLiveChatCommand(
 
   if (!authorName) {
     debugLog(
-      "[action required] empty authorName at addBannerToLiveChatCommand",
+      "[action required] Empty authorName found at addBannerToLiveChatCommand",
       JSON.stringify(liveChatRdr)
     );
   }
