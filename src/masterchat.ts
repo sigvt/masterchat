@@ -1180,24 +1180,36 @@ export class Masterchat extends EventEmitter {
    * Playlist API
    */
 
-  public async getPlaylist() {
+  public async getPlaylist(browseId: string | { type: "membersOnly" }) {
+    if (typeof browseId === "object") {
+      switch (browseId.type) {
+        case "membersOnly": {
+          browseId = "VLUUMO" + this.channelId.replace(/^UC/, "");
+          break;
+        }
+        default: {
+          throw new Error(`Invalid type "${browseId.type}"`);
+        }
+      }
+    }
+
     const res = await this.post<any>(
       "https://www.youtube.com/youtubei/v1/browse",
       {
         context: {
           client: { clientName: "WEB", clientVersion: "2.20220411.09.00" },
         },
-        browseId: "VLUUMO" + this.channelId.replace(/^UC/, ""),
+        browseId,
       }
     );
 
-    const metadata = res.data.metadata.playlistMetadataRenderer;
+    const metadata = res.metadata.playlistMetadataRenderer;
     const title = metadata.title;
     const description = metadata.description;
 
     const contents =
-      res.data.contents.twoColumnBrowseResultsRenderer.tabs[0].tabRenderer
-        .content.sectionListRenderer.contents[0].itemSectionRenderer.contents[0]
+      res.contents.twoColumnBrowseResultsRenderer.tabs[0].tabRenderer.content
+        .sectionListRenderer.contents[0].itemSectionRenderer.contents[0]
         .playlistVideoListRenderer.contents;
 
     const videos = contents.map((content: any) => {
@@ -1206,7 +1218,7 @@ export class Masterchat extends EventEmitter {
       const title = rdr.title.runs;
       const lengthText = rdr.lengthText.simpleText; // "2:12:01"
       const length = Number(rdr.lengthSeconds); // "7921"
-      const thumbnailUrl = pickThumbUrl(rdr.thumbnails);
+      const thumbnailUrl = pickThumbUrl(rdr.thumbnail);
       return {
         videoId,
         title,
