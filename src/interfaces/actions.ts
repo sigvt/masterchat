@@ -40,7 +40,8 @@ export type Action =
   | ShowTooltipAction
   | ModeChangeAction
   | MembershipGiftPurchaseAction
-  | MembershipGiftRedemptionAction;
+  | MembershipGiftRedemptionAction
+  | ModerationMessageAction;
 
 export interface AddChatItemAction {
   type: "addChatItemAction";
@@ -372,6 +373,14 @@ export interface MembershipGiftRedemptionAction {
   authorName: string;
   authorChannelId: string;
   authorPhoto: string;
+}
+
+export interface ModerationMessageAction {
+  type: "moderationMessageAction";
+  id: string;
+  timestamp: Date;
+  timestampUsec: string;
+  message: YTRun[];
 }
 
 export interface UnknownAction {

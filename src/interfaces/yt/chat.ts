@@ -254,7 +254,8 @@ export type YTAddChatItemActionItem =
   | YTLiveChatViewerEngagementMessageRendererContainer
   | YTLiveChatModeChangeMessageRendererContainer
   | YTLiveChatSponsorshipsGiftPurchaseAnnouncementRendererContainer
-  | YTLiveChatSponsorshipsGiftRedemptionAnnouncementRendererContainer;
+  | YTLiveChatSponsorshipsGiftRedemptionAnnouncementRendererContainer
+  | YTLiveChatModerationMessageRendererContainer;
 
 export interface YTAddLiveChatTickerItemAction {
   item: YTAddLiveChatTickerItem;
@@ -353,6 +354,10 @@ export interface YTLiveChatSponsorshipsGiftPurchaseAnnouncementRendererContainer
 
 export interface YTLiveChatSponsorshipsGiftRedemptionAnnouncementRendererContainer {
   liveChatSponsorshipsGiftRedemptionAnnouncementRenderer: YTLiveChatSponsorshipsGiftRedemptionAnnouncementRenderer;
+}
+
+export interface YTLiveChatModerationMessageRendererContainer {
+  liveChatModerationMessageRenderer: YTLiveChatModerationMessageRenderer;
 }
 
 // LiveChat Renderers
@@ -590,6 +595,24 @@ export interface YTLiveChatSponsorshipsGiftRedemptionAnnouncementRenderer {
   contextMenuEndpoint: YTLiveChatItemContextMenuEndpointContainer;
   contextMenuAccessibility: YTAccessibilityData;
   trackingParams: string;
+}
+
+// Moderation message
+export interface YTLiveChatModerationMessageRenderer {
+  message: {
+    runs: [
+      { text: string; bold: true; italics: true },
+      {
+        // TODO: find other variants
+        text: " was hidden by " | " was unhidden by ";
+        italics: true;
+      },
+      { text: string; bold: true; italics: true },
+      { text: "."; italics: true }
+    ];
+  };
+  id: string;
+  timestampUsec: string;
 }
 
 // Ticker Renderers

@@ -10,6 +10,7 @@
   - `mc.getTranscript()`
 - Playlist API
   - `mc.getPlaylist()`
+- New: `ModerationMessageAction` (type: `moderationMessageAction`)
 
 ### Improvements
 

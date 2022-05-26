@@ -12,11 +12,13 @@ import {
   MembershipGiftPurchaseAction,
   MembershipGiftRedemptionAction,
   MembershipGiftPurchaseTickerContent,
+  ModerationMessageAction,
 } from "../../interfaces/actions";
 import {
   YTAddChatItemAction,
   YTLiveChatMembershipItemRenderer,
   YTLiveChatModeChangeMessageRenderer,
+  YTLiveChatModerationMessageRenderer,
   YTLiveChatPaidMessageRenderer,
   YTLiveChatPaidStickerRenderer,
   YTLiveChatPlaceholderItemRenderer,
@@ -84,6 +86,9 @@ export function parseAddChatItemAction(payload: YTAddChatItemAction) {
     return parseLiveChatSponsorshipsGiftRedemptionAnnouncementRenderer(
       renderer
     );
+  } else if ("liveChatModerationMessageRenderer" in item) {
+    const renderer = item["liveChatModerationMessageRenderer"];
+    return parseLiveChatModerationMessageRenderer(renderer);
   }
 
   debugLog(
@@ -538,6 +543,26 @@ export function parseLiveChatSponsorshipsGiftRedemptionAnnouncementRenderer(
     authorName,
     authorChannelId,
     authorPhoto,
+  };
+  return parsed;
+}
+
+// Moderation message
+export function parseLiveChatModerationMessageRenderer(
+  renderer: YTLiveChatModerationMessageRenderer
+) {
+  const id = renderer.id;
+  const timestampUsec = renderer.timestampUsec;
+  const timestamp = tsToDate(timestampUsec);
+
+  const message = renderer.message.runs;
+
+  const parsed: ModerationMessageAction = {
+    type: "moderationMessageAction",
+    id,
+    timestamp,
+    timestampUsec,
+    message,
   };
   return parsed;
 }
