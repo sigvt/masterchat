@@ -4,7 +4,9 @@ it("can fetch transcript", async () => {
   const videoId = "VFxHb8KY2LI";
 
   const mc = new Masterchat(videoId, "");
-  const res = await mc.getTranscript();
+
+  const res = await mc.getTranscript("id");
+
   expect(res).toEqual(
     expect.arrayContaining([
       expect.objectContaining({

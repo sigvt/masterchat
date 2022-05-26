@@ -165,7 +165,7 @@ describe("moderation (timeout)", () => {
 
   describe("verify timeout", () => {
     itif("try sending chat", async () => {
-      expect(other.sendMessage("Hi!")).rejects.toThrow(
+      await expect(other.sendMessage("Hi!")).rejects.toThrow(
         "You have been placed in timeout"
       );
     });

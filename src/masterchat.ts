@@ -693,7 +693,13 @@ export class Masterchat extends EventEmitter {
 
         // handle server errors
         if ((err as any)?.isAxiosError) {
-          const { code: axiosErrorCode, response } = err as AxiosError;
+          const { code: axiosErrorCode, response } = err as AxiosError<{
+            error: {
+              code: number;
+              status: string;
+              message: string;
+            };
+          }>;
 
           // handle early timeout
           if (
@@ -1076,9 +1082,6 @@ export class Masterchat extends EventEmitter {
     const comments = await this.getComments({
       highlightedCommentId: commentId,
     });
-    if (comments.error) {
-      throw comments.error;
-    }
     const first = comments.comments?.[0];
     if (first.renderingPriority !== RenderingPriority.LinkedComment)
       return undefined;
@@ -1095,40 +1098,30 @@ export class Masterchat extends EventEmitter {
       continuation,
     });
 
-    try {
-      const res = await this.post<any>(Constants.EP_NXT, body);
+    const payload = await this.post<any>(Constants.EP_NXT, body);
 
-      const payload = res.data;
+    const endpoints = payload.onResponseReceivedEndpoints;
+    const isAppend = endpoints.length === 1;
 
-      const endpoints = payload.onResponseReceivedEndpoints;
-      const isAppend = endpoints.length === 1;
+    const items: YTContinuationItem[] = isAppend
+      ? endpoints[0].appendContinuationItemsAction.continuationItems
+      : endpoints[1].reloadContinuationItemsCommand.continuationItems;
 
-      const items: YTContinuationItem[] = isAppend
-        ? endpoints[0].appendContinuationItemsAction.continuationItems
-        : endpoints[1].reloadContinuationItemsCommand.continuationItems;
+    const nextContinuation =
+      items[items.length - 1].continuationItemRenderer?.continuationEndpoint
+        .continuationCommand.token;
 
-      const nextContinuation =
-        items[items.length - 1].continuationItemRenderer?.continuationEndpoint
-          .continuationCommand.token;
+    const comments = items
+      .map((item) => item.commentThreadRenderer)
+      .filter((rdr): rdr is YTCommentThreadRenderer => rdr !== undefined);
 
-      const comments = items
-        .map((item) => item.commentThreadRenderer)
-        .filter((rdr): rdr is YTCommentThreadRenderer => rdr !== undefined);
-
-      return {
-        comments,
-        continuation: nextContinuation,
-        next: nextContinuation
-          ? () => this.getComments(nextContinuation)
-          : undefined,
-      };
-    } catch (err) {
-      const data = (err as AxiosError)?.response?.data;
-      if (data) {
-        return data;
-      }
-      throw err;
-    }
+    return {
+      comments,
+      continuation: nextContinuation,
+      next: nextContinuation
+        ? () => this.getComments(nextContinuation)
+        : undefined,
+    };
   }
 
   /*
@@ -1180,8 +1173,6 @@ export class Masterchat extends EventEmitter {
       throw new Error("No transcript available for " + language);
     }
 
-    this.log("transcript", JSON.stringify(res));
-
     return res.segments;
   }
 
@@ -1225,7 +1216,7 @@ export class Masterchat extends EventEmitter {
       };
     });
 
-    console.log(title, description, videos);
+    this.log(title, description, videos);
 
     return {
       title,

@@ -9,5 +9,5 @@ it("can generate lrc", () => {
 });
 
 it("can generate gtsm", () => {
-  expect(transcriptFormatToken("id", true)).toBe("CgNhc3ISAmVuGgA%3D");
+  expect(transcriptFormatToken("en", true)).toBe("CgNhc3ISAmVuGgA%3D");
 });
