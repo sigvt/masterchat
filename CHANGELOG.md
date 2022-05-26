@@ -16,6 +16,7 @@
 
 - Move video comments API to Masterchat class
   - `mc.getComments()`
+- Add `executor` to `MarkChatItemAsDeletedAction`
 
 ### Fixes
 

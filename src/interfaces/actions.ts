@@ -182,6 +182,7 @@ export interface MarkChatItemAsDeletedAction {
   type: "markChatItemAsDeletedAction";
   retracted: boolean;
   targetId: string;
+  executor?: string;
   timestamp: Date;
 }
 
