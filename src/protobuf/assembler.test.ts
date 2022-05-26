@@ -7,5 +7,5 @@ it("can generate lrc", () => {
 });
 
 it("can generate gtsm", () => {
-  expect(gtsm()).toBe("CgNhc3ISAmVuGgA%3D");
+  expect(gtsm("id", true)).toBe("CgNhc3ISAmVuGgA%3D");
 });
