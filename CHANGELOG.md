@@ -4,15 +4,12 @@
 
 ### New
 
-- Async Iterator API
-  - `(await Masterchat.init("<videoId>")).iter()`
 - Transcript API
   - `mc.getTranscript()`
 - Playlist API
   - `mc.getPlaylist()`
 - New: `ModerationMessageAction` (type: `moderationMessageAction`) for moderation messages for moderators
 - New: `AddRedirectBannerAction` (type: `addRedirectBannerAction`) for raid event notifications
-- Add support for `Raid` event
 
 ### Improvements
 
