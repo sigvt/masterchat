@@ -106,6 +106,17 @@ export interface YTActionResponse {
   responseContext: YTResponseContext;
   success: boolean;
   actions: YTAction[];
+  timeoutDurationUsec?: string;
+  errorMessage?: YTLiveChatTextActionsErrorMessageRenderer;
+}
+
+export interface YTLiveChatTextActionsErrorMessageRenderer {
+  errorText: YTRunContainer;
+  editMessageText: YTRunContainer;
+  clickToDismissText: YTRunContainer;
+  originalRichMessage: {
+    textSegments: YTTextRun[];
+  };
 }
 
 // Interfaces

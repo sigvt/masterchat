@@ -857,6 +857,14 @@ export class Masterchat extends EventEmitter {
       body
     );
 
+    if (res.timeoutDurationUsec) {
+      // You are timeouted
+      const timeoutSec = usecToSeconds(res.timeoutDurationUsec);
+      throw new Error(
+        `You have been placed in timeout for ${timeoutSec} seconds`
+      );
+    }
+
     const item = res.actions?.[0].addChatItemAction?.item;
     if (!(item && "liveChatTextMessageRenderer" in item)) {
       throw new Error(`Invalid response: ` + item);

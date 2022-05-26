@@ -23,6 +23,7 @@
 - Don't overwrite `isLive` unless it is undefined
 - Reintroduce timeout drift adjustment
 - Treat `ERR_REQUEST_ABORTED` as aborted
+- Detect being timeouted by moderator when sending a chat
 
 ## v0.15.0
 

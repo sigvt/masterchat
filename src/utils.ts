@@ -50,6 +50,10 @@ export function tsToNumber(timestampUsec: string): number {
   return Number(BigInt(timestampUsec) / BigInt(1000));
 }
 
+export function usecToSeconds(usec: string): number {
+  return Number(BigInt(usec) / BigInt(1000 * 2));
+}
+
 export function formatColor(color: Color, format: ColorFormat = "hex"): string {
   switch (format) {
     case "rgb":
