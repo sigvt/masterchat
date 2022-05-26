@@ -16,6 +16,7 @@
 
 - Move video comments API to Masterchat class
   - `mc.getComments()`
+- Use direct method for `hide`, `unhide`, `pin`, `unpin`, `addModerator`, `removeModerator` and `timeout`
 - Add `executor` to `MarkChatItemAsDeletedAction`
 
 ### Fixes

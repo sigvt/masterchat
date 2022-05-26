@@ -1,18 +1,20 @@
 import { setupRecorder } from "nock-record";
 import { AddChatItemAction, delay, Masterchat } from "../../src";
 
-const id = process.env.MC_MSG_TEST_ID;
-const channelId = process.env.MC_MSG_TEST_CHANNEL_ID;
-const credentialsB64 = process.env.MC_MSG_TEST_CREDENTIALS;
-const credentialsB64_second = process.env.MC_MSG_TEST_CREDENTIALS_SECOND;
+const id = process.env.MC_TEST_VIDEO_ID;
+const channelId = process.env.MC_TEST_CHANNEL_ID;
+const credentialsB64 = process.env.MC_TEST_CREDENTIAL;
+const channelId_second = process.env.MC_TEST_CHANNEL_ID_2;
+const credentialsB64_second = process.env.MC_TEST_CREDENTIAL_2;
 const credentials = credentialsB64
-  ? JSON.parse(Buffer.from(credentialsB64!, "base64").toString())
+  ? JSON.parse(Buffer.from(credentialsB64, "base64").toString())
   : undefined;
 const credentials_second = credentialsB64_second
-  ? JSON.parse(Buffer.from(credentialsB64_second!, "base64").toString())
+  ? JSON.parse(Buffer.from(credentialsB64_second, "base64").toString())
   : undefined;
 
-const enabled = id && channelId && credentialsB64 && credentials_second;
+const enabled =
+  id && channelId && channelId_second && credentials && credentials_second;
 if (!enabled) {
   console.log("message test disabled");
 }
@@ -58,20 +60,20 @@ describe("normal message handling", () => {
       const { completeRecording } = await record("message_remove");
       const res = await mc.remove(chatId);
       completeRecording();
-      const targetId = res?.targetItemId;
+      const targetId = res.targetId;
       expect(targetId).toBe(chatId);
     });
   });
 });
 
-describe("moderation (delete)", () => {
+describe("moderation (remove)", () => {
   let me: Masterchat;
   let other: Masterchat;
   let chatId: string;
   let recorder: any;
 
   beforeAll(async () => {
-    recorder = await record("mod_send");
+    recorder = await record("mod_remove");
     me = new Masterchat(id!, channelId!, { credentials });
     other = new Masterchat(id!, channelId!, {
       credentials: credentials_second,
@@ -95,7 +97,7 @@ describe("moderation (delete)", () => {
 
   describe("check message", () => {
     itif("receive message", async () => {
-      if (mode === "record") await delay(3000);
+      if (mode === "record" || mode === "wild") await delay(3000);
 
       const res = await me.fetch();
       const chat = res.actions.find(
@@ -106,8 +108,66 @@ describe("moderation (delete)", () => {
     });
 
     itif("delete message", async () => {
-      const del = await me.remove(chatId);
-      expect(del.targetItemId).toBe(chatId);
+      const removed = await me.remove(chatId);
+      expect(removed.targetId).toBe(chatId);
+    });
+  });
+});
+
+describe("moderation (hide/unhide)", () => {
+  let me: Masterchat;
+  let recorder: any;
+
+  beforeAll(async () => {
+    recorder = await record("mod_hide");
+    me = new Masterchat(id!, channelId!, { credentials });
+  });
+
+  afterAll(() => {
+    recorder.completeRecording();
+  });
+
+  describe("hide", () => {
+    itif("hide channel", async () => {
+      await me.hide(channelId_second!);
+    });
+  });
+
+  describe("unhide", () => {
+    itif("unhide channel", async () => {
+      await me.unhide(channelId_second!);
+    });
+  });
+});
+
+describe("moderation (timeout)", () => {
+  let me: Masterchat;
+  let other: Masterchat;
+  let recorder: any;
+
+  beforeAll(async () => {
+    recorder = await record("mod_timeout");
+    me = new Masterchat(id!, channelId!, { credentials });
+    other = new Masterchat(id!, channelId!, {
+      credentials: credentials_second,
+    });
+  });
+
+  afterAll(() => {
+    recorder.completeRecording();
+  });
+
+  describe("timeout", () => {
+    itif("timeout channel", async () => {
+      await me.timeout(channelId_second!);
+    });
+  });
+
+  describe("verify timeout", () => {
+    itif("try sending chat", async () => {
+      expect(other.sendMessage("Hi!")).rejects.toThrow(
+        "You have been placed in timeout"
+      );
     });
   });
 });

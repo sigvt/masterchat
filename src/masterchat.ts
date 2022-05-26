@@ -4,8 +4,9 @@ import { AsyncIterator } from "iterator-helpers-polyfill";
 import { buildMeta } from "./api";
 import { buildAuthHeaders } from "./auth";
 import { parseAction } from "./chat";
+import { parseMarkChatItemAsDeletedAction } from "./chat/actions/markChatItemAsDeletedAction";
 import { pickThumbUrl } from "./chat/utils";
-import * as constants from "./constants";
+import * as Constants from "./constants";
 import { parseMetadataFromEmbed, parseMetadataFromWatch } from "./context";
 import {
   AbortError,
@@ -25,7 +26,11 @@ import {
   YTCommentThreadRenderer,
   YTContinuationItem,
 } from "./interfaces";
-import { Action, AddChatItemAction } from "./interfaces/actions";
+import {
+  Action,
+  AddChatItemAction,
+  MarkChatItemAsDeletedAction,
+} from "./interfaces/actions";
 import { ActionCatalog, ActionInfo } from "./interfaces/contextActions";
 import { TranscriptSegment } from "./interfaces/transcript";
 import {
@@ -37,7 +42,21 @@ import {
   YTLiveChatTextMessageRenderer,
 } from "./interfaces/yt/chat";
 import { GetTranscriptResponse } from "./interfaces/yt/transcript";
-import { b64tou8, csc, CscOptions, gts, lrc, rmp, rtc, smp } from "./protobuf";
+import {
+  addModeratorParams,
+  b64tou8,
+  csc,
+  CscOptions,
+  getTranscriptParams,
+  hideParams,
+  liveReloadContinuation,
+  pinParams,
+  removeMessageParams,
+  replayTimedContinuation,
+  sendMessageParams,
+  timeoutParams,
+  unpinParams,
+} from "./protobuf";
 import {
   debugLog,
   delay,
@@ -45,6 +64,7 @@ import {
   stringify,
   toVideoId,
   unwrapReplayActions,
+  usecToSeconds,
   withContext,
 } from "./utils";
 
@@ -140,7 +160,7 @@ export class Masterchat extends EventEmitter {
     body: any,
     options?: RetryOptions
   ): Promise<T> {
-    this.log("postWithRetry", input);
+    // this.log("postWithRetry", input);
     const errors = [];
 
     let remaining = options?.retry ?? 0;
@@ -148,8 +168,7 @@ export class Masterchat extends EventEmitter {
 
     while (true) {
       try {
-        const res = await this.post<T>(input, body);
-        return res.data;
+        return await this.post<T>(input, body);
       } catch (err) {
         if (err instanceof Error) {
           if (err.message === "canceled") throw new AbortError();
@@ -176,12 +195,12 @@ export class Masterchat extends EventEmitter {
     input: string,
     body: any,
     config: AxiosRequestConfig = {}
-  ) {
+  ): Promise<T> {
     if (!input.startsWith("http")) {
-      input = constants.DO + input;
+      input = Constants.DO + input;
     }
 
-    return this.axiosInstance.request<T>({
+    const res = await this.axiosInstance.request<T>({
       ...config,
       url: input,
       signal: this.listenerAbortion.signal,
@@ -190,27 +209,34 @@ export class Masterchat extends EventEmitter {
         ...config.headers,
         "Content-Type": "application/json",
         ...(this.credentials && buildAuthHeaders(this.credentials)),
-        ...constants.DH,
+        ...Constants.DH,
       },
       data: body,
     });
+
+    return res.data;
   }
 
-  private get(input: string, config: AxiosRequestConfig = {}) {
+  private async get<T>(
+    input: string,
+    config: AxiosRequestConfig = {}
+  ): Promise<T> {
     if (!input.startsWith("http")) {
-      input = constants.DO + input;
+      input = Constants.DO + input;
     }
 
-    return this.axiosInstance.request({
+    const res = await this.axiosInstance.request<T>({
       ...config,
       url: input,
       signal: this.listenerAbortion.signal,
       headers: {
         ...config.headers,
         ...(this.credentials && buildAuthHeaders(this.credentials)),
-        ...constants.DH,
+        ...Constants.DH,
       },
     });
+
+    return res.data;
   }
 
   private log(label: string, ...obj: any) {
@@ -233,7 +259,7 @@ export class Masterchat extends EventEmitter {
     const query = new URLSearchParams({
       params: contextMenuEndpointParams,
     });
-    const endpoint = constants.EP_GICM + "&" + query.toString();
+    const endpoint = Constants.EP_GICM + "&" + query.toString();
     const response = await this.postWithRetry<YTGetItemContextMenuResponse>(
       endpoint,
       withContext(),
@@ -332,19 +358,18 @@ export class Masterchat extends EventEmitter {
     return items;
   }
 
-  private async sendAction<T = YTAction[]>(actionInfo: ActionInfo): Promise<T> {
+  private async sendAction(actionInfo: ActionInfo): Promise<YTAction[]> {
     const url = actionInfo.url;
-    let res;
+    let json: YTActionResponse;
     if (actionInfo.isPost) {
-      res = await this.post(url, {
+      json = await this.post<YTActionResponse>(url, {
         body: withContext({
           params: actionInfo.params,
         }),
       });
     } else {
-      res = await this.get(url);
+      json = await this.get(url);
     }
-    const json = res.data;
     if (!json.success) {
       throw new Error(`Failed to perform action: ` + JSON.stringify(json));
     }
@@ -410,25 +435,26 @@ export class Masterchat extends EventEmitter {
   }
 
   public async fetchMetadataFromWatch(id: string) {
-    const res = await this.get("/watch?v=" + this.videoId);
-
-    // Check ban status
-    if (res.status === 429) {
-      throw new AccessDeniedError("Rate limit exceeded: " + this.videoId);
+    try {
+      const html = await this.get<string>("/watch?v=" + this.videoId);
+      return parseMetadataFromWatch(html);
+    } catch (err) {
+      // Check ban status
+      if ((err as AxiosError).code === "429") {
+        throw new AccessDeniedError("Rate limit exceeded: " + this.videoId);
+      }
+      throw err;
     }
-
-    const html = res.data;
-    return parseMetadataFromWatch(html);
   }
 
   public async fetchMetadataFromEmbed(id: string) {
-    const res = await this.get(`/embed/${id}`);
-
-    if (res.status === 429)
-      throw new AccessDeniedError("Rate limit exceeded: " + id);
-
-    const html = res.data;
-    return parseMetadataFromEmbed(html);
+    try {
+      const html = await this.get<string>(`/embed/${id}`);
+      return parseMetadataFromEmbed(html);
+    } catch (err) {
+      if ((err as AxiosError).code === "429")
+        throw new AccessDeniedError("Rate limit exceeded: " + id);
+    }
   }
 
   public get metadata() {
@@ -639,14 +665,14 @@ export class Masterchat extends EventEmitter {
     let payload: YTChatResponse;
 
     function applyNewLiveStatus(isLive: boolean) {
-      requestUrl = isLive ? constants.EP_GLC : constants.EP_GLCR;
+      requestUrl = isLive ? Constants.EP_GLC : Constants.EP_GLCR;
 
       const continuation =
         typeof tokenOrOptions === "string"
           ? tokenOrOptions
           : isLive
-          ? lrc(target, { top: topChat })
-          : rtc(target, { top: topChat });
+          ? liveReloadContinuation(target, { top: topChat })
+          : replayTimedContinuation(target, { top: topChat });
 
       requestBody = withContext({
         continuation,
@@ -657,8 +683,7 @@ export class Masterchat extends EventEmitter {
 
     loop: while (true) {
       try {
-        payload = (await this.post<YTChatResponse>(requestUrl, requestBody))
-          .data;
+        payload = await this.post<YTChatResponse>(requestUrl, requestBody);
       } catch (err) {
         // handle user cancallation
         if ((err as any)?.message === "canceled") {
@@ -834,12 +859,17 @@ export class Masterchat extends EventEmitter {
   }
 
   /**
-   * Message
+   * NOTE: invalid params -> "actions":[{"liveChatAddToToastAction":{"item":{"notificationTextRenderer":{"successResponseText":{"runs":[{"text":"Error, try again."}]},"trackingParams":"CAAQyscDIhMI56_wmNj89wIV0HVgCh2Qow9y"}}}}]
    */
+
+  /**
+   * Send Message API
+   */
+
   public async sendMessage(
     message: string
   ): Promise<YTLiveChatTextMessageRenderer> {
-    const params = smp(this.cvPair());
+    const params = sendMessageParams(this.cvPair());
 
     const body = withContext({
       richMessage: {
@@ -853,7 +883,7 @@ export class Masterchat extends EventEmitter {
     });
 
     const res = await this.postWithRetry<YTActionResponse>(
-      constants.EP_SM,
+      Constants.EP_SM,
       body
     );
 
@@ -873,51 +903,121 @@ export class Masterchat extends EventEmitter {
   }
 
   /**
-   * Context Menu Actions API
+   * Live Chat Action API
    */
-  // async report(contextMenuEndpointParams: string) {
-  //   const catalog = await this.getActionCatalog(contextMenuEndpointParams);
-  //   const actionInfo = catalog?.report;
-  //   if (!actionInfo) return;
-  //   return await this.sendAction(actionInfo);
-  // }
-  // TODO: narrow down return type
-  public async pin(contextMenuEndpointParams: string) {
-    const catalog = await this.getActionCatalog(contextMenuEndpointParams);
-    const actionInfo = catalog?.pin;
-    if (!actionInfo) return;
-    return await this.sendAction(actionInfo);
-  }
 
-  // TODO: narrow down return type
-  public async unpin(contextMenuEndpointParams: string) {
-    const catalog = await this.getActionCatalog(contextMenuEndpointParams);
-    const actionInfo = catalog?.unpin;
-    if (!actionInfo) return;
-    return await this.sendAction(actionInfo);
-  }
-
-  public async remove(chatId: string) {
-    const params = rmp(chatId, this.cvPair());
-    const res = await this.postWithRetry<YTActionResponse>(
-      constants.EP_M,
+  public async pin(chatId: string) {
+    const params = pinParams(chatId, this.cvPair());
+    const res = await this.post<YTActionResponse>(
+      Constants.EP_LCA,
       withContext({
         params,
       })
     );
     if (!res.success) {
-      // {"error":{"code":501,"message":"Operation is not implemented, or supported, or enabled.","errors":[{"message":"Operation is not implemented, or supported, or enabled.","domain":"global","reason":"notImplemented"}],"status":"UNIMPLEMENTED"}}
-      throw new Error(`Failed to perform action: ` + JSON.stringify(res));
+      throw new Error(`Failed to pin chat: ` + JSON.stringify(res));
     }
-    return res.actions[0].markChatItemAsDeletedAction!;
+    return res; // TODO
   }
 
-  // TODO: narrow down return type
-  public async timeout(contextMenuEndpointParams: string) {
-    const catalog = await this.getActionCatalog(contextMenuEndpointParams);
-    const actionInfo = catalog?.timeout;
-    if (!actionInfo) return;
-    return await this.sendAction(actionInfo);
+  public async unpin(actionId: string) {
+    const params = unpinParams(actionId, this.cvPair());
+
+    const res = await this.post<YTActionResponse>(
+      Constants.EP_LCA,
+      withContext({
+        params,
+      })
+    );
+
+    if (!res.success) {
+      throw new Error(`Failed to unpin chat: ` + JSON.stringify(res));
+    }
+
+    return res; // TODO
+  }
+
+  /**
+   * Moderate API
+   */
+
+  public async remove(chatId: string): Promise<MarkChatItemAsDeletedAction> {
+    const params = removeMessageParams(chatId, this.cvPair());
+
+    const res = await this.post<YTActionResponse>(
+      Constants.EP_MOD,
+      withContext({
+        params,
+      })
+    );
+
+    if (!res.success) {
+      // {"error":{"code":501,"message":"Operation is not implemented, or supported, or enabled.","errors":[{"message":"Operation is not implemented, or supported, or enabled.","domain":"global","reason":"notImplemented"}],"status":"UNIMPLEMENTED"}}
+      throw new Error(`Failed to remove chat: ` + JSON.stringify(res));
+    }
+
+    const payload = res.actions[0].markChatItemAsDeletedAction;
+
+    if (!payload) {
+      throw new Error(
+        `Invalid response when removing chat: ${JSON.stringify(res)}`
+      );
+    }
+
+    return parseMarkChatItemAsDeletedAction(payload);
+  }
+
+  /**
+   * Put user in timeout for 300 seconds
+   */
+  public async timeout(channelId: string): Promise<void> {
+    const params = timeoutParams(channelId, this.cvPair());
+
+    const res = await this.post<YTActionResponse>(
+      Constants.EP_MOD,
+      withContext({
+        params,
+      })
+    );
+
+    if (!res.success) {
+      throw new Error(`Failed to timeout user: ` + JSON.stringify(res));
+    }
+  }
+
+  /**
+   * Hide user on the channel
+   */
+  public async hide(targetChannelId: string): Promise<void> {
+    const params = hideParams(targetChannelId, this.cvPair());
+
+    const res = await this.post<YTActionResponse>(
+      Constants.EP_MOD,
+      withContext({
+        params,
+      })
+    );
+
+    if (!res.success) {
+      throw new Error(`Failed to hide user: ` + JSON.stringify(res));
+    }
+
+    // NOTE: res.actions[0] -> {"liveChatAddToToastAction":{"item":{"notificationActionRenderer":{"responseText":{"runs":[{"text":"This user's messages will be hidden"}]},"actionButton":{"buttonRenderer":{"style":"STYLE_BLUE_TEXT","size":"SIZE_DEFAULT","isDisabled":false,"text":{"runs":[{"text":"Undo"}]},"command":{...}}}}}}}
+  }
+
+  public async unhide(channelId: string): Promise<void> {
+    const params = hideParams(channelId, this.cvPair(), true);
+
+    const res = await this.post<YTActionResponse>(
+      Constants.EP_MOD,
+      withContext({
+        params,
+      })
+    );
+
+    if (!res.success) {
+      throw new Error(`Failed to unhide user: ` + JSON.stringify(res));
+    }
   }
 
   // TODO: narrow down return type
@@ -936,36 +1036,36 @@ export class Masterchat extends EventEmitter {
     return await this.sendAction(actionInfo);
   }
 
-  // TODO: narrow down return type
-  public async hide(contextMenuEndpointParams: string) {
-    const catalog = await this.getActionCatalog(contextMenuEndpointParams);
-    const actionInfo = catalog?.hide;
-    if (!actionInfo) return;
-    return await this.sendAction(actionInfo);
+  /**
+   * Manage User API
+   */
+
+  public async addModerator(channelId: string) {
+    const params = addModeratorParams(channelId, this.cvPair());
+    const res = await this.post<YTActionResponse>(
+      Constants.EP_MU,
+      withContext({
+        params,
+      })
+    );
+    if (!res.success) {
+      throw new Error(`Failed to perform action: ` + JSON.stringify(res));
+    }
+    return res; // TODO
   }
 
-  // TODO: narrow down return type
-  public async unhide(contextMenuEndpointParams: string) {
-    const catalog = await this.getActionCatalog(contextMenuEndpointParams);
-    const actionInfo = catalog?.unhide;
-    if (!actionInfo) return;
-    return await this.sendAction(actionInfo);
-  }
-
-  // TODO: narrow down return type
-  public async addModerator(contextMenuEndpointParams: string) {
-    const catalog = await this.getActionCatalog(contextMenuEndpointParams);
-    const actionInfo = catalog?.addModerator;
-    if (!actionInfo) return;
-    return await this.sendAction(actionInfo);
-  }
-
-  // TODO: narrow down return type
-  public async removeModerator(contextMenuEndpointParams: string) {
-    const catalog = await this.getActionCatalog(contextMenuEndpointParams);
-    const actionInfo = catalog?.removeModerator;
-    if (!actionInfo) return;
-    return await this.sendAction(actionInfo);
+  public async removeModerator(channelId: string) {
+    const params = addModeratorParams(channelId, this.cvPair(), true);
+    const res = await this.post<YTActionResponse>(
+      Constants.EP_MU,
+      withContext({
+        params,
+      })
+    );
+    if (!res.success) {
+      throw new Error(`Failed to perform action: ` + JSON.stringify(res));
+    }
+    return res; // TODO
   }
 
   /*
@@ -996,7 +1096,7 @@ export class Masterchat extends EventEmitter {
     });
 
     try {
-      const res = await this.post<any>(constants.EP_NXT, body);
+      const res = await this.post<any>(Constants.EP_NXT, body);
 
       const payload = res.data;
 
@@ -1044,16 +1144,16 @@ export class Masterchat extends EventEmitter {
     }: {
       autoGenerated: boolean;
     }) => {
-      const res = await this.post<GetTranscriptResponse>(constants.EP_GTS, {
+      const res = await this.post<GetTranscriptResponse>(Constants.EP_GTS, {
         context: {
           client: { clientName: "WEB", clientVersion: "2.20220502.01.00" },
         },
-        params: gts(this.videoId, language, autoGenerated),
+        params: getTranscriptParams(this.videoId, language, autoGenerated),
       });
 
       const rdr =
-        res.data.actions[0].updateEngagementPanelAction.content
-          .transcriptRenderer.content.transcriptSearchPanelRenderer;
+        res.actions[0].updateEngagementPanelAction.content.transcriptRenderer
+          .content.transcriptSearchPanelRenderer;
 
       const subtitles =
         rdr.footer?.transcriptFooterRenderer.languageMenu
