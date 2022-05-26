@@ -31,6 +31,7 @@ export type Action =
   | AddMembershipTickerAction
   | AddBannerAction
   | RemoveBannerAction
+  | AddRedirectBannerAction
   | AddViewerEngagementMessageAction
   | ShowPanelAction
   | ShowPollPanelAction
@@ -263,6 +264,14 @@ export interface AddBannerAction {
 export interface RemoveBannerAction {
   type: "removeBannerAction";
   targetActionId: string;
+}
+
+export interface AddRedirectBannerAction {
+  type: "addRedirectBannerAction";
+  actionId: string;
+  targetId: string;
+  authorName: string;
+  authorPhoto: string;
 }
 
 export interface ShowTooltipAction {

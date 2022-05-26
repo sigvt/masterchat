@@ -10,7 +10,9 @@
   - `mc.getTranscript()`
 - Playlist API
   - `mc.getPlaylist()`
-- New: `ModerationMessageAction` (type: `moderationMessageAction`)
+- New: `ModerationMessageAction` (type: `moderationMessageAction`) for moderation messages for moderators
+- New: `AddRedirectBannerAction` (type: `addRedirectBannerAction`) for raid event notifications
+- Add support for `Raid` event
 
 ### Improvements
 

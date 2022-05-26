@@ -371,6 +371,10 @@ export interface YTLiveChatModerationMessageRendererContainer {
   liveChatModerationMessageRenderer: YTLiveChatModerationMessageRenderer;
 }
 
+export interface YTLiveChatBannerRedirectRendererContainer {
+  liveChatBannerRedirectRenderer: YTLiveChatBannerRedirectRenderer;
+}
+
 // LiveChat Renderers
 
 export interface YTLiveChatTextMessageRenderer {
@@ -461,7 +465,9 @@ export interface YTLiveChatPlaceholderItemRenderer {
 export interface YTLiveChatBannerRenderer {
   actionId: string;
   targetId: string; // live-chat-banner
-  contents: YTLiveChatTextMessageRendererContainer;
+  contents:
+    | YTLiveChatTextMessageRendererContainer
+    | YTLiveChatBannerRedirectRendererContainer;
   header?: YTLiveChatBannerRendererHeader;
   viewerIsCreator: boolean;
 }
@@ -508,6 +514,28 @@ export interface YTLiveChatActionPanelRenderer {
   contents: YTLiveChatPollRendererContainer | any;
   id: string;
   targetId: string;
+}
+
+export interface YTLiveChatBannerRedirectRenderer {
+  /**
+   * "runs": [
+          {
+            "text": "Athena Nightingale【AkioAIR】",
+            "bold": true,
+            "textColor": 4294967295,
+            "fontFace": "FONT_FACE_ROBOTO_REGULAR"
+          },
+          {
+            "text": " and their viewers just joined. Say hello!",
+            "textColor": 4294967295,
+            "fontFace": "FONT_FACE_ROBOTO_REGULAR"
+          }
+        ]
+   */
+  bannerMessage: YTRunContainer<YTTextRun>;
+  authorPhoto: YTThumbnailList;
+  inlineActionButton: YTActionButtonRendererContainer;
+  contextMenuButton: YTContextMenuButtonRendererContainer;
 }
 
 export interface YTLiveChatPollChoice {
