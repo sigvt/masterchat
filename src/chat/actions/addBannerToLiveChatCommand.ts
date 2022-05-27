@@ -1,4 +1,7 @@
-import { AddBannerAction } from "../../interfaces/actions";
+import {
+  AddBannerAction,
+  AddRedirectBannerAction,
+} from "../../interfaces/actions";
 import { YTAddBannerToLiveChatCommand } from "../../interfaces/yt/chat";
 import { debugLog, stringify, tsToDate } from "../../utils";
 import { parseBadges } from "../badge";
@@ -10,10 +13,10 @@ export function parseAddBannerToLiveChatCommand(
   // add pinned item
   const bannerRdr = payload["bannerRenderer"]["liveChatBannerRenderer"];
 
-  if (bannerRdr.header.liveChatBannerHeaderRenderer.icon.iconType !== "KEEP") {
+  if (bannerRdr.header?.liveChatBannerHeaderRenderer.icon.iconType !== "KEEP") {
     debugLog(
-      "[action required] unknown icon type (addBannerToLiveChatCommand)",
-      JSON.stringify(bannerRdr.header.liveChatBannerHeaderRenderer.icon)
+      "[action required] Unknown icon type (addBannerToLiveChatCommand)",
+      JSON.stringify(bannerRdr.header)
     );
   }
 
@@ -22,48 +25,70 @@ export function parseAddBannerToLiveChatCommand(
   const targetId = bannerRdr.targetId;
   const viewerIsCreator = bannerRdr.viewerIsCreator;
 
-  // header
-  const header = bannerRdr.header.liveChatBannerHeaderRenderer;
-  const title = header.text.runs;
-
   // contents
-  const liveChatRdr = bannerRdr.contents.liveChatTextMessageRenderer;
-  const id = liveChatRdr.id;
-  const message = liveChatRdr.message.runs;
-  const timestampUsec = liveChatRdr.timestampUsec;
-  const timestamp = tsToDate(timestampUsec);
-  const authorName = stringify(liveChatRdr.authorName);
-  const authorPhoto = pickThumbUrl(liveChatRdr.authorPhoto);
-  const authorChannelId = liveChatRdr.authorExternalChannelId;
-  const { isVerified, isOwner, isModerator, membership } =
-    parseBadges(liveChatRdr);
+  const contents = bannerRdr.contents;
 
-  if (!authorName) {
-    debugLog(
-      "[action required] empty authorName at addBannerToLiveChatCommand",
-      JSON.stringify(liveChatRdr)
+  if ("liveChatTextMessageRenderer" in contents) {
+    const rdr = contents.liveChatTextMessageRenderer;
+    const id = rdr.id;
+    const message = rdr.message.runs;
+    const timestampUsec = rdr.timestampUsec;
+    const timestamp = tsToDate(timestampUsec);
+    const authorName = stringify(rdr.authorName);
+    const authorPhoto = pickThumbUrl(rdr.authorPhoto);
+    const authorChannelId = rdr.authorExternalChannelId;
+    const { isVerified, isOwner, isModerator, membership } = parseBadges(rdr);
+
+    // header
+    const header = bannerRdr.header!.liveChatBannerHeaderRenderer;
+    const title = header.text.runs;
+
+    if (!authorName) {
+      debugLog(
+        "[action required] Empty authorName found at addBannerToLiveChatCommand",
+        JSON.stringify(rdr)
+      );
+    }
+
+    const parsed: AddBannerAction = {
+      type: "addBannerAction",
+      actionId,
+      targetId,
+      id,
+      title,
+      message,
+      timestampUsec,
+      timestamp,
+      authorName,
+      authorPhoto,
+      authorChannelId,
+      isVerified,
+      isOwner,
+      isModerator,
+      membership,
+      viewerIsCreator,
+      contextMenuEndpointParams:
+        rdr.contextMenuEndpoint?.liveChatItemContextMenuEndpoint.params,
+    };
+    return parsed;
+  } else if ("liveChatBannerRedirectRenderer" in contents) {
+    // TODO:
+    const rdr = contents.liveChatBannerRedirectRenderer;
+    const authorName = rdr.bannerMessage.runs[0].text;
+    const authorPhoto = pickThumbUrl(rdr.authorPhoto);
+    const payload: AddRedirectBannerAction = {
+      type: "addRedirectBannerAction",
+      actionId,
+      targetId,
+      authorName,
+      authorPhoto,
+    };
+    return payload;
+  } else {
+    throw new Error(
+      `[action required] Unrecognized content type found in parseAddBannerToLiveChatCommand: ${JSON.stringify(
+        payload
+      )}`
     );
   }
-
-  const parsed: AddBannerAction = {
-    type: "addBannerAction",
-    actionId,
-    targetId,
-    id,
-    title,
-    message,
-    timestampUsec,
-    timestamp,
-    authorName,
-    authorPhoto,
-    authorChannelId,
-    isVerified,
-    isOwner,
-    isModerator,
-    membership,
-    viewerIsCreator,
-    contextMenuEndpointParams:
-      liveChatRdr.contextMenuEndpoint?.liveChatItemContextMenuEndpoint.params,
-  };
-  return parsed;
 }

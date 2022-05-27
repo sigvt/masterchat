@@ -18,6 +18,8 @@ console.log(`info: ${title} @ ${channelName} (${channelId})`);
 
 ### Iterate over live chats
 
+#### EventEmitter API
+
 ```js
 import { Masterchat, stringify } from "masterchat";
 
@@ -69,6 +71,46 @@ async function main() {
 main();
 ```
 
+#### AsyncIterator API
+
+```js
+import { Masterchat, MasterchatError, stringify } from "masterchat";
+
+async function main() {
+  const mc = await Masterchat.init("<videoId>");
+
+  const iter = mc
+    .iter()
+    .filter((action) => action.type === "addChatItemAction")
+    .map((chat) => stringify(chat.message));
+
+  try {
+    for await (const message of iter) {
+      console.log(msg);
+    }
+  } catch (err) {
+    // Handle errors
+    if (err instanceof MasterchatError) {
+      console.log(err.code);
+      // "disabled" => Live chat is disabled
+      // "membersOnly" => No permission (members-only)
+      // "private" => No permission (private video)
+      // "unavailable" => Deleted OR wrong video id
+      // "unarchived" => Live stream recording is not available
+      // "denied" => Access denied (429)
+      // "invalid" => Invalid request
+      return;
+    }
+
+    throw err;
+  }
+
+  console.log("Live stream has ended");
+}
+
+main();
+```
+
 ### Save replay chats in .jsonl
 
 ```js
@@ -78,19 +120,11 @@ import { appendFile, writeFile, readFile } from "fs/promises";
 async function main() {
   const mc = await Masterchat.init("<videoId>");
 
-  const lastContinuation = await readFile("./checkpoint").catch(
-    () => undefined
-  );
-
-  mc.on("chats", async (chats) => {
-    const jsonl = chats.map((chat) => JSON.stringify(chat)).join("\n") + "\n";
-    await appendFile("./chats.jsonl", jsonl);
-
-    // save checkpoint
-    await writeFile("./checkpoint", continuation.token);
-  });
-
-  await mc.listen({ continuation: lastContinuation });
+  await mc
+    .iter()
+    .filter((action) => action.type === "addChatItemAction") // only chat events
+    .map((chat) => JSON.stringify(chat) + "\n") // convert to JSONL
+    .map((jsonl) => appendFile("./chats.jsonl", jsonl)); // append to the file
 }
 
 main();
@@ -114,23 +148,23 @@ async function main() {
 
   const mc = await Masterchat.init("<videoId>", { credentials });
 
-  mc.on("chats", async (chats) => {
-    for (const chat of chats) {
-      const message = stringify(chat.message, {
-        // omit emojis
-        emojiHandler: (emoji) => "",
-      });
+  const iter = mc
+    .iter()
+    .filter((action) => action.type === "addChatItemAction");
 
-      if (isSpam(message) || /UGLY/.test(message)) {
-        // delete chat
-        // if flagged as spam by Spamreaper
-        // or contains "UGLY"
-        await mc.remove(action.id);
-      }
+  for await (const chat of iter) {
+    const message = stringify(chat.message, {
+      // omit emojis
+      emojiHandler: (emoji) => "",
+    });
+
+    if (isSpam(message) || /UGLY/.test(message)) {
+      // delete chat
+      // if flagged as spam by Spamreaper
+      // or contains "UGLY"
+      await mc.remove(action.id);
     }
-  });
-
-  mc.listen();
+  }
 }
 
 main();
@@ -139,11 +173,13 @@ main();
 ### Get video comments (≠ live chats)
 
 ```js
-import { getComments, getComment } from "masterchat";
+import { Masterchat } from "masterchat";
 
 async function main() {
+  const mc = new Masterchat("<videoId>", "");
+
   // Iterate over all comments
-  let res = getComments("<videoId>", { top: true });
+  let res = await mc.getComments({ top: true });
   while (true) {
     console.log(res.comments);
 
@@ -152,8 +188,26 @@ async function main() {
   }
 
   // Get comment by id
-  const comment = await getComment("<videoId>", "<commentId>");
+  const comment = await mc.getComment("<commentId>");
   console.log(comment);
+}
+
+main();
+```
+
+### Get transcript
+
+```js
+import { Masterchat, stringify } from "masterchat";
+
+async function main() {
+  const mc = new Masterchat("<videoId>", "");
+
+  const transcript = await mc.getTranscript();
+
+  for (const item of transcript) {
+    console.log(item.startMs, stringify(item.snippet));
+  }
 }
 
 main();

@@ -1,5 +1,30 @@
 # Changelog
 
+## Unreleased
+
+### New
+
+- Transcript API
+  - `mc.getTranscript()`
+- Playlist API
+  - `mc.getPlaylist()`
+- New: `ModerationMessageAction` (type: `moderationMessageAction`) for moderation messages for moderators
+- New: `AddRedirectBannerAction` (type: `addRedirectBannerAction`) for raid event notifications
+
+### Improvements
+
+- Move video comments API to Masterchat class
+  - `mc.getComments()`
+- Use direct method for `hide`, `unhide`, `pin`, `unpin`, `addModerator`, `removeModerator` and `timeout`
+- Add `executor` to `MarkChatItemAsDeletedAction`
+
+### Fixes
+
+- Don't overwrite `isLive` unless it is undefined
+- Reintroduce timeout drift adjustment
+- Treat `ERR_REQUEST_ABORTED` as aborted
+- Detect being timeouted by moderator when sending a chat
+
 ## v0.15.0
 
 ### Improvements

@@ -31,6 +31,7 @@ export type Action =
   | AddMembershipTickerAction
   | AddBannerAction
   | RemoveBannerAction
+  | AddRedirectBannerAction
   | AddViewerEngagementMessageAction
   | ShowPanelAction
   | ShowPollPanelAction
@@ -40,7 +41,8 @@ export type Action =
   | ShowTooltipAction
   | ModeChangeAction
   | MembershipGiftPurchaseAction
-  | MembershipGiftRedemptionAction;
+  | MembershipGiftRedemptionAction
+  | ModerationMessageAction;
 
 export interface AddChatItemAction {
   type: "addChatItemAction";
@@ -181,6 +183,7 @@ export interface MarkChatItemAsDeletedAction {
   type: "markChatItemAsDeletedAction";
   retracted: boolean;
   targetId: string;
+  executor?: string;
   timestamp: Date;
 }
 
@@ -261,6 +264,14 @@ export interface AddBannerAction {
 export interface RemoveBannerAction {
   type: "removeBannerAction";
   targetActionId: string;
+}
+
+export interface AddRedirectBannerAction {
+  type: "addRedirectBannerAction";
+  actionId: string;
+  targetId: string;
+  authorName: string;
+  authorPhoto: string;
 }
 
 export interface ShowTooltipAction {
@@ -372,6 +383,14 @@ export interface MembershipGiftRedemptionAction {
   authorName: string;
   authorChannelId: string;
   authorPhoto: string;
+}
+
+export interface ModerationMessageAction {
+  type: "moderationMessageAction";
+  id: string;
+  timestamp: Date;
+  timestampUsec: string;
+  message: YTRun[];
 }
 
 export interface UnknownAction {

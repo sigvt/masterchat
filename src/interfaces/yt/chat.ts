@@ -106,6 +106,17 @@ export interface YTActionResponse {
   responseContext: YTResponseContext;
   success: boolean;
   actions: YTAction[];
+  timeoutDurationUsec?: string;
+  errorMessage?: YTLiveChatTextActionsErrorMessageRenderer;
+}
+
+export interface YTLiveChatTextActionsErrorMessageRenderer {
+  errorText: YTRunContainer;
+  editMessageText: YTRunContainer;
+  clickToDismissText: YTRunContainer;
+  originalRichMessage: {
+    textSegments: YTTextRun[];
+  };
 }
 
 // Interfaces
@@ -254,7 +265,8 @@ export type YTAddChatItemActionItem =
   | YTLiveChatViewerEngagementMessageRendererContainer
   | YTLiveChatModeChangeMessageRendererContainer
   | YTLiveChatSponsorshipsGiftPurchaseAnnouncementRendererContainer
-  | YTLiveChatSponsorshipsGiftRedemptionAnnouncementRendererContainer;
+  | YTLiveChatSponsorshipsGiftRedemptionAnnouncementRendererContainer
+  | YTLiveChatModerationMessageRendererContainer;
 
 export interface YTAddLiveChatTickerItemAction {
   item: YTAddLiveChatTickerItem;
@@ -355,6 +367,14 @@ export interface YTLiveChatSponsorshipsGiftRedemptionAnnouncementRendererContain
   liveChatSponsorshipsGiftRedemptionAnnouncementRenderer: YTLiveChatSponsorshipsGiftRedemptionAnnouncementRenderer;
 }
 
+export interface YTLiveChatModerationMessageRendererContainer {
+  liveChatModerationMessageRenderer: YTLiveChatModerationMessageRenderer;
+}
+
+export interface YTLiveChatBannerRedirectRendererContainer {
+  liveChatBannerRedirectRenderer: YTLiveChatBannerRedirectRenderer;
+}
+
 // LiveChat Renderers
 
 export interface YTLiveChatTextMessageRenderer {
@@ -445,8 +465,10 @@ export interface YTLiveChatPlaceholderItemRenderer {
 export interface YTLiveChatBannerRenderer {
   actionId: string;
   targetId: string; // live-chat-banner
-  contents: YTLiveChatTextMessageRendererContainer;
-  header: YTLiveChatBannerRendererHeader;
+  contents:
+    | YTLiveChatTextMessageRendererContainer
+    | YTLiveChatBannerRedirectRendererContainer;
+  header?: YTLiveChatBannerRendererHeader;
   viewerIsCreator: boolean;
 }
 
@@ -492,6 +514,28 @@ export interface YTLiveChatActionPanelRenderer {
   contents: YTLiveChatPollRendererContainer | any;
   id: string;
   targetId: string;
+}
+
+export interface YTLiveChatBannerRedirectRenderer {
+  /**
+   * "runs": [
+          {
+            "text": "Athena Nightingale【AkioAIR】",
+            "bold": true,
+            "textColor": 4294967295,
+            "fontFace": "FONT_FACE_ROBOTO_REGULAR"
+          },
+          {
+            "text": " and their viewers just joined. Say hello!",
+            "textColor": 4294967295,
+            "fontFace": "FONT_FACE_ROBOTO_REGULAR"
+          }
+        ]
+   */
+  bannerMessage: YTRunContainer<YTTextRun>;
+  authorPhoto: YTThumbnailList;
+  inlineActionButton: YTActionButtonRendererContainer;
+  contextMenuButton: YTContextMenuButtonRendererContainer;
 }
 
 export interface YTLiveChatPollChoice {
@@ -590,6 +634,24 @@ export interface YTLiveChatSponsorshipsGiftRedemptionAnnouncementRenderer {
   contextMenuEndpoint: YTLiveChatItemContextMenuEndpointContainer;
   contextMenuAccessibility: YTAccessibilityData;
   trackingParams: string;
+}
+
+// Moderation message
+export interface YTLiveChatModerationMessageRenderer {
+  message: {
+    runs: [
+      { text: string; bold: true; italics: true },
+      {
+        // TODO: find other variants
+        text: " was hidden by " | " was unhidden by ";
+        italics: true;
+      },
+      { text: string; bold: true; italics: true },
+      { text: "."; italics: true }
+    ];
+  };
+  id: string;
+  timestampUsec: string;
 }
 
 // Ticker Renderers

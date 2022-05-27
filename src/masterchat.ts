@@ -3,7 +3,9 @@ import { EventEmitter } from "events";
 import { buildMeta } from "./api";
 import { buildAuthHeaders } from "./auth";
 import { parseAction } from "./chat";
-import * as constants from "./constants";
+import { parseMarkChatItemAsDeletedAction } from "./chat/actions/markChatItemAsDeletedAction";
+import { pickThumbUrl } from "./chat/utils";
+import * as Constants from "./constants";
 import { parseMetadataFromEmbed, parseMetadataFromWatch } from "./context";
 import {
   AbortError,
@@ -16,9 +18,20 @@ import {
   NoPermissionError,
   UnavailableError,
 } from "./errors";
-import { ChatResponse, Credentials } from "./interfaces";
-import { Action, AddChatItemAction } from "./interfaces/actions";
+import {
+  ChatResponse,
+  Credentials,
+  RenderingPriority,
+  YTCommentThreadRenderer,
+  YTContinuationItem,
+} from "./interfaces";
+import {
+  Action,
+  AddChatItemAction,
+  MarkChatItemAsDeletedAction,
+} from "./interfaces/actions";
 import { ActionCatalog, ActionInfo } from "./interfaces/contextActions";
+import { TranscriptSegment } from "./interfaces/transcript";
 import {
   YTAction,
   YTActionResponse,
@@ -27,7 +40,22 @@ import {
   YTGetItemContextMenuResponse,
   YTLiveChatTextMessageRenderer,
 } from "./interfaces/yt/chat";
-import { b64tou8, lrc, rmp, rtc, smp } from "./protobuf";
+import { GetTranscriptResponse } from "./interfaces/yt/transcript";
+import {
+  addModeratorParams,
+  b64tou8,
+  csc,
+  CscOptions,
+  getTranscriptParams,
+  hideParams,
+  liveReloadContinuation,
+  pinParams,
+  removeMessageParams,
+  replayTimedContinuation,
+  sendMessageParams,
+  timeoutParams,
+  unpinParams,
+} from "./protobuf";
 import {
   debugLog,
   delay,
@@ -35,6 +63,7 @@ import {
   stringify,
   toVideoId,
   unwrapReplayActions,
+  usecToSeconds,
   withContext,
 } from "./utils";
 
@@ -108,21 +137,255 @@ export interface MasterchatOptions {
 }
 
 export class Masterchat extends EventEmitter {
-  public isLive?: boolean;
   public videoId!: string;
   public channelId!: string;
+
+  public isLive?: boolean;
   public channelName?: string;
   public title?: string;
 
   private axiosInstance: AxiosInstance;
-  private credentials?: Credentials;
   private listener: ChatListener | null = null;
   private listenerAbortion: AbortController = new AbortController();
+
+  private credentials?: Credentials;
+
+  /*
+   * Private API
+   */
+
+  private async postWithRetry<T>(
+    input: string,
+    body: any,
+    options?: RetryOptions
+  ): Promise<T> {
+    // this.log("postWithRetry", input);
+    const errors = [];
+
+    let remaining = options?.retry ?? 0;
+    const retryInterval = options?.retryInterval ?? 1000;
+
+    while (true) {
+      try {
+        return await this.post<T>(input, body);
+      } catch (err) {
+        if (err instanceof Error) {
+          if (err.message === "canceled") throw new AbortError();
+
+          errors.push(err);
+
+          if (remaining > 0) {
+            await delay(retryInterval);
+            remaining -= 1;
+            debugLog(
+              `Retrying(postJson) remaining=${remaining} after=${retryInterval}`
+            );
+            continue;
+          }
+
+          (err as any).errors = errors;
+        }
+        throw err;
+      }
+    }
+  }
+
+  private async post<T>(
+    input: string,
+    body: any,
+    config: AxiosRequestConfig = {}
+  ): Promise<T> {
+    if (!input.startsWith("http")) {
+      input = Constants.DO + input;
+    }
+
+    const res = await this.axiosInstance.request<T>({
+      ...config,
+      url: input,
+      signal: this.listenerAbortion.signal,
+      method: "POST",
+      headers: {
+        ...config.headers,
+        "Content-Type": "application/json",
+        ...(this.credentials && buildAuthHeaders(this.credentials)),
+        ...Constants.DH,
+      },
+      data: body,
+    });
+
+    return res.data;
+  }
+
+  private async get<T>(
+    input: string,
+    config: AxiosRequestConfig = {}
+  ): Promise<T> {
+    if (!input.startsWith("http")) {
+      input = Constants.DO + input;
+    }
+
+    const res = await this.axiosInstance.request<T>({
+      ...config,
+      url: input,
+      signal: this.listenerAbortion.signal,
+      headers: {
+        ...config.headers,
+        ...(this.credentials && buildAuthHeaders(this.credentials)),
+        ...Constants.DH,
+      },
+    });
+
+    return res.data;
+  }
+
+  private log(label: string, ...obj: any) {
+    debugLog(`${label}(${this.videoId}):`, ...obj);
+  }
+
+  private cvPair() {
+    return {
+      channelId: this.channelId,
+      videoId: this.videoId,
+    };
+  }
+
+  /**
+   * NOTE: urlParams: pbj=1|0
+   */
+  private async getActionCatalog(
+    contextMenuEndpointParams: string
+  ): Promise<ActionCatalog | undefined> {
+    const query = new URLSearchParams({
+      params: contextMenuEndpointParams,
+    });
+    const endpoint = Constants.EP_GICM + "&" + query.toString();
+    const response = await this.postWithRetry<YTGetItemContextMenuResponse>(
+      endpoint,
+      withContext(),
+      {
+        retry: 2,
+      }
+    );
+
+    if (response.error) {
+      // TODO: handle this
+      // {
+      //   "error": {
+      //     "code": 400,
+      //     "message": "Precondition check failed.",
+      //     "errors": [
+      //       {
+      //         "message": "Precondition check failed.",
+      //         "domain": "global",
+      //         "reason": "failedPrecondition"
+      //       }
+      //     ],
+      //     "status": "FAILED_PRECONDITION"
+      //   }
+      // }
+      return undefined;
+    }
+
+    let items: ActionCatalog = {};
+    for (const item of response.liveChatItemContextMenuSupportedRenderers!
+      .menuRenderer.items) {
+      const rdr =
+        item.menuServiceItemRenderer ?? item.menuNavigationItemRenderer!;
+      const text = rdr.text.runs[0].text;
+
+      switch (text) {
+        case "Report": {
+          const endpoint = item.menuServiceItemRenderer!.serviceEndpoint;
+          items.report = buildMeta(endpoint);
+          break;
+        }
+        case "Block": {
+          const endpoint =
+            item.menuNavigationItemRenderer!.navigationEndpoint
+              .confirmDialogEndpoint!.content.confirmDialogRenderer
+              .confirmButton.buttonRenderer.serviceEndpoint;
+          items.block = buildMeta(endpoint);
+          break;
+        }
+        case "Unblock": {
+          const endpoint = item.menuServiceItemRenderer!.serviceEndpoint;
+          items.unblock = buildMeta(endpoint);
+          break;
+        }
+        case "Pin message": {
+          const endpoint = item.menuServiceItemRenderer!.serviceEndpoint;
+          items.pin = buildMeta(endpoint);
+          break;
+        }
+        case "Unpin message": {
+          const endpoint = item.menuServiceItemRenderer!.serviceEndpoint;
+          items.unpin = buildMeta(endpoint);
+          break;
+        }
+        case "Remove": {
+          const endpoint = item.menuServiceItemRenderer!.serviceEndpoint;
+          items.remove = buildMeta(endpoint);
+          break;
+        }
+        case "Put user in timeout": {
+          const endpoint = item.menuServiceItemRenderer!.serviceEndpoint;
+          items.timeout = buildMeta(endpoint);
+          break;
+        }
+        case "Hide user on this channel": {
+          const endpoint = item.menuServiceItemRenderer!.serviceEndpoint;
+          items.hide = buildMeta(endpoint);
+          break;
+        }
+        case "Unhide user on this channel": {
+          const endpoint = item.menuServiceItemRenderer!.serviceEndpoint;
+          items.unhide = buildMeta(endpoint);
+          break;
+        }
+        case "Add moderator": {
+          const endpoint = item.menuServiceItemRenderer!.serviceEndpoint;
+          items.addModerator = buildMeta(endpoint);
+          break;
+        }
+        case "Remove moderator": {
+          const endpoint = item.menuServiceItemRenderer!.serviceEndpoint;
+          items.removeModerator = buildMeta(endpoint);
+          break;
+        }
+      }
+    }
+    return items;
+  }
+
+  private async sendAction(actionInfo: ActionInfo): Promise<YTAction[]> {
+    const url = actionInfo.url;
+    let json: YTActionResponse;
+    if (actionInfo.isPost) {
+      json = await this.post<YTActionResponse>(url, {
+        body: withContext({
+          params: actionInfo.params,
+        }),
+      });
+    } else {
+      json = await this.get(url);
+    }
+    if (!json.success) {
+      throw new Error(`Failed to perform action: ` + JSON.stringify(json));
+    }
+    return json.actions;
+  }
+
+  /*
+   * Public API
+   */
 
   /**
    * Useful when you don't know channelId or isLive status
    */
-  static async init(videoIdOrUrl: string, options: MasterchatOptions = {}) {
+  public static async init(
+    videoIdOrUrl: string,
+    options: MasterchatOptions = {}
+  ) {
     const videoId = toVideoId(videoIdOrUrl);
     if (!videoId) {
       throw new InvalidArgumentError(
@@ -130,9 +393,7 @@ export class Masterchat extends EventEmitter {
       );
     }
     // set channelId "" as populateMetadata will fill out it anyways
-    const mc = new Masterchat(videoId, "", {
-      ...options,
-    });
+    const mc = new Masterchat(videoId, "", options);
     await mc.populateMetadata();
     return mc;
   }
@@ -160,11 +421,42 @@ export class Masterchat extends EventEmitter {
     this.setCredentials(credentials);
   }
 
-  get stopped() {
-    return this.listener === null;
+  /**
+   * Context API
+   */
+  public async populateMetadata(): Promise<void> {
+    const metadata = await this.fetchMetadataFromWatch(this.videoId);
+
+    this.title = metadata.title;
+    this.channelId = metadata.channelId;
+    this.channelName = metadata.channelName;
+    this.isLive ??= metadata.isLive;
   }
 
-  get metadata() {
+  public async fetchMetadataFromWatch(id: string) {
+    try {
+      const html = await this.get<string>("/watch?v=" + this.videoId);
+      return parseMetadataFromWatch(html);
+    } catch (err) {
+      // Check ban status
+      if ((err as AxiosError).code === "429") {
+        throw new AccessDeniedError("Rate limit exceeded: " + this.videoId);
+      }
+      throw err;
+    }
+  }
+
+  public async fetchMetadataFromEmbed(id: string) {
+    try {
+      const html = await this.get<string>(`/embed/${id}`);
+      return parseMetadataFromEmbed(html);
+    } catch (err) {
+      if ((err as AxiosError).code === "429")
+        throw new AccessDeniedError("Rate limit exceeded: " + id);
+    }
+  }
+
+  public get metadata() {
     return {
       videoId: this.videoId,
       channelId: this.channelId,
@@ -177,7 +469,7 @@ export class Masterchat extends EventEmitter {
   /**
    * Set credentials. This will take effect on the subsequent requests.
    */
-  setCredentials(credentials?: Credentials | string): void {
+  public setCredentials(credentials?: Credentials | string): void {
     if (typeof credentials === "string") {
       credentials = JSON.parse(
         new TextDecoder().decode(b64tou8(credentials))
@@ -188,7 +480,8 @@ export class Masterchat extends EventEmitter {
   }
 
   /**
-   * Chat API
+   * (EventEmitter API)
+   * start listening live stream
    */
   public listen(iterateOptions?: IterateChatOptions) {
     if (this.listener) return this.listener;
@@ -269,6 +562,10 @@ export class Masterchat extends EventEmitter {
     return this.listener;
   }
 
+  /**
+   * (EventEmitter API)
+   * stop listening live stream
+   */
   public stop(): void {
     if (!this.listener) return;
     this.listenerAbortion.abort();
@@ -276,9 +573,18 @@ export class Masterchat extends EventEmitter {
   }
 
   /**
-   * Iterate chat until live stream ends
+   * (EventEmitter API)
+   * returns listener status
    */
-  async *iterate({
+  public get stopped() {
+    return this.listener === null;
+  }
+
+  /**
+   * (AsyncGenerator API)
+   * Iterate until live stream ends
+   */
+  public async *iterate({
     topChat = false,
     ignoreFirstResponse = false,
     continuation,
@@ -296,6 +602,7 @@ export class Masterchat extends EventEmitter {
     // continuously fetch chat fragments
     while (true) {
       const res = await this.fetch(token);
+      const startMs = Date.now();
 
       // handle chats
       if (!(ignoreFirstResponse && !treatedFirstResponse)) {
@@ -315,15 +622,21 @@ export class Masterchat extends EventEmitter {
       token = continuation.token;
 
       if (this.isLive ?? true) {
-        const timeoutMs = continuation.timeoutMs;
-        await delay(timeoutMs, signal);
+        const driftMs = Date.now() - startMs;
+        const timeoutMs = continuation.timeoutMs - driftMs;
+        if (timeoutMs > 500) {
+          await delay(timeoutMs, signal);
+        }
       }
     }
   }
 
-  async fetch(options?: FetchChatOptions): Promise<ChatResponse>;
-  async fetch(token: string, options?: FetchChatOptions): Promise<ChatResponse>;
-  async fetch(
+  public async fetch(options?: FetchChatOptions): Promise<ChatResponse>;
+  public async fetch(
+    token: string,
+    options?: FetchChatOptions
+  ): Promise<ChatResponse>;
+  public async fetch(
     tokenOrOptions?: string | FetchChatOptions,
     maybeOptions?: FetchChatOptions
   ): Promise<ChatResponse> {
@@ -341,14 +654,14 @@ export class Masterchat extends EventEmitter {
     let payload: YTChatResponse;
 
     function applyNewLiveStatus(isLive: boolean) {
-      requestUrl = isLive ? constants.EP_GLC : constants.EP_GLCR;
+      requestUrl = isLive ? Constants.EP_GLC : Constants.EP_GLCR;
 
       const continuation =
         typeof tokenOrOptions === "string"
           ? tokenOrOptions
           : isLive
-          ? lrc(target, { top: topChat })
-          : rtc(target, { top: topChat });
+          ? liveReloadContinuation(target, { top: topChat })
+          : replayTimedContinuation(target, { top: topChat });
 
       requestBody = withContext({
         continuation,
@@ -359,7 +672,7 @@ export class Masterchat extends EventEmitter {
 
     loop: while (true) {
       try {
-        payload = (await this.post(requestUrl, requestBody)).data;
+        payload = await this.post<YTChatResponse>(requestUrl, requestBody);
       } catch (err) {
         // handle user cancallation
         if ((err as any)?.message === "canceled") {
@@ -369,10 +682,19 @@ export class Masterchat extends EventEmitter {
 
         // handle server errors
         if ((err as any)?.isAxiosError) {
-          const { code: axiosErrorCode, response } = err as AxiosError;
+          const { code: axiosErrorCode, response } = err as AxiosError<{
+            error: {
+              code: number;
+              status: string;
+              message: string;
+            };
+          }>;
 
           // handle early timeout
-          if (axiosErrorCode === "ECONNABORTED") {
+          if (
+            axiosErrorCode === "ECONNABORTED" ||
+            axiosErrorCode === "ERR_REQUEST_ABORTED"
+          ) {
             if (retryRemaining > 0) {
               retryRemaining -= 1;
               this.log(
@@ -532,44 +854,17 @@ export class Masterchat extends EventEmitter {
   }
 
   /**
-   * Context API
+   * NOTE: invalid params -> "actions":[{"liveChatAddToToastAction":{"item":{"notificationTextRenderer":{"successResponseText":{"runs":[{"text":"Error, try again."}]},"trackingParams":"CAAQyscDIhMI56_wmNj89wIV0HVgCh2Qow9y"}}}}]
    */
-  async populateMetadata(): Promise<void> {
-    const metadata = await this.fetchMetadataFromWatch(this.videoId);
-
-    this.title = metadata.title;
-    this.channelId = metadata.channelId;
-    this.channelName = metadata.channelName;
-    this.isLive = metadata.isLive;
-  }
-
-  async fetchMetadataFromWatch(id: string) {
-    const res = await this.get("/watch?v=" + this.videoId);
-
-    // Check ban status
-    if (res.status === 429) {
-      throw new AccessDeniedError("Rate limit exceeded: " + this.videoId);
-    }
-
-    const html = res.data;
-    return parseMetadataFromWatch(html);
-  }
-
-  async fetchMetadataFromEmbed(id: string) {
-    const res = await this.get(`/embed/${id}`);
-
-    if (res.status === 429)
-      throw new AccessDeniedError("Rate limit exceeded: " + id);
-
-    const html = res.data;
-    return parseMetadataFromEmbed(html);
-  }
 
   /**
-   * Message
+   * Send Message API
    */
-  async sendMessage(message: string): Promise<YTLiveChatTextMessageRenderer> {
-    const params = smp(this.cvPair());
+
+  public async sendMessage(
+    message: string
+  ): Promise<YTLiveChatTextMessageRenderer> {
+    const params = sendMessageParams(this.cvPair());
 
     const body = withContext({
       richMessage: {
@@ -583,9 +878,17 @@ export class Masterchat extends EventEmitter {
     });
 
     const res = await this.postWithRetry<YTActionResponse>(
-      constants.EP_SM,
+      Constants.EP_SM,
       body
     );
+
+    if (res.timeoutDurationUsec) {
+      // You are timeouted
+      const timeoutSec = usecToSeconds(res.timeoutDurationUsec);
+      throw new Error(
+        `You have been placed in timeout for ${timeoutSec} seconds`
+      );
+    }
 
     const item = res.actions?.[0].addChatItemAction?.item;
     if (!(item && "liveChatTextMessageRenderer" in item)) {
@@ -595,55 +898,125 @@ export class Masterchat extends EventEmitter {
   }
 
   /**
-   * Context Menu Actions API
+   * Live Chat Action API
    */
-  // async report(contextMenuEndpointParams: string) {
-  //   const catalog = await this.getActionCatalog(contextMenuEndpointParams);
-  //   const actionInfo = catalog?.report;
-  //   if (!actionInfo) return;
-  //   return await this.sendAction(actionInfo);
-  // }
-  // TODO: narrow down return type
-  async pin(contextMenuEndpointParams: string) {
-    const catalog = await this.getActionCatalog(contextMenuEndpointParams);
-    const actionInfo = catalog?.pin;
-    if (!actionInfo) return;
-    return await this.sendAction(actionInfo);
-  }
 
-  // TODO: narrow down return type
-  async unpin(contextMenuEndpointParams: string) {
-    const catalog = await this.getActionCatalog(contextMenuEndpointParams);
-    const actionInfo = catalog?.unpin;
-    if (!actionInfo) return;
-    return await this.sendAction(actionInfo);
-  }
-
-  async remove(chatId: string) {
-    const params = rmp(chatId, this.cvPair());
-    const res = await this.postWithRetry<YTActionResponse>(
-      constants.EP_M,
+  public async pin(chatId: string) {
+    const params = pinParams(chatId, this.cvPair());
+    const res = await this.post<YTActionResponse>(
+      Constants.EP_LCA,
       withContext({
         params,
       })
     );
     if (!res.success) {
-      // {"error":{"code":501,"message":"Operation is not implemented, or supported, or enabled.","errors":[{"message":"Operation is not implemented, or supported, or enabled.","domain":"global","reason":"notImplemented"}],"status":"UNIMPLEMENTED"}}
-      throw new Error(`Failed to perform action: ` + JSON.stringify(res));
+      throw new Error(`Failed to pin chat: ` + JSON.stringify(res));
     }
-    return res.actions[0].markChatItemAsDeletedAction!;
+    return res; // TODO
+  }
+
+  public async unpin(actionId: string) {
+    const params = unpinParams(actionId, this.cvPair());
+
+    const res = await this.post<YTActionResponse>(
+      Constants.EP_LCA,
+      withContext({
+        params,
+      })
+    );
+
+    if (!res.success) {
+      throw new Error(`Failed to unpin chat: ` + JSON.stringify(res));
+    }
+
+    return res; // TODO
+  }
+
+  /**
+   * Moderate API
+   */
+
+  public async remove(chatId: string): Promise<MarkChatItemAsDeletedAction> {
+    const params = removeMessageParams(chatId, this.cvPair());
+
+    const res = await this.post<YTActionResponse>(
+      Constants.EP_MOD,
+      withContext({
+        params,
+      })
+    );
+
+    if (!res.success) {
+      // {"error":{"code":501,"message":"Operation is not implemented, or supported, or enabled.","errors":[{"message":"Operation is not implemented, or supported, or enabled.","domain":"global","reason":"notImplemented"}],"status":"UNIMPLEMENTED"}}
+      throw new Error(`Failed to remove chat: ` + JSON.stringify(res));
+    }
+
+    const payload = res.actions[0].markChatItemAsDeletedAction;
+
+    if (!payload) {
+      throw new Error(
+        `Invalid response when removing chat: ${JSON.stringify(res)}`
+      );
+    }
+
+    return parseMarkChatItemAsDeletedAction(payload);
+  }
+
+  /**
+   * Put user in timeout for 300 seconds
+   */
+  public async timeout(channelId: string): Promise<void> {
+    const params = timeoutParams(channelId, this.cvPair());
+
+    const res = await this.post<YTActionResponse>(
+      Constants.EP_MOD,
+      withContext({
+        params,
+      })
+    );
+
+    if (!res.success) {
+      throw new Error(`Failed to timeout user: ` + JSON.stringify(res));
+    }
+  }
+
+  /**
+   * Hide user on the channel
+   */
+  public async hide(targetChannelId: string): Promise<void> {
+    const params = hideParams(targetChannelId, this.cvPair());
+
+    const res = await this.post<YTActionResponse>(
+      Constants.EP_MOD,
+      withContext({
+        params,
+      })
+    );
+
+    if (!res.success) {
+      throw new Error(`Failed to hide user: ` + JSON.stringify(res));
+    }
+
+    // NOTE: res.actions[0] -> {"liveChatAddToToastAction":{"item":{"notificationActionRenderer":{"responseText":{"runs":[{"text":"This user's messages will be hidden"}]},"actionButton":{"buttonRenderer":{"style":"STYLE_BLUE_TEXT","size":"SIZE_DEFAULT","isDisabled":false,"text":{"runs":[{"text":"Undo"}]},"command":{...}}}}}}}
+  }
+
+  public async unhide(channelId: string): Promise<void> {
+    const params = hideParams(channelId, this.cvPair(), true);
+
+    const res = await this.post<YTActionResponse>(
+      Constants.EP_MOD,
+      withContext({
+        params,
+      })
+    );
+
+    if (!res.success) {
+      throw new Error(`Failed to unhide user: ` + JSON.stringify(res));
+    }
   }
 
   // TODO: narrow down return type
-  async timeout(contextMenuEndpointParams: string) {
-    const catalog = await this.getActionCatalog(contextMenuEndpointParams);
-    const actionInfo = catalog?.timeout;
-    if (!actionInfo) return;
-    return await this.sendAction(actionInfo);
-  }
-
-  // TODO: narrow down return type
-  async block(contextMenuEndpointParams: string) {
+  public async block(contextMenuEndpointParams: string) {
     const catalog = await this.getActionCatalog(contextMenuEndpointParams);
     const actionInfo = catalog?.block;
     if (!actionInfo) return;
@@ -651,261 +1024,205 @@ export class Masterchat extends EventEmitter {
   }
 
   // TODO: narrow down return type
-  async unblock(contextMenuEndpointParams: string) {
+  public async unblock(contextMenuEndpointParams: string) {
     const catalog = await this.getActionCatalog(contextMenuEndpointParams);
     const actionInfo = catalog?.unblock;
     if (!actionInfo) return;
     return await this.sendAction(actionInfo);
   }
 
-  // TODO: narrow down return type
-  async hide(contextMenuEndpointParams: string) {
-    const catalog = await this.getActionCatalog(contextMenuEndpointParams);
-    const actionInfo = catalog?.hide;
-    if (!actionInfo) return;
-    return await this.sendAction(actionInfo);
-  }
+  /**
+   * Manage User API
+   */
 
-  // TODO: narrow down return type
-  async unhide(contextMenuEndpointParams: string) {
-    const catalog = await this.getActionCatalog(contextMenuEndpointParams);
-    const actionInfo = catalog?.unhide;
-    if (!actionInfo) return;
-    return await this.sendAction(actionInfo);
-  }
-
-  // TODO: narrow down return type
-  async addModerator(contextMenuEndpointParams: string) {
-    const catalog = await this.getActionCatalog(contextMenuEndpointParams);
-    const actionInfo = catalog?.addModerator;
-    if (!actionInfo) return;
-    return await this.sendAction(actionInfo);
-  }
-
-  // TODO: narrow down return type
-  async removeModerator(contextMenuEndpointParams: string) {
-    const catalog = await this.getActionCatalog(contextMenuEndpointParams);
-    const actionInfo = catalog?.removeModerator;
-    if (!actionInfo) return;
-    return await this.sendAction(actionInfo);
-  }
-
-  private async sendAction<T = YTAction[]>(actionInfo: ActionInfo): Promise<T> {
-    const url = actionInfo.url;
-    let res;
-    if (actionInfo.isPost) {
-      res = await this.post(url, {
-        body: withContext({
-          params: actionInfo.params,
-        }),
-      });
-    } else {
-      res = await this.get(url);
+  public async addModerator(channelId: string) {
+    const params = addModeratorParams(channelId, this.cvPair());
+    const res = await this.post<YTActionResponse>(
+      Constants.EP_MU,
+      withContext({
+        params,
+      })
+    );
+    if (!res.success) {
+      throw new Error(`Failed to perform action: ` + JSON.stringify(res));
     }
-    const json = res.data;
-    if (!json.success) {
-      throw new Error(`Failed to perform action: ` + JSON.stringify(json));
-    }
-    return json.actions;
+    return res; // TODO
   }
+
+  public async removeModerator(channelId: string) {
+    const params = addModeratorParams(channelId, this.cvPair(), true);
+    const res = await this.post<YTActionResponse>(
+      Constants.EP_MU,
+      withContext({
+        params,
+      })
+    );
+    if (!res.success) {
+      throw new Error(`Failed to perform action: ` + JSON.stringify(res));
+    }
+    return res; // TODO
+  }
+
+  /*
+   * Video Comments API
+   */
+
+  public async getComment(commentId: string) {
+    const comments = await this.getComments({
+      highlightedCommentId: commentId,
+    });
+    const first = comments.comments?.[0];
+    if (first.renderingPriority !== RenderingPriority.LinkedComment)
+      return undefined;
+
+    return first;
+  }
+
+  public async getComments(continuation: string | CscOptions = {}) {
+    if (typeof continuation !== "string") {
+      continuation = csc(this.videoId, continuation);
+    }
+
+    const body = withContext({
+      continuation,
+    });
+
+    const payload = await this.post<any>(Constants.EP_NXT, body);
+
+    const endpoints = payload.onResponseReceivedEndpoints;
+    const isAppend = endpoints.length === 1;
+
+    const items: YTContinuationItem[] = isAppend
+      ? endpoints[0].appendContinuationItemsAction.continuationItems
+      : endpoints[1].reloadContinuationItemsCommand.continuationItems;
+
+    const nextContinuation =
+      items[items.length - 1].continuationItemRenderer?.continuationEndpoint
+        .continuationCommand.token;
+
+    const comments = items
+      .map((item) => item.commentThreadRenderer)
+      .filter((rdr): rdr is YTCommentThreadRenderer => rdr !== undefined);
+
+    return {
+      comments,
+      continuation: nextContinuation,
+      next: nextContinuation
+        ? () => this.getComments(nextContinuation)
+        : undefined,
+    };
+  }
+
+  /*
+   * Transcript API
+   */
 
   /**
-   * NOTE: urlParams: pbj=1|0
+   * Fetch transcript
    */
-  private async getActionCatalog(
-    contextMenuEndpointParams: string
-  ): Promise<ActionCatalog | undefined> {
-    const query = new URLSearchParams({
-      params: contextMenuEndpointParams,
-    });
-    const endpoint = constants.EP_GICM + "&" + query.toString();
-    const response = await this.postWithRetry<YTGetItemContextMenuResponse>(
-      endpoint,
-      withContext(),
+  public async getTranscript(language: string): Promise<TranscriptSegment[]> {
+    const fetchTranscript = async ({
+      autoGenerated,
+    }: {
+      autoGenerated: boolean;
+    }) => {
+      const res = await this.post<GetTranscriptResponse>(Constants.EP_GTS, {
+        context: {
+          client: { clientName: "WEB", clientVersion: "2.20220502.01.00" },
+        },
+        params: getTranscriptParams(this.videoId, language, autoGenerated),
+      });
+
+      const rdr =
+        res.actions[0].updateEngagementPanelAction.content.transcriptRenderer
+          .content.transcriptSearchPanelRenderer;
+
+      const subtitles =
+        rdr.footer?.transcriptFooterRenderer.languageMenu
+          ?.sortFilterSubMenuRenderer.subMenuItems;
+      const segments = rdr.body.transcriptSegmentListRenderer.initialSegments
+        ?.map((seg) => seg.transcriptSegmentRenderer)
+        .map((rdr) => ({
+          startMs: Number(rdr.startMs),
+          endMs: Number(rdr.endMs),
+          snippet: rdr.snippet.runs,
+          startTimeText: rdr.startTimeText.simpleText,
+        }));
+
+      return { segments, subtitles };
+    };
+
+    let res = await fetchTranscript({ autoGenerated: true });
+    if (!res.segments && res.subtitles) {
+      this.log("transcript", "retry fetching non-autogenerated transcript");
+      res = await fetchTranscript({ autoGenerated: false });
+    }
+
+    if (!res.segments) {
+      throw new Error("No transcript available for " + language);
+    }
+
+    return res.segments;
+  }
+
+  /*
+   * Playlist API
+   */
+
+  public async getPlaylist(browseId: string | { type: "membersOnly" }) {
+    if (typeof browseId === "object") {
+      switch (browseId.type) {
+        case "membersOnly": {
+          browseId = "VLUUMO" + this.channelId.replace(/^UC/, "");
+          break;
+        }
+        default: {
+          throw new Error(`Invalid type "${browseId.type}"`);
+        }
+      }
+    }
+
+    const res = await this.post<any>(
+      "https://www.youtube.com/youtubei/v1/browse",
       {
-        retry: 2,
+        context: {
+          client: { clientName: "WEB", clientVersion: "2.20220411.09.00" },
+        },
+        browseId,
       }
     );
 
-    if (response.error) {
-      // TODO: handle this
-      // {
-      //   "error": {
-      //     "code": 400,
-      //     "message": "Precondition check failed.",
-      //     "errors": [
-      //       {
-      //         "message": "Precondition check failed.",
-      //         "domain": "global",
-      //         "reason": "failedPrecondition"
-      //       }
-      //     ],
-      //     "status": "FAILED_PRECONDITION"
-      //   }
-      // }
-      return undefined;
-    }
+    const metadata = res.metadata.playlistMetadataRenderer;
+    const title = metadata.title;
+    const description = metadata.description;
 
-    let items: ActionCatalog = {};
-    for (const item of response.liveChatItemContextMenuSupportedRenderers!
-      .menuRenderer.items) {
-      const rdr =
-        item.menuServiceItemRenderer ?? item.menuNavigationItemRenderer!;
-      const text = rdr.text.runs[0].text;
+    const contents =
+      res.contents.twoColumnBrowseResultsRenderer.tabs[0].tabRenderer.content
+        .sectionListRenderer.contents[0].itemSectionRenderer.contents[0]
+        .playlistVideoListRenderer.contents;
 
-      switch (text) {
-        case "Report": {
-          const endpoint = item.menuServiceItemRenderer!.serviceEndpoint;
-          items.report = buildMeta(endpoint);
-          break;
-        }
-        case "Block": {
-          const endpoint =
-            item.menuNavigationItemRenderer!.navigationEndpoint
-              .confirmDialogEndpoint!.content.confirmDialogRenderer
-              .confirmButton.buttonRenderer.serviceEndpoint;
-          items.block = buildMeta(endpoint);
-          break;
-        }
-        case "Unblock": {
-          const endpoint = item.menuServiceItemRenderer!.serviceEndpoint;
-          items.unblock = buildMeta(endpoint);
-          break;
-        }
-        case "Pin message": {
-          const endpoint = item.menuServiceItemRenderer!.serviceEndpoint;
-          items.pin = buildMeta(endpoint);
-          break;
-        }
-        case "Unpin message": {
-          const endpoint = item.menuServiceItemRenderer!.serviceEndpoint;
-          items.unpin = buildMeta(endpoint);
-          break;
-        }
-        case "Remove": {
-          const endpoint = item.menuServiceItemRenderer!.serviceEndpoint;
-          items.remove = buildMeta(endpoint);
-          break;
-        }
-        case "Put user in timeout": {
-          const endpoint = item.menuServiceItemRenderer!.serviceEndpoint;
-          items.timeout = buildMeta(endpoint);
-          break;
-        }
-        case "Hide user on this channel": {
-          const endpoint = item.menuServiceItemRenderer!.serviceEndpoint;
-          items.hide = buildMeta(endpoint);
-          break;
-        }
-        case "Unhide user on this channel": {
-          const endpoint = item.menuServiceItemRenderer!.serviceEndpoint;
-          items.unhide = buildMeta(endpoint);
-          break;
-        }
-        case "Add moderator": {
-          const endpoint = item.menuServiceItemRenderer!.serviceEndpoint;
-          items.addModerator = buildMeta(endpoint);
-          break;
-        }
-        case "Remove moderator": {
-          const endpoint = item.menuServiceItemRenderer!.serviceEndpoint;
-          items.removeModerator = buildMeta(endpoint);
-          break;
-        }
-      }
-    }
-    return items;
-  }
-
-  /**
-   * Private API
-   */
-  private async postWithRetry<T>(
-    input: string,
-    body: any,
-    options?: RetryOptions
-  ): Promise<T> {
-    this.log("postWithRetry", input);
-    const errors = [];
-
-    let remaining = options?.retry ?? 0;
-    const retryInterval = options?.retryInterval ?? 1000;
-
-    while (true) {
-      try {
-        const res = await this.post(input, body);
-        return res.data;
-      } catch (err) {
-        if (err instanceof Error) {
-          if (err.message === "canceled") throw new AbortError();
-
-          errors.push(err);
-
-          if (remaining > 0) {
-            await delay(retryInterval);
-            remaining -= 1;
-            debugLog(
-              `Retrying(postJson) remaining=${remaining} after=${retryInterval}`
-            );
-            continue;
-          }
-
-          (err as any).errors = errors;
-        }
-        throw err;
-      }
-    }
-  }
-
-  private async post(
-    input: string,
-    body: any,
-    config: AxiosRequestConfig = {}
-  ) {
-    if (!input.startsWith("http")) {
-      input = constants.DO + input;
-    }
-
-    return this.axiosInstance.request({
-      ...config,
-      url: input,
-      signal: this.listenerAbortion.signal,
-      method: "POST",
-      headers: {
-        ...config.headers,
-        "Content-Type": "application/json",
-        ...(this.credentials && buildAuthHeaders(this.credentials)),
-        ...constants.DH,
-      },
-      data: body,
+    const videos = contents.map((content: any) => {
+      const rdr = content.playlistVideoRenderer;
+      const videoId = rdr.videoId;
+      const title = rdr.title.runs;
+      const lengthText = rdr.lengthText.simpleText; // "2:12:01"
+      const length = Number(rdr.lengthSeconds); // "7921"
+      const thumbnailUrl = pickThumbUrl(rdr.thumbnail);
+      return {
+        videoId,
+        title,
+        thumbnailUrl,
+        length,
+        lengthText,
+      };
     });
-  }
 
-  private get(input: string, config: AxiosRequestConfig = {}) {
-    if (!input.startsWith("http")) {
-      input = constants.DO + input;
-    }
+    this.log(title, description, videos);
 
-    return this.axiosInstance.request({
-      ...config,
-      url: input,
-      signal: this.listenerAbortion.signal,
-      headers: {
-        ...config.headers,
-        ...(this.credentials && buildAuthHeaders(this.credentials)),
-        ...constants.DH,
-      },
-    });
-  }
-
-  private log(label: string, ...obj: any) {
-    debugLog(`${label}(${this.videoId}):`, ...obj);
-  }
-
-  private cvPair() {
     return {
-      channelId: this.channelId,
-      videoId: this.videoId,
+      title,
+      description,
+      videos,
     };
   }
 }

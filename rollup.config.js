@@ -3,6 +3,7 @@ import { nodeResolve } from "@rollup/plugin-node-resolve";
 import typescript from "@rollup/plugin-typescript";
 import dts from "rollup-plugin-dts";
 // import { terser } from "rollup-plugin-terser";
+import json from "@rollup/plugin-json";
 
 const isProd = process.env.NODE_ENV === "production";
 
@@ -28,13 +29,14 @@ export default [
       nodeResolve({
         preferBuiltins: false, // required for `events` polyfill
       }),
+      json(),
       commonjs(),
       // isProd &&
       //   terser({
       //     keep_classnames: true, // avoid Error class mangling
       //   }),
     ],
-    external: ["cross-fetch", "debug"],
+    external: ["debug"],
   },
   {
     input: "./lib/lib/index.d.ts",

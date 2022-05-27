@@ -1,4 +1,3 @@
-export * from "./comments";
 export * from "./errors";
 export * from "./interfaces";
 export * from "./masterchat";

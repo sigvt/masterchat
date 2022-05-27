@@ -5,6 +5,7 @@ export * from "./actions";
 export * from "./context";
 export * from "./contextActions";
 export * from "./misc";
+export * from "./transcript";
 export * from "./yt";
 
 export interface Metadata {

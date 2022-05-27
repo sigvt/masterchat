@@ -1,5 +1,5 @@
 {
-  "exclude": ["tools", "lib"],
+  "exclude": ["tools", "lib", "examples"],
   "compilerOptions": {
     /* https://www.typescriptlang.org/docs/handbook/project-references.html */
     "target": "es2020",
