@@ -95,6 +95,7 @@ export interface Events {
   data: (data: ChatResponse, mc: Masterchat) => void;
   actions: (actions: Action[], mc: Masterchat) => void;
   chats: (chats: AddChatItemAction[], mc: Masterchat) => void;
+  chat: (chat: AddChatItemAction, mc: Masterchat) => void;
   end: (reason: EndReason) => void;
   error: (error: MasterchatError | Error) => void;
 }
@@ -505,12 +506,13 @@ export class Masterchat extends EventEmitter {
         this.emit("actions", actions, this);
 
         // only normal chats
-        if (this.listenerCount("chats") > 0) {
+        if (this.listenerCount("chats") > 0 || this.listenerCount("chat") > 0) {
           const chats = actions.filter(
             (action): action is AddChatItemAction =>
               action.type === "addChatItemAction"
           );
           this.emit("chats", chats, this);
+          chats.forEach((chat) => this.emit("chat", chat, this));
         }
       }
     };
