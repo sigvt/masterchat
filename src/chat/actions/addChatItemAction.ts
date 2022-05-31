@@ -255,8 +255,10 @@ export function parseLiveChatMembershipItemRenderer(
     ? parseMembership(renderer.authorBadges[renderer.authorBadges.length - 1])
     : undefined;
   if (!membership) {
-    throw new Error(
-      `Failed to parse membership (membership): ${JSON.stringify(renderer)}`
+    debugLog(
+      `missing membership information while parsing neww membership action: ${JSON.stringify(
+        renderer
+      )}`
     );
   }
 

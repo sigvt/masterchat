@@ -8,6 +8,10 @@
   - `mc.iter()`
 - New event for event emitter API (`chat`)
 
+### Fixes
+
+- `membership` in `AddMembershipMilestoneItemAction` and `AddMembershipItemAction` now becomes optional and won't raise an error when membership information lacks in those actions
+
 ## v1.0.0
 
 ### New

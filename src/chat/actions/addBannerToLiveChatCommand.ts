@@ -13,7 +13,10 @@ export function parseAddBannerToLiveChatCommand(
   // add pinned item
   const bannerRdr = payload["bannerRenderer"]["liveChatBannerRenderer"];
 
-  if (bannerRdr.header?.liveChatBannerHeaderRenderer.icon.iconType !== "KEEP") {
+  if (
+    bannerRdr.header &&
+    bannerRdr.header.liveChatBannerHeaderRenderer.icon.iconType !== "KEEP"
+  ) {
     debugLog(
       "[action required] Unknown icon type (addBannerToLiveChatCommand)",
       JSON.stringify(bannerRdr.header)

@@ -126,7 +126,9 @@ export interface AddMembershipItemAction {
   // `level` is only shown when there's multiple levels available
   level?: string;
 
-  membership: Membership;
+  /** Sometimes customThumbnail is not available */
+  membership?: Membership;
+
   /** rare but can be undefined */
   authorName?: string;
   authorChannelId: string;
@@ -139,10 +141,12 @@ export interface AddMembershipMilestoneItemAction {
   timestamp: Date;
   timestampUsec: string;
 
-  // `level` is only shown when there's multiple levels available
+  /** `level` is only shown when there's multiple levels available */
   level?: string;
 
-  membership: Membership;
+  /** Sometimes customThumbnail is not available */
+  membership?: Membership;
+
   authorName?: string;
   authorChannelId: string;
   authorPhoto: string;
