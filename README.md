@@ -18,21 +18,33 @@ import { Masterchat, stringify } from "masterchat";
 
 const mc = await Masterchat.init("<videoId>");
 
-mc.on("chats", (chats) => {
-  for (const chat of chats) {
-    console.log(chat.authorName, stringify(chat.message));
+for await (const action of mc.iter()) {
+  switch (action.type) {
+    case "addChatItemAction": {
+      console.log(`${action.authorName}: ${stringify(action.message)}`);
+      break;
+    }
+    case "addSuperChatItemAction": {
+      const label = `SC ${action.amount} ${action.currency}`;
+      console.log(
+        `[${label}] ${action.authorName}: ${stringify(action.message)}`
+      );
+      break;
+    }
   }
-});
-
-mc.listen();
+}
 ```
 
 See [MANUAL](https://github.com/holodata/masterchat/tree/master/MANUAL.md) for further instructions.
 
 ## CLI
 
-```
+```bash
 npm i -g masterchat-cli
+```
+
+```bash
+mc watch --org Hololive
 ```
 
 See [masterchat-cli](https://github.com/holodata/masterchat-cli) for the detailed usage.
