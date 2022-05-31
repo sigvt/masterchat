@@ -13,6 +13,20 @@ Masterchat is the most powerful library for YouTube Live Chat, supporting parsin
 npm install masterchat
 ```
 
+```js
+import { Masterchat, stringify } from "masterchat";
+
+const mc = await Masterchat.init("<videoId>");
+
+mc.on("chats", (chats) => {
+  for (const chat of chats) {
+    console.log(chat.authorName, stringify(chat.message));
+  }
+});
+
+mc.listen();
+```
+
 See [MANUAL](https://github.com/holodata/masterchat/tree/master/MANUAL.md) for further instructions.
 
 ## CLI

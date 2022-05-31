@@ -1,6 +1,14 @@
 # Changelog
 
-## Unreleased
+## v1.1.0
+
+### New
+
+- AsyncIterator API
+  - `mc.iter()`
+- New event for event emitter API (`chat`)
+
+## v1.0.0
 
 ### New
 

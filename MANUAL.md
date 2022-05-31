@@ -79,14 +79,9 @@ import { Masterchat, MasterchatError, stringify } from "masterchat";
 async function main() {
   const mc = await Masterchat.init("<videoId>");
 
-  const iter = mc
-    .iter()
-    .filter((action) => action.type === "addChatItemAction")
-    .map((chat) => stringify(chat.message));
-
   try {
-    for await (const message of iter) {
-      console.log(msg);
+    for await (const action of mc.iter()) {
+      console.log(action);
     }
   } catch (err) {
     // Handle errors
@@ -291,6 +286,8 @@ const mc = await Masterchat.init("<videoId>", { axiosInstance });
 | [modeChangeAction](https://holodata.github.io/masterchat/interfaces/ModeChangeAction.html)                                         | Notify mode changes (slow mode, members-only, subscribers-only)    |
 | [membershipGiftPurchaseAction](https://holodata.github.io/masterchat/interfaces/MembershipGiftPurchaseAction.html)                 | Membership gift purchase notification                              |
 | [membershipGiftRedemptionAction](https://holodata.github.io/masterchat/interfaces/MembershipGiftRedemptionAction.html)             | Membership gift redemption notification                            |
+| [moderationMessageAction](https://holodata.github.io/masterchat/interfaces/ModerationMessageAction.html)                           | Moderation message                                                 |
+| [addRedirectBannerAction](https://holodata.github.io/masterchat/interfaces/AddRedirectBannerAction.html)                           | Redirect banner notification (raid event)                          |
 
 ### Stream type
 
