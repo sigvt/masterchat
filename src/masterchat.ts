@@ -583,6 +583,17 @@ export class Masterchat extends EventEmitter {
   }
 
   /**
+   * AsyncIterator API
+   */
+  public async *iter(options?: IterateChatOptions) {
+    for await (const { actions } of this.iterate(options)) {
+      for (const action of actions) {
+        yield action;
+      }
+    }
+  }
+
+  /**
    * (AsyncGenerator API)
    * Iterate until live stream ends
    */
