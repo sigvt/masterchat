@@ -16,22 +16,12 @@ npm install masterchat
 ```js
 import { Masterchat, stringify } from "masterchat";
 
-const mc = await Masterchat.init("<videoId>");
+const mc = await Masterchat.init("oyxvhJW1Cf8");
 
-for await (const action of mc.iter()) {
-  switch (action.type) {
-    case "addChatItemAction": {
-      console.log(`${action.authorName}: ${stringify(action.message)}`);
-      break;
-    }
-    case "addSuperChatItemAction": {
-      const label = `SC ${action.amount} ${action.currency}`;
-      console.log(
-        `[${label}] ${action.authorName}: ${stringify(action.message)}`
-      );
-      break;
-    }
-  }
+const chats = mc.iter().filter((action) => action.type === "addChatItemAction");
+
+for await (const chat of chats) {
+  console.log(`${chat.authorName}: ${stringify(chat.message)}`);
 }
 ```
 

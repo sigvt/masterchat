@@ -1,0 +1,2 @@
+3a4
+> import { AsyncIterator } from 'iterator-helpers-polyfill';

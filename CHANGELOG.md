@@ -4,9 +4,9 @@
 
 ### New
 
-- AsyncIterator API
-  - `mc.iter()`
-- New event for event emitter API (`chat`)
+- Async Iterator API
+  - `mc.iter().filter().map()...`
+- New event type for Event Emitter API (`chat`)
 
 ### Fixes
 

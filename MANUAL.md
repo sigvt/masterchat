@@ -6,7 +6,7 @@
 
 ## Usage
 
-### Just grab some metadata
+### Just grab metadata
 
 ```js
 import { Masterchat, stringify } from "masterchat";
@@ -18,37 +18,72 @@ console.log(`info: ${title} @ ${channelName} (${channelId})`);
 
 ### Iterate over live chats
 
-#### EventEmitter API
+#### Event Emitter API
 
 ```js
 import { Masterchat, stringify } from "masterchat";
 
-async function main() {
+const mc = await Masterchat.init("<videoId>");
+
+// Listen for live chat
+mc.on("chat", (chat) => {
+  console.log(chat.authorName, stringify(chat.message));
+});
+
+// Listen for any events
+//   See below for a list of available action types
+mc.on("actions", (actions) => {
+  const chats = actions.filter(
+    (action) => action.type === "addChatItemAction"
+  );
+  const superChats = actions.filter(
+    (action) => action.type === "addSuperChatItemAction"
+  );
+  const superStickers = actions.filter(
+    (action) => action.type === "addSuperStickerItemAction"
+  );
+  // ...
+});
+
+// Handle errors
+mc.on("error", (err) => {
+  console.log(err.code);
+  // "disabled" => Live chat is disabled
+  // "membersOnly" => No permission (members-only)
+  // "private" => No permission (private video)
+  // "unavailable" => Deleted OR wrong video id
+  // "unarchived" => Live stream recording is not available
+  // "denied" => Access denied (429)
+  // "invalid" => Invalid request
+});
+
+// Handle end event
+mc.on("end", () => {
+  console.log("Live stream has ended");
+}
+
+// Start polling live chat API
+mc.listen();
+```
+
+#### Async Iterator API
+
+```js
+import { Masterchat, MasterchatError, stringify } from "masterchat";
+
+try {
   const mc = await Masterchat.init("<videoId>");
 
-  // Listen for live chat
-  mc.on("chats", (chats) => {
-    for (const chat of chats) {
-      console.log(chat.authorName, stringify(chat.message));
-    }
-  });
+  const chats = mc
+    .iter()
+    .filter((action) => action.type === "addChatItemAction");
 
-  // Listen for any events
-  //   See below for a list of available action types
-  mc.on("actions", (actions) => {
-    const chats = actions.filter(
-      (action) => action.type === "addChatItemAction"
-    );
-    const superChats = actions.filter(
-      (action) => action.type === "addSuperChatItemAction"
-    );
-    const superStickers = actions.filter(
-      (action) => action.type === "addSuperStickerItemAction"
-    );
-  });
-
+  for await (const chat of chats) {
+    console.log(`${chat.authorName}: ${stringify(chat.message)}`);
+  }
+} catch (err) {
   // Handle errors
-  mc.on("error", (err) => {
+  if (err instanceof MasterchatError) {
     console.log(err.code);
     // "disabled" => Live chat is disabled
     // "membersOnly" => No permission (members-only)
@@ -57,72 +92,28 @@ async function main() {
     // "unarchived" => Live stream recording is not available
     // "denied" => Access denied (429)
     // "invalid" => Invalid request
-  });
-
-  // Handle end event
-  mc.on("end", () => {
-    console.log("Live stream has ended");
+    return;
   }
 
-  // Start polling live chat API
-  mc.listen();
+  throw err;
 }
 
-main();
-```
-
-#### AsyncIterator API
-
-```js
-import { Masterchat, MasterchatError, stringify } from "masterchat";
-
-async function main() {
-  const mc = await Masterchat.init("<videoId>");
-
-  try {
-    for await (const action of mc.iter()) {
-      console.log(action);
-    }
-  } catch (err) {
-    // Handle errors
-    if (err instanceof MasterchatError) {
-      console.log(err.code);
-      // "disabled" => Live chat is disabled
-      // "membersOnly" => No permission (members-only)
-      // "private" => No permission (private video)
-      // "unavailable" => Deleted OR wrong video id
-      // "unarchived" => Live stream recording is not available
-      // "denied" => Access denied (429)
-      // "invalid" => Invalid request
-      return;
-    }
-
-    throw err;
-  }
-
-  console.log("Live stream has ended");
-}
-
-main();
+console.log("Live stream has ended");
 ```
 
 ### Save replay chats in .jsonl
 
 ```js
 import { Masterchat } from "masterchat";
-import { appendFile, writeFile, readFile } from "fs/promises";
+import { appendFile, writeFile, readFile } from "node:fs/promises";
 
-async function main() {
-  const mc = await Masterchat.init("<videoId>");
+const mc = await Masterchat.init("<videoId>");
 
-  await mc
-    .iter()
-    .filter((action) => action.type === "addChatItemAction") // only chat events
-    .map((chat) => JSON.stringify(chat) + "\n") // convert to JSONL
-    .map((jsonl) => appendFile("./chats.jsonl", jsonl)); // append to the file
-}
-
-main();
+await mc
+  .iter()
+  .filter((action) => action.type === "addChatItemAction") // only chat events
+  .map((chat) => JSON.stringify(chat) + "\n") // convert to JSONL
+  .map((jsonl) => appendFile("./chats.jsonl", jsonl)); // append to the file
 ```
 
 ### Chat moderation bot
@@ -131,38 +122,32 @@ main();
 import { Masterchat, stringify } from "masterchat";
 import { isSpam } from "spamreaper";
 
-async function main() {
-  // `credentials` is an object containing YouTube session cookie or a base64-encoded JSON string of them
-  const credentials = {
-    SAPISID: "<value>",
-    APISID: "<value>",
-    HSID: "<value>",
-    SID: "<value>",
-    SSID: "<value>",
-  };
+// `credentials` is an object containing YouTube session cookie or a base64-encoded JSON string of them
+const credentials = {
+  SAPISID: "<value>",
+  APISID: "<value>",
+  HSID: "<value>",
+  SID: "<value>",
+  SSID: "<value>",
+};
 
-  const mc = await Masterchat.init("<videoId>", { credentials });
+const mc = await Masterchat.init("<videoId>", { credentials });
 
-  const iter = mc
-    .iter()
-    .filter((action) => action.type === "addChatItemAction");
+const iter = mc.iter().filter((action) => action.type === "addChatItemAction");
 
-  for await (const chat of iter) {
-    const message = stringify(chat.message, {
-      // omit emojis
-      emojiHandler: (emoji) => "",
-    });
+for await (const chat of iter) {
+  const message = stringify(chat.message, {
+    // omit emojis
+    emojiHandler: (emoji) => "",
+  });
 
-    if (isSpam(message) || /UGLY/.test(message)) {
-      // delete chat
-      // if flagged as spam by Spamreaper
-      // or contains "UGLY"
-      await mc.remove(action.id);
-    }
+  if (isSpam(message) || /UGLY/.test(message)) {
+    // delete chat
+    // if flagged as spam by Spamreaper
+    // or contains "UGLY"
+    await mc.remove(action.id);
   }
 }
-
-main();
 ```
 
 ### Get video comments (≠ live chats)
@@ -170,24 +155,20 @@ main();
 ```js
 import { Masterchat } from "masterchat";
 
-async function main() {
-  const mc = new Masterchat("<videoId>", "");
+const mc = new Masterchat("<videoId>", "");
 
-  // Iterate over all comments
-  let res = await mc.getComments({ top: true });
-  while (true) {
-    console.log(res.comments);
+// Iterate over all comments
+let res = await mc.getComments({ top: true });
+while (true) {
+  console.log(res.comments);
 
-    if (!res.next) break;
-    res = await res.next();
-  }
-
-  // Get comment by id
-  const comment = await mc.getComment("<commentId>");
-  console.log(comment);
+  if (!res.next) break;
+  res = await res.next();
 }
 
-main();
+// Get comment by id
+const comment = await mc.getComment("<commentId>");
+console.log(comment);
 ```
 
 ### Get transcript
@@ -195,17 +176,13 @@ main();
 ```js
 import { Masterchat, stringify } from "masterchat";
 
-async function main() {
-  const mc = new Masterchat("<videoId>", "");
+const mc = new Masterchat("<videoId>", "");
 
-  const transcript = await mc.getTranscript();
+const transcript = await mc.getTranscript();
 
-  for (const item of transcript) {
-    console.log(item.startMs, stringify(item.snippet));
-  }
+for (const item of transcript) {
+  console.log(item.startMs, stringify(item.snippet));
 }
-
-main();
 ```
 
 ## Advanced usage
@@ -228,6 +205,7 @@ The former won't fetch metadata. If you need metadata, call:
 
 ```js
 await live.populateMetadata(); // will scrape metadata from watch page
+
 console.log(live.title);
 console.log(live.channelName);
 ```

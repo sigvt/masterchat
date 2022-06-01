@@ -2,12 +2,12 @@
   "exclude": ["tools", "lib", "examples"],
   "compilerOptions": {
     /* https://www.typescriptlang.org/docs/handbook/project-references.html */
-    "target": "es2020",
+    "noEmit": true,
+    "target": "esnext",
     "module": "esnext",
     "moduleResolution": "node",
     "declaration": true,
     "sourceMap": true,
-    "noEmit": true,
     "outDir": "./lib",
     "sourceRoot": "./src",
     "strict": true,
