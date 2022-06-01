@@ -5,7 +5,7 @@
 [![npm: publish size](https://badgen.net/packagephobia/publish/masterchat)](https://npmjs.org/package/masterchat)
 [![typedoc](https://badgen.net/badge/docs/typedoc/purple)](https://holodata.github.io/masterchat/)
 
-Masterchat is the most powerful library for YouTube Live Chat, supporting parsing 20+ actions, video comments, transcripts, as well as sending messages and moderating chats.
+Masterchat is the most powerful library for YouTube Live Chat, supporting parsing 20+ actions, video comments and transcripts, as well as sending messages and moderating chats.
 
 ## Install
 
@@ -37,7 +37,7 @@ npm i -g masterchat-cli
 mc watch --org Hololive
 ```
 
-See [masterchat-cli](https://github.com/holodata/masterchat-cli) for the detailed usage.
+See [masterchat-cli](https://github.com/holodata/masterchat-cli) for detailed usage.
 
 ## Desktop App
 
