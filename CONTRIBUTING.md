@@ -1,5 +1,7 @@
 # Contribution Guide
 
+[Join our Discord](https://holodata.org/discord) to participate in discussions.
+
 ## Build
 
 ```bash
