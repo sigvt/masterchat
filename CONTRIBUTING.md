@@ -1,5 +1,8 @@
 # Contribution Guide
 
+- Use Masterchat with `DEBUG=masterchat` and [report](https://github.com/holodata/masterchat/issues/new) logs that are prefixed with `[action required]`
+- Squash [TODOs](https://github.com/holodata/masterchat/search?l=TypeScript&q=TODO)
+
 [Join our Discord](https://holodata.org/discord) to participate in discussions.
 
 ## Build
