@@ -216,6 +216,20 @@ console.log(live.channelName);
 cd extra/credentials-fetcher
 npm i
 npm start
+
+> credential-fetcher@0.0.0 start
+> electron .
+
+Login succeeded. Use credential token below:
+eyJTSUQiOiJL[omit]iJBSEwx
+```
+
+Set credentials.
+
+```js
+const credentials = "eyJTSUQiOiJL[omit]iJBSEwx";
+
+const client = await Masterchat.init(id, { credentials });
 ```
 
 ### Custom axios client
