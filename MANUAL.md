@@ -220,7 +220,6 @@ npm start
 > credential-fetcher@0.0.0 start
 > electron .
 
-[libprotobuf ERROR ../../third_party/protobuf/src/google/protobuf/message_lite.cc:133] Can't parse message of type "content.proto.CacheMetadata" because it is missing required fields: (cannot determine missing fields for lite message)
 Login succeeded. Use credential token below:
 eyJTSUQiOiJL[omit]iJBSEwx
 ```
