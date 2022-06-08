@@ -77,6 +77,7 @@ export function parseAddBannerToLiveChatCommand(
   } else if ("liveChatBannerRedirectRenderer" in contents) {
     // TODO:
     const rdr = contents.liveChatBannerRedirectRenderer;
+    debugLog("[action required] RedirectBannerRenderer:", JSON.stringify(rdr));
     const authorName = rdr.bannerMessage.runs[0].text;
     const authorPhoto = pickThumbUrl(rdr.authorPhoto);
     const payload: AddRedirectBannerAction = {
