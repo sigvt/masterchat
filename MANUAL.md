@@ -216,6 +216,21 @@ console.log(live.channelName);
 cd extra/credentials-fetcher
 npm i
 npm start
+
+> credential-fetcher@0.0.0 start
+> electron .
+
+[libprotobuf ERROR ../../third_party/protobuf/src/google/protobuf/message_lite.cc:133] Can't parse message of type "content.proto.CacheMetadata" because it is missing required fields: (cannot determine missing fields for lite message)
+Login succeeded. Use credential token below:
+eyJTSUQiOiJLd2p0Z1R2UGZQSlJPM1NSVFJvZXpNNGFubXV0c25XZFBhSUVjR3NrQzFKZUR5YlM3X1pnY3VXdnNxZ0JndUJBd0pXS19RLiIsIkhTSUQiOiJBQ084UEE4dWhnMFJPd0M2RyIsIlNTSUQiOiJBSEwxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+Set credentials.
+
+```js
+const credentials = "eyJTSUQiOiJLd2p0Z1R2UGZQSlJPM1NSVFJvZXpNNGFubXV0c25XZFBhSUVjR3NrQzFKZUR5YlM3X1pnY3VXdnNxZ0JndUJBd0pXS19RLiIsIkhTSUQiOiJBQ084UEE4dWhnMFJPd0M2RyIsIlNTSUQiOiJBSEwxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+
+const client = await Masterchat.init(id, { credentials });
 ```
 
 ### Custom axios client
