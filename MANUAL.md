@@ -228,7 +228,7 @@ eyJTSUQiOiJL[omit]iJBSEwx
 Set credentials.
 
 ```js
-const credentials = "eyJTSUQiOiJLd2p0Z1R2UGZQSlJPM1NSVFJvZXpNNGFubXV0c25XZFBhSUVjR3NrQzFKZUR5YlM3X1pnY3VXdnNxZ0JndUJBd0pXS19RLiIsIkhTSUQiOiJBQ084UEE4dWhnMFJPd0M2RyIsIlNTSUQiOiJBSEwxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+const credentials = "eyJTSUQiOiJL[omit]iJBSEwx";
 
 const client = await Masterchat.init(id, { credentials });
 ```
