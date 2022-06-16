@@ -31,7 +31,8 @@ export type Action =
   | AddMembershipTickerAction
   | AddBannerAction
   | RemoveBannerAction
-  | AddRedirectBannerAction
+  | AddIncomingRaidBannerAction
+  | AddOutgoingRaidBannerAction
   | AddViewerEngagementMessageAction
   | ShowPanelAction
   | ShowPollPanelAction
@@ -271,12 +272,21 @@ export interface RemoveBannerAction {
   targetActionId: string;
 }
 
-export interface AddRedirectBannerAction {
-  type: "addRedirectBannerAction";
+export interface AddIncomingRaidBannerAction {
+  type: "addIncomingRaidBannerAction";
   actionId: string;
   targetId: string;
-  authorName: string;
-  authorPhoto: string;
+  sourceName: string;
+  sourcePhoto: string;
+}
+
+export interface AddOutgoingRaidBannerAction {
+  type: "addOutgoingRaidBannerAction";
+  actionId: string;
+  targetId: string;
+  targetName: string;
+  targetPhoto: string;
+  targetVideoId: string;
 }
 
 export interface ShowTooltipAction {

@@ -3,6 +3,9 @@
 ## Unreleased
 
 ### New
+
+- New action `AddOutgoingRaidBannerAction` and `AddIncomingRaidBannerAction`
+  - Removed `AddRedirectBannerAction`
 - New action `RemoveChatItemAction`
 
 ## v1.1.0

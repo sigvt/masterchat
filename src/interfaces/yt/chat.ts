@@ -539,7 +539,9 @@ export interface YTLiveChatBannerRedirectRenderer {
    */
   bannerMessage: YTRunContainer<YTTextRun>;
   authorPhoto: YTThumbnailList;
-  inlineActionButton: YTActionButtonRendererContainer;
+  inlineActionButton: YTContextMenuButtonRendererContainer<
+    YTUrlEndpointContainer | YTWatchEndpointContainer
+  >;
   contextMenuButton: YTContextMenuButtonRendererContainer;
 }
 
@@ -924,7 +926,7 @@ export interface YTContextMenuButtonRendererContainer<
   buttonRenderer: {
     icon: YTIcon;
     style?: string;
-    command?: Command;
+    command: Command;
     accessibilityData: YTAccessibilityData;
     trackingParams: string;
   };

@@ -1,6 +1,7 @@
 import {
   AddBannerAction,
-  AddRedirectBannerAction,
+  AddIncomingRaidBannerAction,
+  AddOutgoingRaidBannerAction,
 } from "../../interfaces/actions";
 import { YTAddBannerToLiveChatCommand } from "../../interfaces/yt/chat";
 import { debugLog, stringify, tsToDate } from "../../utils";
@@ -75,19 +76,38 @@ export function parseAddBannerToLiveChatCommand(
     };
     return parsed;
   } else if ("liveChatBannerRedirectRenderer" in contents) {
-    // TODO:
     const rdr = contents.liveChatBannerRedirectRenderer;
-    debugLog("[action required] RedirectBannerRenderer:", JSON.stringify(rdr));
-    const authorName = rdr.bannerMessage.runs[0].text;
-    const authorPhoto = pickThumbUrl(rdr.authorPhoto);
-    const payload: AddRedirectBannerAction = {
-      type: "addRedirectBannerAction",
-      actionId,
-      targetId,
-      authorName,
-      authorPhoto,
-    };
-    return payload;
+    const targetVideoId =
+      "watchEndpoint" in rdr.inlineActionButton.buttonRenderer.command
+        ? rdr.inlineActionButton.buttonRenderer.command.watchEndpoint.videoId
+        : undefined;
+
+    const photo = pickThumbUrl(rdr.authorPhoto);
+
+    if (targetVideoId) {
+      // Outgoing
+      const targetName = rdr.bannerMessage.runs[1].text;
+      const payload: AddOutgoingRaidBannerAction = {
+        type: "addOutgoingRaidBannerAction",
+        actionId,
+        targetId,
+        targetName,
+        targetPhoto: photo,
+        targetVideoId,
+      };
+      return payload;
+    } else {
+      // Incoming
+      const sourceName = rdr.bannerMessage.runs[0].text;
+      const payload: AddIncomingRaidBannerAction = {
+        type: "addIncomingRaidBannerAction",
+        actionId,
+        targetId,
+        sourceName,
+        sourcePhoto: photo,
+      };
+      return payload;
+    }
   } else {
     throw new Error(
       `[action required] Unrecognized content type found in parseAddBannerToLiveChatCommand: ${JSON.stringify(
