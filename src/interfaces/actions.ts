@@ -42,7 +42,8 @@ export type Action =
   | ModeChangeAction
   | MembershipGiftPurchaseAction
   | MembershipGiftRedemptionAction
-  | ModerationMessageAction;
+  | ModerationMessageAction
+  | RemoveChatItemAction;
 
 export interface AddChatItemAction {
   type: "addChatItemAction";
@@ -395,6 +396,12 @@ export interface ModerationMessageAction {
   timestamp: Date;
   timestampUsec: string;
   message: YTRun[];
+}
+
+export interface RemoveChatItemAction {
+  type: "removeChatItemAction";
+  targetId: string;
+  timestamp: Date;
 }
 
 export interface UnknownAction {

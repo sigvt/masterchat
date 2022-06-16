@@ -232,6 +232,7 @@ export interface YTAction {
   addChatItemAction?: YTAddChatItemAction;
   markChatItemsByAuthorAsDeletedAction?: YTMarkChatItemsByAuthorAsDeletedAction;
   markChatItemAsDeletedAction?: YTMarkChatItemAsDeletedAction;
+  removeChatItemAction?: YTRemoveChatItemAction;
 
   // Ticker
   addLiveChatTickerItemAction?: YTAddLiveChatTickerItemAction;
@@ -289,6 +290,10 @@ export interface YTMarkChatItemAsDeletedAction {
 export interface YTMarkChatItemsByAuthorAsDeletedAction {
   deletedStateMessage: YTRunContainer<YTTextRun>;
   externalChannelId: string;
+}
+
+export interface YTRemoveChatItemAction {
+  targetItemId: string;
 }
 
 export interface YTAddBannerToLiveChatCommand {

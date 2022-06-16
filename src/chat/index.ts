@@ -8,6 +8,7 @@ import { parseCloseLiveChatActionPanelAction } from "./actions/closeLiveChatActi
 import { parseMarkChatItemAsDeletedAction } from "./actions/markChatItemAsDeletedAction";
 import { parseMarkChatItemsByAuthorAsDeletedAction } from "./actions/markChatItemsByAuthorAsDeletedAction";
 import { parseRemoveBannerForLiveChatCommand } from "./actions/removeBannerForLiveChatCommand";
+import { parseRemoveChatItemAction } from "./actions/removeChatItemAction";
 import { parseReplaceChatItemAction } from "./actions/replaceChatItemAction";
 import { parseShowLiveChatActionPanelAction } from "./actions/showLiveChatActionPanelAction";
 import { parseShowLiveChatTooltipCommand } from "./actions/showLiveChatTooltipCommand";
@@ -60,6 +61,9 @@ export function parseAction(action: YTAction): Action | UnknownAction {
 
     case "closeLiveChatActionPanelAction":
       return parseCloseLiveChatActionPanelAction(action[type]!);
+
+    case "removeChatItemAction":
+      return parseRemoveChatItemAction(action[type]!);
 
     default: {
       const _: never = type;

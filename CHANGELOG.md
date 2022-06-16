@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+### New
+- New action `RemoveChatItemAction`
+
 ## v1.1.0
 
 ### New
