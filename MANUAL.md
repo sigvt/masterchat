@@ -122,7 +122,7 @@ await mc
 import { Masterchat, stringify } from "masterchat";
 import { isSpam } from "spamreaper";
 
-// `credentials` is an object containing YouTube session cookie or a base64-encoded JSON string of them
+// `credentials` is an object containing YouTube session cookie, or a base64-encoded JSON string of the object
 const credentials = {
   SAPISID: "<value>",
   APISID: "<value>",
@@ -133,19 +133,19 @@ const credentials = {
 
 const mc = await Masterchat.init("<videoId>", { credentials });
 
-const iter = mc.iter().filter((action) => action.type === "addChatItemAction");
+const chats = mc.iter().filter((action) => action.type === "addChatItemAction");
 
-for await (const chat of iter) {
+for await (const chat of chats) {
   const message = stringify(chat.message, {
     // omit emojis
     emojiHandler: (emoji) => "",
   });
 
+  // delete chat
+  //   if flagged as spam by Spamreaper
+  //   or contains "UGLY"
   if (isSpam(message) || /UGLY/.test(message)) {
-    // delete chat
-    // if flagged as spam by Spamreaper
-    // or contains "UGLY"
-    await mc.remove(action.id);
+    await mc.remove(chat.id);
   }
 }
 ```
@@ -155,7 +155,7 @@ for await (const chat of iter) {
 ```js
 import { Masterchat } from "masterchat";
 
-const mc = new Masterchat("<videoId>", "");
+const mc = await Masterchat.init("<videoId>");
 
 // Iterate over all comments
 let res = await mc.getComments({ top: true });
@@ -176,7 +176,7 @@ console.log(comment);
 ```js
 import { Masterchat, stringify } from "masterchat";
 
-const mc = new Masterchat("<videoId>", "");
+const mc = await Masterchat.init("<videoId>");
 
 const transcript = await mc.getTranscript();
 
@@ -189,19 +189,14 @@ for (const item of transcript) {
 
 ### Faster instantiation
 
-To skip loading watch page, use `new Masterchat(videoId: string, channelId: string, { mode?: "live" | "replay" })`:
+For faster instantiation, you can totally skip fetching metadata (channelId, title, isLive) phase which happens behind `Masterchat.init()`. To do this, use `new Masterchat(videoId: string, channelId: string, { mode?: "live" | "replay" })`:
 
 ```js
+// const live = Masterchat.init(videoId);
 const live = new Masterchat(videoId, channelId, { mode: "live" });
 ```
 
-instead of:
-
-```js
-const live = await Masterchat.init(videoId);
-```
-
-The former won't fetch metadata. If you need metadata, call:
+Since with this way Masterchat won't fetch metadata, should you need metadata later on, manually call `populateMetadata`:
 
 ```js
 await live.populateMetadata(); // will scrape metadata from watch page
@@ -209,6 +204,9 @@ await live.populateMetadata(); // will scrape metadata from watch page
 console.log(live.title);
 console.log(live.channelName);
 ```
+
+> **Note**  
+> Fetching watch page is rate limited
 
 ### Fetch credentials
 
@@ -265,7 +263,9 @@ const mc = await Masterchat.init("<videoId>", { axiosInstance });
 | [membershipGiftPurchaseAction](https://holodata.github.io/masterchat/interfaces/MembershipGiftPurchaseAction.html)                 | Membership gift purchase notification                              |
 | [membershipGiftRedemptionAction](https://holodata.github.io/masterchat/interfaces/MembershipGiftRedemptionAction.html)             | Membership gift redemption notification                            |
 | [moderationMessageAction](https://holodata.github.io/masterchat/interfaces/ModerationMessageAction.html)                           | Moderation message                                                 |
-| [addRedirectBannerAction](https://holodata.github.io/masterchat/interfaces/AddRedirectBannerAction.html)                           | Redirect banner notification (raid event)                          |
+| [addIncomingRaidBannerAction](https://holodata.github.io/masterchat/interfaces/AddIncomingRaidBannerAction.html)                   | Incoming raid notification                                         |
+| [addOutgoingRaidBannerAction](https://holodata.github.io/masterchat/interfaces/AddOutgoingRaidBannerAction.html)                   | Outgoing raid notification                                         |
+| [removeChatItemAction](https://holodata.github.io/masterchat/interfaces/RemoveChatItemAction.html)                                 | Remove chat item action                                            |
 
 ### Stream type
 

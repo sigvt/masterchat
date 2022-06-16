@@ -17,27 +17,50 @@ yarn build
 
 ## Development Flow
 
-```bash
-yarn dev
-```
+In `masterchat` dir:
 
 ```bash
 yarn build
-yarn link
+yarn link # link local masterchat package
+yarn dev # watch and transpile files
+```
 
-cd ..
+Clone and build [Masterchat CLI](https://github.com/holodata/masterchat-cli):
 
-git clone https://github.com/holodata/masterchat-cli
+```bash
+git clone https://github.com/holodata/masterchat-cli ../masterchat-cli
 cd masterchat-cli
 yarn install
 yarn build
-yarn link
-yarn link masterchat
+yarn link # make local `masterchat` and `mc` command available on the shell
+```
+
+In `masterchat-cli` dir, link local `masterchat` module and rebuild the cli:
+
+```bash
+yarn link masterchat # now `masterchat-cli` uses local `masterchat` module
+yarn build
 DEBUG=masterchat mc live <videoId>
 DEBUG=masterchat mc events
 ```
 
 ## Testing
+
+### Setup
+
+Export necessary env vars:
+
+```bash
+export MC_TEST_VIDEO_ID=<video ID of the unlisted live stream from the `MC_TEST_CHANNEL_ID` channel>
+export MC_TEST_CHANNEL_ID=<primary test channel id>
+export MC_TEST_CHANNEL_ID_2=<secondary test channel id>
+export MC_TEST_CREDENTIAL=<base64-encoded credentials of primary test channel id>
+export MC_TEST_CREDENTIAL_2=<base64-encoded credentials of secondary test channel id>
+```
+
+Use [https://github.com/holodata/masterchat/tree/master/extra/credential-fetcher](credential-fetcher) to obtain base64-encoded credentials.
+
+### Record API response while testing
 
 Test while recording response (run only once):
 
@@ -45,7 +68,7 @@ Test while recording response (run only once):
 NOCK_BACK_MODE=record jest
 ```
 
-Test using recorded response:
+### Run tests using recorded response
 
 ```bash
 jest
