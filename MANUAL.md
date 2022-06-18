@@ -113,7 +113,7 @@ await mc
   .iter()
   .filter((action) => action.type === "addChatItemAction") // only chat events
   .map((chat) => JSON.stringify(chat) + "\n") // convert to JSONL
-  .map((jsonl) => appendFile("./chats.jsonl", jsonl)); // append to the file
+  .forEach((jsonl) => appendFile("./chats.jsonl", jsonl)) // append to the file
 ```
 
 ### Chat moderation bot
