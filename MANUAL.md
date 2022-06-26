@@ -113,7 +113,7 @@ await mc
   .iter()
   .filter((action) => action.type === "addChatItemAction") // only chat events
   .map((chat) => JSON.stringify(chat) + "\n") // convert to JSONL
-  .map((jsonl) => appendFile("./chats.jsonl", jsonl)); // append to the file
+  .forEach((jsonl) => appendFile("./chats.jsonl", jsonl)) // append to the file
 ```
 
 ### Chat moderation bot
@@ -214,6 +214,20 @@ console.log(live.channelName);
 cd extra/credentials-fetcher
 npm i
 npm start
+
+> credential-fetcher@0.0.0 start
+> electron .
+
+Login succeeded. Use credential token below:
+eyJTSUQiOiJL[omit]iJBSEwx
+```
+
+Set credentials.
+
+```js
+const credentials = "eyJTSUQiOiJL[omit]iJBSEwx";
+
+const client = await Masterchat.init(id, { credentials });
 ```
 
 ### Custom axios client
