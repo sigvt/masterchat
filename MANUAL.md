@@ -113,7 +113,7 @@ await mc
   .iter()
   .filter((action) => action.type === "addChatItemAction") // only chat events
   .map((chat) => JSON.stringify(chat) + "\n") // convert to JSONL
-  .forEach((jsonl) => appendFile("./chats.jsonl", jsonl)) // append to the file
+  .forEach((jsonl) => appendFile("./chats.jsonl", jsonl)); // append to the file
 ```
 
 ### Chat moderation bot
@@ -279,6 +279,7 @@ const mc = await Masterchat.init("<videoId>", { axiosInstance });
 | [moderationMessageAction](https://holodata.github.io/masterchat/interfaces/ModerationMessageAction.html)                           | Moderation message                                                 |
 | [addIncomingRaidBannerAction](https://holodata.github.io/masterchat/interfaces/AddIncomingRaidBannerAction.html)                   | Incoming raid notification                                         |
 | [addOutgoingRaidBannerAction](https://holodata.github.io/masterchat/interfaces/AddOutgoingRaidBannerAction.html)                   | Outgoing raid notification                                         |
+| [addProductBannerAction](https://holodata.github.io/masterchat/interfaces/AddProductBannerAction.html)                             | Product promotion banner notification                              |
 | [removeChatItemAction](https://holodata.github.io/masterchat/interfaces/RemoveChatItemAction.html)                                 | Remove chat item action                                            |
 
 ### Stream type

@@ -7,6 +7,7 @@
 - New action `AddOutgoingRaidBannerAction` and `AddIncomingRaidBannerAction`
   - Removed `AddRedirectBannerAction`
 - New action `RemoveChatItemAction`
+- New action `AddProductBannerAction`
 
 ## v1.1.0
 
