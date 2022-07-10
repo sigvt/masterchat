@@ -65,19 +65,19 @@ Use [https://github.com/holodata/masterchat/tree/master/extra/credential-fetcher
 Test while recording response (run only once):
 
 ```bash
-NOCK_BACK_MODE=record jest
+NOCK_BACK_MODE=record vitest --run
 ```
 
 ### Run tests using recorded response
 
 ```bash
-jest
+vitest
 ```
 
 Disable fixtures completely:
 
 ```bash
-NOCK_BACK_MODE=wild jest
+NOCK_BACK_MODE=wild vitest
 ```
 
 ## Release Flow (Maintainers only)

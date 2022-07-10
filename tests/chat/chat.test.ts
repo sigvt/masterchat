@@ -1,5 +1,6 @@
 import axios from "axios";
 import { setupRecorder } from "nock-record";
+import { describe, expect, it, beforeAll, vitest } from "vitest";
 import { Masterchat } from "../../src";
 
 const mode = (process.env.NOCK_BACK_MODE as any) || "lockdown";
@@ -13,8 +14,6 @@ async function fetchUpcomingStreams() {
 }
 
 describe("normal live chat", () => {
-  jest.setTimeout(60000);
-
   let subject: any;
   let mc: Masterchat;
 
@@ -32,14 +31,14 @@ describe("normal live chat", () => {
   it("context match", async () => {
     expect(mc.channelId).toBe(subject.channel.id);
     expect(mc.channelName).toBe(subject.channel.name);
-  });
+  }, 60000);
 
   it("can fetch live chat", async () => {
     expect.assertions(3);
 
     const { completeRecording } = await record("wildlife2");
 
-    const errFn = jest.fn();
+    const errFn = vitest.fn();
 
     let times = 0;
     await mc
@@ -77,5 +76,5 @@ describe("normal live chat", () => {
     completeRecording();
 
     expect(errFn).not.toBeCalled();
-  });
+  }, 60000);
 });

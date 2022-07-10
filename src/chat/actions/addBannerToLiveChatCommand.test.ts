@@ -1,4 +1,5 @@
 import assert from "assert";
+import { it } from "vitest";
 import { YTAddBannerToLiveChatCommand } from "../../interfaces/yt/chat";
 import { parseAddBannerToLiveChatCommand } from "./addBannerToLiveChatCommand";
 

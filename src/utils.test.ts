@@ -1,3 +1,4 @@
+import { describe, expect, it } from "vitest";
 import { textRunToPlainText, toVideoId } from "./utils";
 
 it("toVideoId", () => {

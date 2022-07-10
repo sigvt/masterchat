@@ -1,5 +1,6 @@
 import assert from "assert";
 import { setupRecorder } from "nock-record";
+import { expect, it } from "vitest";
 import { Masterchat, YTCommentThreadRenderer } from "../../src";
 import { stringify } from "../../src/utils";
 

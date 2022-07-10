@@ -1,4 +1,5 @@
 import assert from "assert";
+import { expect, it } from "vitest";
 import { YTLiveChatViewerEngagementMessageRenderer } from "../../interfaces/yt/chat";
 import { stringify } from "../../utils";
 import { parseLiveChatViewerEngagementMessageRenderer } from "./addChatItemAction";

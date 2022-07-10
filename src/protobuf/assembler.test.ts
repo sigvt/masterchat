@@ -1,4 +1,5 @@
-import { transcriptFormatToken, liveReloadContinuation } from "./assembler";
+import { expect, it } from "vitest";
+import { liveReloadContinuation, transcriptFormatToken } from "./assembler";
 
 it("can generate lrc", () => {
   expect(
