@@ -2,9 +2,10 @@ import {
   AddBannerAction,
   AddIncomingRaidBannerAction,
   AddOutgoingRaidBannerAction,
+  AddProductBannerAction,
 } from "../../interfaces/actions";
 import { YTAddBannerToLiveChatCommand } from "../../interfaces/yt/chat";
-import { debugLog, stringify, tsToDate } from "../../utils";
+import { debugLog, endpointToUrl, stringify, tsToDate } from "../../utils";
 import { parseBadges } from "../badge";
 import { pickThumbUrl } from "../utils";
 
@@ -28,6 +29,7 @@ export function parseAddBannerToLiveChatCommand(
   const actionId = bannerRdr.actionId;
   const targetId = bannerRdr.targetId;
   const viewerIsCreator = bannerRdr.viewerIsCreator;
+  const isStackable = bannerRdr.isStackable;
 
   // contents
   const contents = bannerRdr.contents;
@@ -108,6 +110,44 @@ export function parseAddBannerToLiveChatCommand(
       };
       return payload;
     }
+  } else if ("liveChatProductItemRenderer" in contents) {
+    const rdr = contents.liveChatProductItemRenderer;
+    const title = rdr.title;
+    const description = rdr.accessibilityTitle;
+    const thumbnail = rdr.thumbnail.thumbnails[0].url;
+    const price = rdr.price;
+    const vendorName = rdr.vendorName;
+    const creatorMessage = rdr.creatorMessage;
+    const creatorName = rdr.creatorName;
+    const authorPhoto = pickThumbUrl(rdr.authorPhoto);
+    const url = endpointToUrl(rdr.onClickCommand)!;
+    if (!url) {
+      debugLog(
+        `Empty url at liveChatProductItemRenderer: ${JSON.stringify(rdr)}`
+      );
+    }
+    const dialogMessage =
+      rdr.informationDialog.liveChatDialogRenderer.dialogMessages;
+    const isVerified = rdr.isVerified;
+    const payload: AddProductBannerAction = {
+      type: "addProductBannerAction",
+      actionId,
+      targetId,
+      viewerIsCreator,
+      isStackable,
+      title,
+      description,
+      thumbnail,
+      price,
+      vendorName,
+      creatorMessage,
+      creatorName,
+      authorPhoto,
+      url,
+      dialogMessage,
+      isVerified,
+    };
+    return payload;
   } else {
     throw new Error(
       `[action required] Unrecognized content type found in parseAddBannerToLiveChatCommand: ${JSON.stringify(

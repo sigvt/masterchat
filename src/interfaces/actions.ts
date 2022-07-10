@@ -9,6 +9,7 @@ import {
   YTLiveChatPollChoice,
   YTLiveChatPollType,
   YTRun,
+  YTSimpleTextContainer,
   YTText,
 } from "./yt/chat";
 
@@ -33,6 +34,7 @@ export type Action =
   | RemoveBannerAction
   | AddIncomingRaidBannerAction
   | AddOutgoingRaidBannerAction
+  | AddProductBannerAction
   | AddViewerEngagementMessageAction
   | ShowPanelAction
   | ShowPollPanelAction
@@ -287,6 +289,25 @@ export interface AddOutgoingRaidBannerAction {
   targetName: string;
   targetPhoto: string;
   targetVideoId: string;
+}
+
+export interface AddProductBannerAction {
+  type: "addProductBannerAction";
+  actionId: string;
+  targetId: string;
+  viewerIsCreator: boolean;
+  isStackable?: boolean;
+  title: string;
+  description: string;
+  thumbnail: string;
+  price: string;
+  vendorName: string;
+  creatorMessage: string;
+  creatorName: string;
+  authorPhoto: string;
+  url: string;
+  dialogMessage: YTSimpleTextContainer[];
+  isVerified: boolean;
 }
 
 export interface ShowTooltipAction {
