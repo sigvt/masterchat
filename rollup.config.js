@@ -1,6 +1,7 @@
 import commonjs from "@rollup/plugin-commonjs";
 // import { terser } from "rollup-plugin-terser";
 // import json from "@rollup/plugin-json";
+import nodePolyfills from "rollup-plugin-node-polyfills";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
 import typescript from "@rollup/plugin-typescript";
 import dts from "rollup-plugin-dts";
@@ -27,12 +28,15 @@ export default [
       typescript({
         tsconfig: "./tsconfig.build.json",
       }),
+      nodePolyfills(),
       externals({
         devDeps: false, // embed devDeps
-        builtins: false, // for `events` polyfill
+        builtins: false, // for `events` polyfill,
+        // builtinsPrefix: "add",
+        // exclude: ["events"],
       }),
       nodeResolve({
-        preferBuiltins: false, // for `events` polyfill
+        // preferBuiltins: false, // for `events` polyfill
       }),
       // json(),
       commonjs(),
