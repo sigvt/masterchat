@@ -1,3 +1,4 @@
+import { unknown } from "..";
 import {
   AddBannerAction,
   AddIncomingRaidBannerAction,
@@ -149,10 +150,11 @@ export function parseAddBannerToLiveChatCommand(
     };
     return payload;
   } else {
-    throw new Error(
+    debugLog(
       `[action required] Unrecognized content type found in parseAddBannerToLiveChatCommand: ${JSON.stringify(
         payload
       )}`
     );
+    return unknown(payload);
   }
 }

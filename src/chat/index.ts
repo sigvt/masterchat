@@ -22,11 +22,8 @@ export function parseAction(action: YTAction): Action | UnknownAction {
   const type = Object.keys(filteredActions)[0] as keyof typeof filteredActions;
 
   switch (type) {
-    case "addChatItemAction": {
-      const parsed = parseAddChatItemAction(action[type]!);
-      if (parsed) return parsed;
-      break;
-    }
+    case "addChatItemAction":
+      return parseAddChatItemAction(action[type]!);
 
     case "markChatItemsByAuthorAsDeletedAction":
       return parseMarkChatItemsByAuthorAsDeletedAction(action[type]!);
@@ -34,11 +31,8 @@ export function parseAction(action: YTAction): Action | UnknownAction {
     case "markChatItemAsDeletedAction":
       return parseMarkChatItemAsDeletedAction(action[type]!);
 
-    case "addLiveChatTickerItemAction": {
-      const parsed = parseAddLiveChatTickerItemAction(action[type]!);
-      if (parsed) return parsed;
-      break;
-    }
+    case "addLiveChatTickerItemAction":
+      return parseAddLiveChatTickerItemAction(action[type]!);
 
     case "replaceChatItemAction":
       return parseReplaceChatItemAction(action[type]!);
@@ -53,8 +47,7 @@ export function parseAction(action: YTAction): Action | UnknownAction {
       return parseShowLiveChatTooltipCommand(action[type]!);
 
     case "showLiveChatActionPanelAction":
-      const parsed = parseShowLiveChatActionPanelAction(action[type]!);
-      return parsed;
+      return parseShowLiveChatActionPanelAction(action[type]!);
 
     case "updateLiveChatPollAction":
       return parseUpdateLiveChatPollAction(action[type]!);
@@ -74,8 +67,14 @@ export function parseAction(action: YTAction): Action | UnknownAction {
     }
   }
 
+  return unknown(action);
+}
+
+/** Unknown action used for unexpected payloads. You should implement an appropriate action parser as soon as you discover this action in the production.
+ */
+export function unknown(payload: unknown) {
   return {
     type: "unknown",
-    payload: action,
+    payload,
   } as UnknownAction;
 }
