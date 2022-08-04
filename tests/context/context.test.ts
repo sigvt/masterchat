@@ -190,17 +190,15 @@ it(
   async () => {
     expect.assertions(8);
 
-    const videoId = "9nComULZvUg";
-    const channelId = "UCFKOVgVbGmX65RxO3EtH3iw";
+    const videoId = "Y_L8TusmUsU";
+    const channelId = "UC3n5uGu18FoCy23ggWWp8tA";
     const { completeRecording } = await record("livechat");
 
     const mc = await Masterchat.init(videoId);
     expect(mc.isLive).toBe(true);
     expect(mc.channelId).toBe(channelId);
-    expect(mc.title).toBe(
-      "【Undertale】アンダイン戦から！！絶対に勝つ！！（Nルート）【雪花ラミィ/ホロライブ】"
-    );
-    expect(mc.channelName).toBe("Lamy Ch. 雪花ラミィ");
+    expect(mc.title).toBe("【KARAOKE】Early Birthday Tunes !!!");
+    expect(mc.channelName).toBe("Nanashi Mumei Ch. hololive-EN");
 
     await setup(videoId, channelId).shouldEmitActions();
     await setup(videoId, channelId, { mode: "replay" }).shouldThrow(
