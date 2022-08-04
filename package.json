@@ -30,6 +30,7 @@
   ],
   "dependencies": {
     "axios": "^0.27.2",
+    "buffer": "^6.0.3",
     "debug": "^4.3.2",
     "iterator-helpers-polyfill": "^2.2.8",
     "sha1": "^1.1.1"
