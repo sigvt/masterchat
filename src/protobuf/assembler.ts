@@ -98,10 +98,13 @@ export function replayTimedContinuation(
   return b64e(
     ld(156074452, [
       ld(3, hdt(origin)),
-      vt(5, seekMs),
+      vt(5, seekMs * 1000), // micro seconds
       vt(8, 0),
-      vt(9, 4), // 3
-      ld(10, vt(4, 0)),
+      vt(9, 4), // TODO: find out the diff between 4 and 3
+      ld(10, [
+        vt(4, 0),
+        vt(22, 0), // recently added
+      ]),
       ld(14, vt(1, chatType)),
       vt(15, 0),
     ]),
