@@ -7,6 +7,13 @@
 
 Masterchat is the most powerful library for YouTube Live Chat, supporting parsing 20+ actions, video comments and transcripts, as well as sending messages and moderating chats.
 
+- 🎓 [Getting Started](https://github.com/holodata/masterchat/tree/master/MANUAL.md)
+- 📖 [References](https://holodata.github.io/masterchat/)
+- 🪁 [Examples](https://github.com/holodata/masterchat/tree/master/examples)
+- 🙋‍♀️ [Ask Questions](https://github.com/holodata/masterchat/discussions)
+- 🐞 [Report a Bug](https://github.com/holodata/masterchat/issues)
+- 🦄 [Join Community](https://holodata.org/discord)
+
 ## Install
 
 ```

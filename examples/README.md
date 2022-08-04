@@ -2,15 +2,15 @@
 
 ```bash
 # build masterchat
-yarn install
-yarn build
+npm install
+npm run build
 
 # move to examples folder
 cd ./examples
-yarn install
+npm install
 
 # run example scripts
 node ./iter.mjs
-yarn ts-node ./iter.ts
+npx ts-node ./iter.ts
 # ...
 ```

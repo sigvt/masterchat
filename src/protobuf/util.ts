@@ -1,4 +1,5 @@
 import { PBToken, PBType, PBValue } from "./token";
+import { Buffer } from "buffer";
 
 function mapType(type: PBType) {
   switch (type) {
@@ -91,16 +92,10 @@ export function u8tohex(data: Uint8Array): string {
   return out;
 }
 
-const _atob = globalThis.atob as ((data: string) => string) | undefined;
-const _btoa = globalThis.btoa as ((data: string) => string) | undefined;
+export const b64tou8 = (data: string) => {
+  const buf = Buffer.from(data, "base64");
+  return new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
+};
 
-export const b64tou8 = _atob
-  ? (data: string) => Uint8Array.from(_atob(data), (c) => c.charCodeAt(0))
-  : (data: string) => {
-      const buf = Buffer.from(data, "base64");
-      return new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
-    };
-
-export const u8tob64 = _btoa
-  ? (data: Uint8Array) => _btoa(String.fromCharCode.apply(null, data as any))
-  : (data: Uint8Array) => Buffer.from(data).toString("base64");
+export const u8tob64 = (data: Uint8Array) =>
+  Buffer.from(data).toString("base64");

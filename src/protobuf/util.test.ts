@@ -1,4 +1,5 @@
 import { hextou8, u8tohex, b64tou8, u8tob64, concatu8 } from "./util";
+import { expect, it, describe } from "vitest";
 
 describe("protobuf util", () => {
   it.each([

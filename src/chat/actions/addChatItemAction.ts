@@ -1,3 +1,4 @@
+import { unknown } from "..";
 import {
   AddChatItemAction,
   AddMembershipItemAction,
@@ -44,57 +45,66 @@ import { parseColorCode, pickThumbUrl } from "../utils";
 export function parseAddChatItemAction(payload: YTAddChatItemAction) {
   const { item } = payload;
 
-  if ("liveChatTextMessageRenderer" in item) {
-    // Chat
-    const renderer = item["liveChatTextMessageRenderer"]!;
-    return parseLiveChatTextMessageRenderer(renderer);
-  } else if ("liveChatPaidMessageRenderer" in item) {
-    // Super Chat
-    const renderer = item["liveChatPaidMessageRenderer"]!;
-    return parseLiveChatPaidMessageRenderer(renderer);
-  } else if ("liveChatPaidStickerRenderer" in item) {
-    // Super Sticker
-    const renderer = item["liveChatPaidStickerRenderer"]!;
-    return parseLiveChatPaidStickerRenderer(renderer);
-  } else if ("liveChatMembershipItemRenderer" in item) {
-    // Membership updates
-    const renderer = item["liveChatMembershipItemRenderer"]!;
-    return parseLiveChatMembershipItemRenderer(renderer);
-  } else if ("liveChatViewerEngagementMessageRenderer" in item) {
-    // Engagement message
-    const renderer = item["liveChatViewerEngagementMessageRenderer"]!;
-    return parseLiveChatViewerEngagementMessageRenderer(renderer);
-  } else if ("liveChatPlaceholderItemRenderer" in item) {
-    // Placeholder chat
-    const renderer = item["liveChatPlaceholderItemRenderer"]!;
-    return parseLiveChatPlaceholderItemRenderer(renderer);
-  } else if ("liveChatModeChangeMessageRenderer" in item) {
-    // Mode change message (e.g. toggle members-only)
-    const renderer = item["liveChatModeChangeMessageRenderer"]!;
-    return parseLiveChatModeChangeMessageRenderer(renderer);
-  } else if ("liveChatSponsorshipsGiftPurchaseAnnouncementRenderer" in item) {
-    // Sponsorships gift purchase announcement
-    const renderer =
-      item["liveChatSponsorshipsGiftPurchaseAnnouncementRenderer"];
-    return parseLiveChatSponsorshipsGiftPurchaseAnnouncementRenderer(
-      renderer
-    ) as MembershipGiftPurchaseAction;
-  } else if ("liveChatSponsorshipsGiftRedemptionAnnouncementRenderer" in item) {
-    // Sponsorships gift purchase announcement
-    const renderer =
-      item["liveChatSponsorshipsGiftRedemptionAnnouncementRenderer"];
-    return parseLiveChatSponsorshipsGiftRedemptionAnnouncementRenderer(
-      renderer
+  const parsedAction = (() => {
+    if ("liveChatTextMessageRenderer" in item) {
+      // Chat
+      const renderer = item["liveChatTextMessageRenderer"]!;
+      return parseLiveChatTextMessageRenderer(renderer);
+    } else if ("liveChatPaidMessageRenderer" in item) {
+      // Super Chat
+      const renderer = item["liveChatPaidMessageRenderer"]!;
+      return parseLiveChatPaidMessageRenderer(renderer);
+    } else if ("liveChatPaidStickerRenderer" in item) {
+      // Super Sticker
+      const renderer = item["liveChatPaidStickerRenderer"]!;
+      return parseLiveChatPaidStickerRenderer(renderer);
+    } else if ("liveChatMembershipItemRenderer" in item) {
+      // Membership updates
+      const renderer = item["liveChatMembershipItemRenderer"]!;
+      return parseLiveChatMembershipItemRenderer(renderer);
+    } else if ("liveChatViewerEngagementMessageRenderer" in item) {
+      // Engagement message
+      const renderer = item["liveChatViewerEngagementMessageRenderer"]!;
+      return parseLiveChatViewerEngagementMessageRenderer(renderer);
+    } else if ("liveChatPlaceholderItemRenderer" in item) {
+      // Placeholder chat
+      const renderer = item["liveChatPlaceholderItemRenderer"]!;
+      return parseLiveChatPlaceholderItemRenderer(renderer);
+    } else if ("liveChatModeChangeMessageRenderer" in item) {
+      // Mode change message (e.g. toggle members-only)
+      const renderer = item["liveChatModeChangeMessageRenderer"]!;
+      return parseLiveChatModeChangeMessageRenderer(renderer);
+    } else if ("liveChatSponsorshipsGiftPurchaseAnnouncementRenderer" in item) {
+      // Sponsorships gift purchase announcement
+      const renderer =
+        item["liveChatSponsorshipsGiftPurchaseAnnouncementRenderer"];
+      return parseLiveChatSponsorshipsGiftPurchaseAnnouncementRenderer(
+        renderer
+      ) as MembershipGiftPurchaseAction;
+    } else if (
+      "liveChatSponsorshipsGiftRedemptionAnnouncementRenderer" in item
+    ) {
+      // Sponsorships gift purchase announcement
+      const renderer =
+        item["liveChatSponsorshipsGiftRedemptionAnnouncementRenderer"];
+      return parseLiveChatSponsorshipsGiftRedemptionAnnouncementRenderer(
+        renderer
+      );
+    } else if ("liveChatModerationMessageRenderer" in item) {
+      const renderer = item["liveChatModerationMessageRenderer"];
+      return parseLiveChatModerationMessageRenderer(renderer);
+    }
+  })();
+
+  if (!parsedAction) {
+    debugLog(
+      "[action required] Unrecognized chat item renderer type:",
+      JSON.stringify(item)
     );
-  } else if ("liveChatModerationMessageRenderer" in item) {
-    const renderer = item["liveChatModerationMessageRenderer"];
-    return parseLiveChatModerationMessageRenderer(renderer);
+    return unknown(payload);
   }
 
-  debugLog(
-    "[action required] Unrecognized chat item renderer type:",
-    JSON.stringify(item)
-  );
+  return parsedAction;
 }
 
 // Chat

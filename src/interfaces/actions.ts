@@ -9,6 +9,7 @@ import {
   YTLiveChatPollChoice,
   YTLiveChatPollType,
   YTRun,
+  YTSimpleTextContainer,
   YTText,
 } from "./yt/chat";
 
@@ -31,7 +32,9 @@ export type Action =
   | AddMembershipTickerAction
   | AddBannerAction
   | RemoveBannerAction
-  | AddRedirectBannerAction
+  | AddIncomingRaidBannerAction
+  | AddOutgoingRaidBannerAction
+  | AddProductBannerAction
   | AddViewerEngagementMessageAction
   | ShowPanelAction
   | ShowPollPanelAction
@@ -42,7 +45,8 @@ export type Action =
   | ModeChangeAction
   | MembershipGiftPurchaseAction
   | MembershipGiftRedemptionAction
-  | ModerationMessageAction;
+  | ModerationMessageAction
+  | RemoveChatItemAction;
 
 export interface AddChatItemAction {
   type: "addChatItemAction";
@@ -270,12 +274,40 @@ export interface RemoveBannerAction {
   targetActionId: string;
 }
 
-export interface AddRedirectBannerAction {
-  type: "addRedirectBannerAction";
+export interface AddIncomingRaidBannerAction {
+  type: "addIncomingRaidBannerAction";
   actionId: string;
   targetId: string;
-  authorName: string;
+  sourceName: string;
+  sourcePhoto: string;
+}
+
+export interface AddOutgoingRaidBannerAction {
+  type: "addOutgoingRaidBannerAction";
+  actionId: string;
+  targetId: string;
+  targetName: string;
+  targetPhoto: string;
+  targetVideoId: string;
+}
+
+export interface AddProductBannerAction {
+  type: "addProductBannerAction";
+  actionId: string;
+  targetId: string;
+  viewerIsCreator: boolean;
+  isStackable?: boolean;
+  title: string;
+  description: string;
+  thumbnail: string;
+  price: string;
+  vendorName: string;
+  creatorMessage: string;
+  creatorName: string;
   authorPhoto: string;
+  url: string;
+  dialogMessage: YTSimpleTextContainer[];
+  isVerified: boolean;
 }
 
 export interface ShowTooltipAction {
@@ -395,6 +427,12 @@ export interface ModerationMessageAction {
   timestamp: Date;
   timestampUsec: string;
   message: YTRun[];
+}
+
+export interface RemoveChatItemAction {
+  type: "removeChatItemAction";
+  targetId: string;
+  timestamp: Date;
 }
 
 export interface UnknownAction {

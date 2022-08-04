@@ -1,3 +1,4 @@
+import { unknown } from "..";
 import {
   AddMembershipTickerAction,
   AddSuperChatTickerAction,
@@ -57,8 +58,9 @@ export function parseAddLiveChatTickerItemAction(
       );
 
       const _: never = rendererType;
-      return _;
   }
+
+  return unknown(payload);
 }
 
 function parseLiveChatTickerPaidMessageItemRenderer(

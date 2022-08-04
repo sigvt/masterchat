@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.2.0
+
+### New
+
+- New action `AddOutgoingRaidBannerAction` and `AddIncomingRaidBannerAction`
+  - Removed `AddRedirectBannerAction`
+- New action `RemoveChatItemAction`
+- New action `AddProductBannerAction`
+
 ## v1.1.0
 
 ### New

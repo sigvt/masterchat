@@ -1,3 +1,4 @@
+import { expect, it } from "vitest";
 import { Masterchat } from "../../src";
 
 it("can fetch transcript", async () => {

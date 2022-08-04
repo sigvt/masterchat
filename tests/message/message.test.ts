@@ -1,4 +1,5 @@
 import { setupRecorder } from "nock-record";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { AddChatItemAction, delay, Masterchat } from "../../src";
 
 const id = process.env.MC_TEST_VIDEO_ID;

@@ -1,9 +1,12 @@
+import { unknown } from "..";
 import {
   AddBannerAction,
-  AddRedirectBannerAction,
+  AddIncomingRaidBannerAction,
+  AddOutgoingRaidBannerAction,
+  AddProductBannerAction,
 } from "../../interfaces/actions";
 import { YTAddBannerToLiveChatCommand } from "../../interfaces/yt/chat";
-import { debugLog, stringify, tsToDate } from "../../utils";
+import { debugLog, endpointToUrl, stringify, tsToDate } from "../../utils";
 import { parseBadges } from "../badge";
 import { pickThumbUrl } from "../utils";
 
@@ -27,6 +30,7 @@ export function parseAddBannerToLiveChatCommand(
   const actionId = bannerRdr.actionId;
   const targetId = bannerRdr.targetId;
   const viewerIsCreator = bannerRdr.viewerIsCreator;
+  const isStackable = bannerRdr.isStackable;
 
   // contents
   const contents = bannerRdr.contents;
@@ -75,23 +79,82 @@ export function parseAddBannerToLiveChatCommand(
     };
     return parsed;
   } else if ("liveChatBannerRedirectRenderer" in contents) {
-    // TODO:
     const rdr = contents.liveChatBannerRedirectRenderer;
-    const authorName = rdr.bannerMessage.runs[0].text;
+    const targetVideoId =
+      "watchEndpoint" in rdr.inlineActionButton.buttonRenderer.command
+        ? rdr.inlineActionButton.buttonRenderer.command.watchEndpoint.videoId
+        : undefined;
+
+    const photo = pickThumbUrl(rdr.authorPhoto);
+
+    if (targetVideoId) {
+      // Outgoing
+      const targetName = rdr.bannerMessage.runs[1].text;
+      const payload: AddOutgoingRaidBannerAction = {
+        type: "addOutgoingRaidBannerAction",
+        actionId,
+        targetId,
+        targetName,
+        targetPhoto: photo,
+        targetVideoId,
+      };
+      return payload;
+    } else {
+      // Incoming
+      const sourceName = rdr.bannerMessage.runs[0].text;
+      const payload: AddIncomingRaidBannerAction = {
+        type: "addIncomingRaidBannerAction",
+        actionId,
+        targetId,
+        sourceName,
+        sourcePhoto: photo,
+      };
+      return payload;
+    }
+  } else if ("liveChatProductItemRenderer" in contents) {
+    const rdr = contents.liveChatProductItemRenderer;
+    const title = rdr.title;
+    const description = rdr.accessibilityTitle;
+    const thumbnail = rdr.thumbnail.thumbnails[0].url;
+    const price = rdr.price;
+    const vendorName = rdr.vendorName;
+    const creatorMessage = rdr.creatorMessage;
+    const creatorName = rdr.creatorName;
     const authorPhoto = pickThumbUrl(rdr.authorPhoto);
-    const payload: AddRedirectBannerAction = {
-      type: "addRedirectBannerAction",
+    const url = endpointToUrl(rdr.onClickCommand)!;
+    if (!url) {
+      debugLog(
+        `Empty url at liveChatProductItemRenderer: ${JSON.stringify(rdr)}`
+      );
+    }
+    const dialogMessage =
+      rdr.informationDialog.liveChatDialogRenderer.dialogMessages;
+    const isVerified = rdr.isVerified;
+    const payload: AddProductBannerAction = {
+      type: "addProductBannerAction",
       actionId,
       targetId,
-      authorName,
+      viewerIsCreator,
+      isStackable,
+      title,
+      description,
+      thumbnail,
+      price,
+      vendorName,
+      creatorMessage,
+      creatorName,
       authorPhoto,
+      url,
+      dialogMessage,
+      isVerified,
     };
     return payload;
   } else {
-    throw new Error(
+    debugLog(
       `[action required] Unrecognized content type found in parseAddBannerToLiveChatCommand: ${JSON.stringify(
         payload
       )}`
     );
+    return unknown(payload);
   }
 }
