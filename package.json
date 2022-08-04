@@ -6,7 +6,7 @@
   "scripts": {
     "build": "cross-env NODE_ENV=production rollup -c && shx rm -rf lib/lib lib/*.map && patch lib/masterchat.d.ts patches/fix-dts.patch",
     "clean": "shx rm -rf lib",
-    "dev": "rollup -c -w",
+    "dev": "rollup -c -w --no-watch.clearScreen",
     "docs": "shx rm -rf docs && typedoc --out ./docs --excludeExternals --excludePrivate --excludeProtected --exclude '**/__tests__/*,**/*.test.ts' src && shx touch docs/.nojekyll",
     "format": "pretty-quick --staged",
     "prepare": "husky install",

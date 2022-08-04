@@ -11,8 +11,8 @@
 git clone https://github.com/holodata/masterchat
 cd masterchat
 git switch dev
-yarn install
-yarn build
+npm install
+npm run build
 ```
 
 ## Development Flow
@@ -20,9 +20,9 @@ yarn build
 In `masterchat` dir:
 
 ```bash
-yarn build
-yarn link # link local masterchat package
-yarn dev # watch and transpile files
+npm run build
+npm link # link local masterchat package
+npm run dev # watch and transpile files
 ```
 
 Clone and build [Masterchat CLI](https://github.com/holodata/masterchat-cli):
@@ -30,16 +30,16 @@ Clone and build [Masterchat CLI](https://github.com/holodata/masterchat-cli):
 ```bash
 git clone https://github.com/holodata/masterchat-cli ../masterchat-cli
 cd masterchat-cli
-yarn install
-yarn build
-yarn link # make local `masterchat` and `mc` command available on the shell
+npm install
+npm run build
+npm link # make local `masterchat` and `mc` command available on the shell
 ```
 
 In `masterchat-cli` dir, link local `masterchat` module and rebuild the cli:
 
 ```bash
-yarn link masterchat # now `masterchat-cli` uses local `masterchat` module
-yarn build
+npm link masterchat # now `masterchat-cli` uses local `masterchat` module
+npm run build
 DEBUG=masterchat mc live <videoId>
 DEBUG=masterchat mc events
 ```
