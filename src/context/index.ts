@@ -1,3 +1,4 @@
+import * as cheerio from "cheerio";
 import {
   MembersOnlyError,
   NoPermissionError,
@@ -120,7 +121,8 @@ export function parseMetadataFromWatch(html: string) {
   const title = runsToString(primaryInfo.title.runs);
   const channelId = videoOwner.navigationEndpoint.browseEndpoint.browseId;
   const channelName = runsToString(videoOwner.title.runs);
-  const isLive = primaryInfo.viewCount!.videoViewCountRenderer.isLive ?? false;
+  const metadata = parseVideoMetadataFromHtml(html);
+  const isLive = !metadata?.publication?.endDate ?? false;
 
   return {
     title,
@@ -128,4 +130,54 @@ export function parseMetadataFromWatch(html: string) {
     channelName,
     isLive,
   };
+}
+
+/**
+ * @see http://schema.org/VideoObject
+ */
+function parseVideoMetadataFromHtml(html: string) {
+  const $ = cheerio.load(html);
+  const meta = parseVideoMetadataFromElement(
+    $("[itemtype=http://schema.org/VideoObject]")?.[0]
+  );
+  return meta;
+}
+
+function parseVideoMetadataFromElement(
+  root: any,
+  meta: Record<string, any> = {}
+) {
+  root?.children?.forEach((child: any) => {
+    const { attributes } = child;
+    const key = attributes.find((v: any) => v.name === "itemprop")?.value;
+    if (!key) {
+      return;
+    }
+
+    if (child.children.length) {
+      meta[key] = parseVideoMetadataFromElement(child);
+      return;
+    }
+
+    const value = attributes.filter((v: any) =>
+      ["href", "content"].includes(v.name)
+    )[0].value;
+    switch (key) {
+      case "paid":
+      case "unlisted":
+      case "isFamilyFriendly":
+      case "interactionCount":
+      case "isLiveBroadcast":
+        meta[key] = /true/i.test(value);
+        break;
+      case "width":
+      case "height":
+        meta[key] = Number(value);
+        break;
+      default:
+        meta[key] = value;
+    }
+  });
+
+  return meta;
 }
