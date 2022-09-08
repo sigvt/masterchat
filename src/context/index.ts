@@ -147,9 +147,9 @@ function parseVideoMetadataFromElement(
   root: any,
   meta: Record<string, any> = {}
 ) {
-  root?.children?.forEach((child: any) => {
-    const { attributes } = child;
-    const key = attributes.find((v: any) => v.name === "itemprop")?.value;
+  root?.children?.forEach((child: cheerio.Element) => {
+    const attributes = child?.attribs;
+    const key = attributes?.itemprop;
     if (!key) {
       return;
     }
@@ -159,25 +159,27 @@ function parseVideoMetadataFromElement(
       return;
     }
 
-    const value = attributes.filter((v: any) =>
-      ["href", "content"].includes(v.name)
-    )[0].value;
-    switch (key) {
-      case "paid":
-      case "unlisted":
-      case "isFamilyFriendly":
-      case "interactionCount":
-      case "isLiveBroadcast":
-        meta[key] = /true/i.test(value);
-        break;
-      case "width":
-      case "height":
-        meta[key] = Number(value);
-        break;
-      default:
-        meta[key] = value;
-    }
+    const value = parseVideoMetaValueByKey(
+      key,
+      attributes?.href || attributes?.content
+    );
+    meta[key] = value;
   });
 
   return meta;
+}
+
+function parseVideoMetaValueByKey(key: string, value: string) {
+  switch (key) {
+    case "paid":
+    case "unlisted":
+    case "isFamilyFriendly":
+    case "interactionCount":
+    case "isLiveBroadcast":
+      return /true/i.test(value);
+    case "width":
+    case "height":
+      return Number(value);
+  }
+  return value;
 }
