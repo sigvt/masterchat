@@ -287,7 +287,9 @@ export function durationToSeconds(durationText: string): number {
   const match = /^(a|\d+)\s(year|month|week|day|hour|minute|second)s?$/.exec(
     durationText
   );
-  if (!match) throw new Error(`Invalid duration: ${durationText}`);
+  if (!match) {
+    throw new Error(`Invalid duration: ${durationText}`);
+  }
 
   const [_, duration, unit] = match;
   const durationInt = parseInt(duration) || 1;
@@ -300,7 +302,9 @@ export function durationToSeconds(durationText: string): number {
     minute: 60,
     second: 1,
   }[unit];
-  if (!multiplier) throw new Error(`Invalid duration unit: ${unit}`);
+  if (!multiplier) {
+    throw new Error(`Invalid duration unit: ${unit}`);
+  }
 
   return durationInt * multiplier;
 }
@@ -309,7 +313,9 @@ export function durationToISO8601(durationText: string): string {
   const match = /^(a|\d+)\s(year|month|week|day|hour|minute|second)s?$/.exec(
     durationText
   );
-  if (!match) throw new Error(`Invalid duration: ${durationText}`);
+  if (!match) {
+    throw new Error(`Invalid duration: ${durationText}`);
+  }
 
   const [_, duration, unit] = match;
   const durationInt = parseInt(duration) || 1;
@@ -322,7 +328,9 @@ export function durationToISO8601(durationText: string): string {
     minute: "TM",
     second: "TS",
   }[unit];
-  if (!durationUnit) throw new Error(`Invalid duration unit: ${unit}`);
+  if (!durationUnit) {
+    throw new Error(`Invalid duration unit: ${unit}`);
+  }
 
   return `P${durationInt}${durationUnit}`;
 }
