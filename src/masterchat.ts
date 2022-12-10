@@ -852,8 +852,15 @@ export class Masterchat extends EventEmitter {
       }
 
       const actions = rawActions
-        .map(parseAction)
-        .filter((a): a is Action => a !== undefined);
+        .map((action) => {
+          try {
+            return parseAction(action);
+          } catch (error: any) {
+            this.log("parseAction", error.message, { action });
+            return null;
+          }
+        })
+        .filter((a): a is Action => !!a);
 
       const chat: ChatResponse = {
         actions,
