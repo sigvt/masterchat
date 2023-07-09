@@ -748,6 +748,7 @@ export interface OwnerBadgeMetadataBadgeRenderer {
 
 export enum PurpleStyle {
   BadgeStyleTypeVerified = "BADGE_STYLE_TYPE_VERIFIED",
+  BadgeStyleTypeMembersOnly = "BADGE_STYLE_TYPE_MEMBERS_ONLY",
 }
 
 export interface MembershipButton {

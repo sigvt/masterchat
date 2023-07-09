@@ -143,6 +143,7 @@ export class Masterchat extends EventEmitter {
   public channelId!: string;
 
   public isLive?: boolean;
+  public isMembersOnly?: boolean;
   public channelName?: string;
   public title?: string;
 
@@ -433,6 +434,7 @@ export class Masterchat extends EventEmitter {
     this.channelId = metadata.channelId;
     this.channelName = metadata.channelName;
     this.isLive ??= metadata.isLive;
+    this.isMembersOnly ??= metadata.isMembersOnly;
   }
 
   public async fetchMetadataFromWatch(id: string) {

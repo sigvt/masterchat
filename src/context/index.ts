@@ -6,7 +6,11 @@ import {
   UnavailableError,
 } from "../errors";
 import { runsToString } from "../utils";
-import { YTInitialData, YTPlayabilityStatus } from "../interfaces/yt/context";
+import {
+  PurpleStyle,
+  YTInitialData,
+  YTPlayabilityStatus,
+} from "../interfaces/yt/context";
 
 // OK duration=">0" => Archived (replay chat may be available)
 // OK duration="0" => Live (chat may be available)
@@ -123,12 +127,18 @@ export function parseMetadataFromWatch(html: string) {
   const channelName = runsToString(videoOwner.title.runs);
   const metadata = parseVideoMetadataFromHtml(html);
   const isLive = !metadata?.publication?.endDate ?? false;
+  const isMembersOnly =
+    primaryInfo.badges?.some?.(
+      (v) =>
+        v.metadataBadgeRenderer.style === PurpleStyle.BadgeStyleTypeMembersOnly
+    ) ?? false;
 
   return {
     title,
     channelId,
     channelName,
     isLive,
+    isMembersOnly,
   };
 }
 
