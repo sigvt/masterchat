@@ -267,9 +267,10 @@ export function parseLiveChatMembershipItemRenderer(
   if (isMilestoneMessage) {
     const message = renderer.message ? renderer.message.runs : null;
     const durationText = renderer
-      .headerPrimaryText!.runs.slice(1)
-      .map((r) => r.text)
-      .join("");
+      .headerPrimaryText!.runs.map((r) => r.text)
+      .join("")
+      .replace("Member for", "")
+      .trim();
     // duration > membership.since
     // e.g. 12 months > 6 months
     const duration = durationToSeconds(durationText);
